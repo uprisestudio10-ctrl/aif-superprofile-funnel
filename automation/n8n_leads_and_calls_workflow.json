@@ -1,0 +1,766 @@
+{
+  "updatedAt": "2026-10-05T14:03:50.683Z",
+  "createdAt": "2026-09-28T11:07:34.710Z",
+  "id": "NiW3vl0a7dawrW6f",
+  "name": "AI Influencer Workshop Leads & 1:1 Calls to Google Sheets + Instant Confirmation Email",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-influencer-leads",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "1b084931-15ee-45df-bcf5-99884a4ec410",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "webhookId": "ai-influencer-leads"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.body || $input.first().json;\n\nlet item = raw;\nlet notes = {};\n\n// Handle direct Razorpay Webhook format if sent from Razorpay Dashboard\nif ((raw.event === 'payment.captured' || raw.event === 'order.paid') && raw.payload) {\n  const p = raw.payload.payment ? raw.payload.payment.entity : (raw.payload.order ? raw.payload.order.entity : {});\n  notes = p.notes || {};\n  const cleanPhone = (notes.phone || notes.contact || p.contact || '').replace(/\\\\D/g, '').slice(-10);\n  const amtNum = p.amount ? Math.round(p.amount / 100) : 29;\n  \n  // Guardrail: Filter out course purchases (>= ₹900) so they NEVER get dumped into workshop sheet\n  if (amtNum >= 900) {\n    return [];\n  }\n  \n  item = {\n    name: notes.name || notes.buyer_name || p.name || 'there',\n    number: cleanPhone,\n    email: notes.email || p.email || '',\n    amount: amtNum,\n    amount_formatted: '₹' + amtNum,\n    workshop_date: '8th October 2026 (Thursday) 7:00 PM IST',\n    has_call_booked: Boolean(notes.offers && notes.offers.includes('call')),\n    call_booked: (notes.offers && notes.offers.includes('call')) ? 'YES' : 'NO',\n    call_status: (notes.offers && notes.offers.includes('call')) ? 'Pending' : 'N/A',\n    recording_purchased: (notes.offers && notes.offers.includes('recording')) ? 'YES' : 'NO',\n    prompts_purchased: (notes.offers && notes.offers.includes('prompts')) ? 'YES' : 'NO',\n    razorpay_payment_id: p.id || '',\n    razorpay_order_id: p.order_id || '',\n    utm_source: notes.utm_source || '',\n    utm_campaign: notes.utm_campaign || '',\n    utm_content: notes.utm_content || '',\n    utm_term: notes.utm_term || '',\n    fb_click_id: notes.fbclid || '',\n    fbp: notes.fbp || '',\n    fbc: notes.fbc || ''\n  };\n}\n\nconst amtVal = parseInt(String(item.amount || '').replace(/\\\\D/g, '')) || 29;\nif (amtVal >= 900) {\n  return [];\n}\n\n// Deduplication safeguard: Prevent duplicate rows/emails if both website & Razorpay send webhooks\nconst paymentId = item.razorpay_payment_id || '';\ntry {\n  const staticData = $getWorkflowStaticData('global');\n  staticData.processedIds = staticData.processedIds || [];\n  if (paymentId && staticData.processedIds.includes(paymentId)) {\n    return [];\n  }\n  if (paymentId) {\n    staticData.processedIds.push(paymentId);\n    if (staticData.processedIds.length > 200) {\n      staticData.processedIds.shift();\n    }\n  }\n} catch (e) {\n  // safe\n}\n\nconst hasCall = item.has_call_booked === true || \n  item.call_booked === 'YES' ||\n  (Array.isArray(item.offers) && item.offers.includes('call')) ||\n  (typeof item.offers_label === 'string' && item.offers_label.toLowerCase().includes('call')) ||\n  amtVal === 528 || amtVal === 677 || amtVal === 727 || amtVal === 876;\n\nconst hasRecording = item.recording_purchased === 'YES' ||\n  (Array.isArray(item.offers) && item.offers.includes('recording')) ||\n  (typeof item.offers_label === 'string' && item.offers_label.toLowerCase().includes('recording')) ||\n  amtVal === 178 || amtVal === 377 || amtVal === 677 || amtVal === 876;\n\nconst hasPrompts = item.prompts_purchased === 'YES' ||\n  (Array.isArray(item.offers) && item.offers.includes('prompts')) ||\n  (typeof item.offers_label === 'string' && item.offers_label.toLowerCase().includes('prompts')) ||\n  amtVal === 228 || amtVal === 377 || amtVal === 727 || amtVal === 876;\n\nconst name = (item.name || 'there').trim();\nconst amount = item.amount_formatted || (item.amount ? '₹' + item.amount : '₹29');\nconst whatsappUrl = 'https://chat.whatsapp.com/FDLe6CBZxa66sEcHvhy1pD?mode=gi_t';\n\nconst emailHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for registering for the <strong>AI Influencer Workshop</strong>. Your seat is confirmed!</p>\n\n<p><strong>Please Note:</strong> You must join our WhatsApp group to attend the live workshop, as the Zoom meeting link and prompt guides will only be shared inside the WhatsApp group (we do not send the link over email to avoid unauthorized access).</p>\n\n<p>👉 <strong>Join WhatsApp Group here:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p><strong>Workshop Details:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Date:</strong> 8th October 2026 (Thursday)</li>\n  <li><strong>Time:</strong> 7:00 PM IST (Sharp)</li>\n  <li><strong>Location:</strong> Live on Zoom (Link shared in the WhatsApp group)</li>\n  <li><strong>Amount Paid:</strong> ${amount}</li>\n</ol>\n\n<p><strong>Next Steps:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li>Click the link above to join the WhatsApp group right now.</li>\n  <li>Pin the group on WhatsApp so you don't miss the Zoom link.</li>\n  <li>Keep your laptop ready on Thursday at 6:55 PM IST.</li>\n</ol>\n\n<div style=\"background-color: #fff9e6; border: 1px solid #ffe082; border-radius: 8px; padding: 14px; margin: 18px 0; font-size: 13px; color: #333333;\">\n  <p style=\"margin: 0 0 8px 0; font-weight: bold; color: #b78103; font-size: 14px;\">⚠️ Important Delivery &amp; Support Guidelines:</p>\n  <ul style=\"margin: 0; padding-left: 18px; line-height: 1.6;\">\n    <li><strong>Recording &amp; 300+ Prompts:</strong> If you purchased the Workshop Recording or Prompts Vault, they will be automatically delivered to this registered email within <strong>12 hours after the live workshop ends</strong>. Delivery is 100% automated, so please do not worry or panic.</li>\n    <li><strong>Check Spam / Promotions:</strong> If you do not see our delivery email in your Primary Inbox, kindly check your <strong>Spam folder</strong> or <strong>Promotions tab</strong>.</li>\n    <li><strong>1:1 Strategy Call:</strong> All 1-on-1 calls are conducted <strong>after the live workshop</strong>. Once the workshop ends, you can directly message the WhatsApp Group Admin to schedule your preferred 1:1 call slot.</li>\n  </ul>\n</div>\n\n<p>If you have any questions, feel free to reply directly to this email.</p>\n\n<p>Looking forward to seeing you live on Thursday.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`;\n\nconst regDate = item.date || new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' });\nconst regTime = item.time || new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });\n\nreturn [{\n  json: {\n    Name: item.name || '',\n    Number: item.number || item.phone || '',\n    Email: item.email || '',\n    'Date ': regDate,\n    Date: regDate,\n    Time: regTime,\n    Amount: amount,\n    'Workshop Date': item.workshop_date || '8th October 2026 (Thursday) 7:00 PM IST',\n    'Utm source': item.utm_source || '',\n    'Utm campaign': item.utm_campaign || '',\n    'Utm content': item.utm_content || '',\n    'Utm term': item.utm_term || '',\n    'FB Click ID': item.fb_click_id || item.fbclid || (notes && notes.fbclid) || '',\n    has_call_booked: Boolean(hasCall),\n    'Call Status': hasCall ? 'Pending' : 'N/A',\n    'Recording Purchased': hasRecording ? 'YES' : 'NO',\n    'Prompts Purchased': hasPrompts ? 'YES' : 'NO',\n    'Payment ID': item.razorpay_payment_id || '',\n    raw_amount: amtVal,\n    fbp: item.fbp || (notes && notes.fbp) || '',\n    fbc: item.fbc || (notes && notes.fbc) || '',\n    email_html: emailHtml\n  }\n}];\n"
+      },
+      "id": "9d81ff3a-8742-411a-8ce8-7be61309d57a",
+      "name": "Format Lead Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+          "mode": "list",
+          "cachedResultName": "AIF Workshop",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": []
+        },
+        "options": {},
+        "authentication": "serviceAccount"
+      },
+      "id": "70b55cfa-fa81-424a-9c7a-59427b0c36df",
+      "name": "Append to Main Lead Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        720,
+        200
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "SsEE517tRUiLR8pJ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "979e2c40-0255-4679-b169-25f0a0d4c82b",
+              "leftValue": "={{ $json.has_call_booked }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "29f3459c-bbcc-46b6-a979-45e0d4bb8b9f",
+      "name": "Is 1:1 Call Booked?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        960,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+          "mode": "list",
+          "cachedResultName": "AIF Workshop",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Call Bookings"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": []
+        },
+        "options": {},
+        "authentication": "serviceAccount"
+      },
+      "id": "0d2eb054-ff43-4cc0-9685-64d5bbbb9789",
+      "name": "Append to Call Bookings Tab",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1220,
+        240
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "SsEE517tRUiLR8pJ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
+        "toEmail": "={{ $json.Email }}",
+        "subject": "Seat Confirmed: Please Join WhatsApp Group for Zoom Link",
+        "html": "={{ $json.email_html }}",
+        "options": {
+          "replyTo": "workshop@prateekmayani.com"
+        }
+      },
+      "id": "e44c207b-871d-407b-99f5-7b567a147810",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        420
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "RmJjbVmoKL0wS3Bl",
+          "name": "SMTP account"
+        }
+      },
+      "webhookId": "11c506ad-c9cb-4460-aab8-c1f0fd0ee2c3"
+    },
+    {
+      "parameters": {
+        "jsCode": "function sha256(ascii) {\n  function rightRotate(value, amount) {\n    return (value>>>amount) | (value<<(32 - amount));\n  }\n  var mathPow = Math.pow;\n  var maxWord = mathPow(2, 32);\n  var lengthProperty = \"length\";\n  var i, j;\n  var result = \"\";\n  var words = [];\n  var asciiBitLength = ascii[lengthProperty]*8;\n  var hash = [];\n  var k = [];\n  var primeCounter = 0;\n\n  var isComposite = {};\n  for (var candidate = 2; primeCounter < 64; candidate++) {\n    if (!isComposite[candidate]) {\n      for (i = 0; i < 313; i += candidate) {\n        isComposite[i] = candidate;\n      }\n      hash[primeCounter] = (mathPow(candidate, .5)*maxWord)|0;\n      k[primeCounter++] = (mathPow(candidate, 1/3)*maxWord)|0;\n    }\n  }\n\n  ascii += \"\\x80\";\n  while (ascii[lengthProperty]%64 - 56) ascii += \"\\x00\";\n  for (i = 0; i < ascii[lengthProperty]; i++) {\n    j = ascii.charCodeAt(i);\n    if (j>>8) return;\n    words[i>>2] |= j << ((3 - i)%4)*8;\n  }\n  words[words[lengthProperty]] = ((asciiBitLength/maxWord)|0);\n  words[words[lengthProperty]] = (asciiBitLength);\n\n  for (j = 0; j < words[lengthProperty];) {\n    var w = words.slice(j, j += 16);\n    var oldHash = hash;\n    hash = hash.slice(0, 8);\n\n    for (i = 0; i < 64; i++) {\n      var i2 = i + j;\n      var w15 = w[i - 15], w2 = w[i - 2];\n      var a = hash[0], e = hash[4];\n      var temp1 = hash[7]\n        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))\n        + ((e & hash[5]) ^ ((~e) & hash[6]))\n        + k[i]\n        + (w[i] = (i < 16) ? w[i] : (\n            w[i - 16]\n            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15>>>3))\n            + w[i - 7]\n            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2>>>10))\n          )|0\n        );\n      var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))\n        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));\n\n      hash = [(temp1 + temp2)|0].concat(hash);\n      hash[4] = (hash[4] + temp1)|0;\n    }\n\n    for (i = 0; i < 8; i++) {\n      hash[i] = (hash[i] + oldHash[i])|0;\n    }\n  }\n\n  for (i = 0; i < 8; i++) {\n    for (j = 3; j >= 0; j--) {\n      var b = (hash[i]>>(j*8))&255;\n      result += ((b < 16) ? 0 : \"\") + b.toString(16);\n    }\n  }\n  return result;\n}\n\nconst item = $input.first().json;\nconst email = (item.Email || '').trim().toLowerCase();\nconst rawPhone = String(item.Number || '').replace(/\\D/g, '').slice(-10);\nconst phone = rawPhone.length === 10 ? '91' + rawPhone : rawPhone;\nconst fullName = (item.Name || '').trim();\nconst firstName = fullName.split(' ')[0].toLowerCase();\nconst paymentId = item['Payment ID'] || ('pay_' + Date.now());\nconst rawAmount = item.raw_amount || parseInt(String(item.Amount || '').replace(/\\D/g, '')) || 29;\n\nconst fbp = item.fbp || '';\nlet fbc = item.fbc || '';\nif (!fbc && item['FB Click ID']) {\n  fbc = 'fb.1.' + Date.now() + '.' + item['FB Click ID'];\n}\n\nconst userData = {};\nif (email && email.includes('@')) {\n  userData.em = [sha256(email)];\n}\nif (phone) {\n  userData.ph = [sha256(phone)];\n}\nif (firstName) {\n  userData.fn = [sha256(firstName)];\n}\nuserData.country = [sha256('in')];\nif (paymentId) {\n  userData.external_id = [sha256(paymentId)];\n}\nif (fbp) userData.fbp = fbp;\nif (fbc) userData.fbc = fbc;\n\nconst capiPayload = {\n  data: [\n    {\n      event_name: 'Purchase',\n      event_time: Math.floor(Date.now() / 1000),\n      event_id: paymentId,\n      event_source_url: 'https://aifworkshop.prateekmayani.com/thank-you-5034',\n      action_source: 'website',\n      user_data: userData,\n      custom_data: {\n        currency: 'INR',\n        value: rawAmount,\n        content_name: 'AI Influencer Workshop'\n      }\n    }\n  ]\n};\n\nreturn [{\n  json: {\n    capiPayload: capiPayload\n  }\n}];\n"
+      },
+      "name": "Prepare Meta CAPI Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        540
+      ],
+      "id": "b46dca52-7158-4e62-a78e-27db8c5f316b"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v19.0/2359274784891947/events?access_token=EAAoYN6dNtekBSu9ToerUbQaM8evi7PVyQzqRdq27m1o0h5hcIT0v9UoXQ9pfbY06ZCgAkyqlmxnY5OhO7CUQzjaoW9wN5ncFNeoIBkZByeGhS93w3RqhubkYFp0goHACz5uynrlSXN7I7nY7MnMkbrubFBghx66zLNRXJyRjO6ELC81sTdcQ3B6OlDHwZC0lwZDZD",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.capiPayload }}",
+        "options": {}
+      },
+      "name": "Send Meta CAPI Purchase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        540
+      ],
+      "continueOnFail": true,
+      "id": "5bdf6f5d-a6e5-403b-ad1a-a0bd8b180bfa"
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Append to Main Lead Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is 1:1 Call Booked?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Meta CAPI Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is 1:1 Call Booked?": {
+      "main": [
+        [
+          {
+            "node": "Append to Call Bookings Tab",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Prepare Meta CAPI Payload": {
+      "main": [
+        [
+          {
+            "node": "Send Meta CAPI Purchase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "global": {
+      "processedIds": [
+        "pay_TiRB2s74SWqGsl",
+        "pay_TiSDbPbUnoCt7C",
+        "pay_TiSm1iEuOBXv95",
+        "pay_TiTH0h4RTB15pN",
+        "pay_TiTZH5nl1ScVM4",
+        "pay_TiTmD5SLmdu8dI",
+        "pay_TiTrfIRtMGTAzv",
+        "pay_TiU3626CDzXg3w",
+        "pay_TiU9ZTZMU1VSsX",
+        "pay_TiUiFjijJWfgte",
+        "pay_TiUqJ86gbW9gMZ",
+        "pay_TiUq5UTRbbOY3P",
+        "pay_TiV08iK2q0tJge",
+        "pay_TiV7jhu3uBH6Jw",
+        "pay_TiWCXXBF4FFjbd",
+        "pay_TiWLZnAaUo8jYS",
+        "pay_TiWb8ORvV2EiF7",
+        "pay_TiXBveTOYlL9Ee",
+        "pay_TiXui9LUp3AchH",
+        "pay_TiXyk0V9DQwUzr",
+        "pay_TiXz68CFhDTe4H",
+        "pay_TiYfV3XiEo8i2n",
+        "pay_TiYt5YJBUjd5gF",
+        "pay_TiYyFeOoUKuIMo",
+        "pay_TiZACxPfPUBHt3",
+        "pay_TiZCNUIP6d33QE",
+        "pay_TiZwDn4h7SwBSx",
+        "pay_TiZzkbxNhzmmea",
+        "pay_Tia4lSfndFWxPn",
+        "pay_TiaAus8LFVbKiI",
+        "pay_TiaJV2WUl4cIVO",
+        "pay_TiaQmF9Rbjjp6C",
+        "pay_TiatWejRCvLhuF",
+        "pay_Tib9kmnc7nc4dq",
+        "pay_TibXWxoWBe4qe0",
+        "pay_TibmTdXG0539wZ",
+        "pay_TibtKL0Z5myc64",
+        "pay_Tic43Cg4ihLVFi",
+        "pay_Tic4chBYy3IZH0",
+        "pay_Tic6aLIj7tzRVo",
+        "pay_TicX45eFee74FY",
+        "pay_TicYjKYHWyIwmq",
+        "pay_Ticts10IsHjPBs",
+        "pay_Tid3fKxRkTVkok",
+        "pay_TidCfnlvq1xSsa",
+        "pay_TidDBf9oDF9F7w",
+        "pay_TidI6MflztlQHi",
+        "pay_TidWTnDjQKIOsB",
+        "pay_Tie4hBdXi5wsGq",
+        "pay_TieAQmXDqm8aMP",
+        "pay_TieECmMXFXrPrz",
+        "pay_TieNOcNFu9GkNg",
+        "pay_TieSCwWq9O0sgc",
+        "pay_TifGR0ISTbq5A8",
+        "pay_TifZj225HsX1ml",
+        "pay_Tifn0G9ueErCd7",
+        "pay_Tig1h1fdzUX1LR",
+        "pay_TigQ8M8d2gt0G3",
+        "pay_TigZUTx3CGmAFc",
+        "pay_TigaD6Zwx7iRto",
+        "pay_Tighf3mQgxi3iz",
+        "pay_TihEAIYhrYK27k",
+        "pay_TihdNhJ9udOu6t",
+        "pay_Tii0OpCSv94taU",
+        "pay_Tii7f9FRFgRr5m",
+        "pay_Tij9IIZsgtpATn",
+        "pay_TijFwl3yuxUIjv",
+        "pay_TijWbmhIGQw3cj",
+        "pay_TijYa4J8uRwRlg",
+        "pay_TijgxPuLGMEHzv",
+        "pay_TijuXlRYqr5YBd",
+        "pay_TikMQ0vhXpanmD",
+        "pay_Tikxpt8GqV88iY",
+        "pay_Til6wbOLsy988k",
+        "pay_TilO5WQGSdHNr3",
+        "pay_TilYGzDJupIGJQ",
+        "pay_TilZbzFuDoc63J",
+        "pay_TillPgxE5UkO4y",
+        "pay_Tip5jd6jR9DAx4",
+        "pay_Tip7HDbytyTk7r",
+        "pay_TipXWq8L4h27eO",
+        "pay_TipebDjenRhjyW",
+        "pay_TipzK4afWKLgKB",
+        "pay_Tiq7NDCp9HAcXH",
+        "pay_TiqAASFPtgcGqu",
+        "pay_Tir3Z8juMYW4rb",
+        "pay_Tirfu6i8FI9wfn",
+        "pay_TirqfmMW5a0S4K",
+        "pay_TirvyFRg4egGF1",
+        "pay_TirxPfbv5Yyldu",
+        "pay_Tis59SHi9qxLuq",
+        "pay_Tis6CypJyknsZ9",
+        "pay_Tis9CpholBuXYe",
+        "pay_TisHjiiLyrSmUm",
+        "pay_TisO93bghcIa00",
+        "pay_TisVMNzhIbSJoF",
+        "pay_Tit6f6lMXAu5gB",
+        "pay_Tit7hkpbhaEpty",
+        "pay_TitBdqRNnV9Np7",
+        "pay_TitsGJFSGrUMPU",
+        "pay_TityDS5ShE5BEg",
+        "pay_Tiu2swbfZDhDJP",
+        "pay_TiuDm7FPlXqYSW",
+        "pay_TiuFfqosa9hqpZ",
+        "pay_TiuZaqj9VMxFQm",
+        "pay_Tiud5s8Jr4k6ak",
+        "pay_TiuuaK1MHBR05n",
+        "pay_Tivi7NK0QAAV0g",
+        "pay_Tivi8936r9Syqf",
+        "pay_Tivu1dykFabJl3",
+        "pay_Tiwb0ZinXvjIcI",
+        "pay_TixhUVOcUOvF2Z",
+        "pay_TiyBFsdqOHifoL",
+        "pay_TiyBbQwycyxNB3",
+        "pay_TiyvLZ5K8KJ5wX",
+        "pay_Tiz29qtwpjHamy",
+        "pay_TizC4WXyqPDrCk",
+        "pay_TizDiqasyn8S1S",
+        "pay_TizGx4IrPVvUY8",
+        "pay_TizJI2sB3qgFqV",
+        "pay_TizcMhUVFUD8V0",
+        "pay_Tj08HNmIs49J7L",
+        "pay_Tj0EtBzh9YStpu",
+        "pay_Tj1SsYWSf1gFdb",
+        "pay_Tj1yzrgkkMBUdX",
+        "pay_Tj2ShWyn9I6xML",
+        "pay_Tj3BUbKhOWjVhG",
+        "pay_Tj3MSLtozdkFOF",
+        "pay_Tj3xGDmg8HN5EH",
+        "pay_Tj3zpsiSnL9a4u",
+        "pay_Tj4TSEKu57n0IH",
+        "pay_Tj4uaR8qwAae8X",
+        "pay_Tj6SJXBEoT2qWg",
+        "pay_Tj7KBcoR59TCDi",
+        "pay_Tj7TrhWynrSF77",
+        "pay_Tj8h1tGQpX9OnZ",
+        "pay_Tj95V1YznXBIbF",
+        "pay_Tj9xrEvZcKw0hB",
+        "pay_TjAld6PZbXhten",
+        "pay_TjB95MJxI0l3rY",
+        "pay_TjBddOgZupeuHE",
+        "pay_TjDMxPJ9PFbZcL",
+        "pay_TjF8qYIBiMGfH3",
+        "pay_TjFyzRvhFvM4Xg",
+        "pay_TjGC5IaWHBZklu",
+        "pay_TjGDtcbI970czA",
+        "pay_TjGVGthiQGX94b",
+        "pay_TjGwuBeRtF5jF6",
+        "pay_TjH03sFgRETwen",
+        "pay_TjH1lyRLFKKfuM",
+        "pay_TjHmYL0gkmYBX7",
+        "pay_TjHmltANK7FbqM",
+        "pay_TjI53FXKWMGQm3",
+        "pay_TjID7X8jBv6OIL",
+        "pay_TjIblROkprihUa",
+        "pay_TjIrXFHwjaeXy4",
+        "pay_TjJ5GNZBxumg7N",
+        "pay_TjJCGMToTwHa7J",
+        "pay_TjJJcc0CjoCrID",
+        "pay_TjJfp3gznuaQB8",
+        "pay_TjK69j6MlWFIuU",
+        "pay_TjK8cyGCRcQd09",
+        "pay_TjKdRpAYYGX9K0",
+        "pay_TjKinYMCrrdiXN",
+        "pay_TjKl0C1sfuzpZD",
+        "pay_TjLeiVXNUYA4jG",
+        "pay_TjLm9Sv3iwNzRU",
+        "pay_TjMElXesycF6Ir",
+        "pay_TjMQJHyHOQv67x",
+        "pay_TjMZD8LWtwlNBl",
+        "pay_TjMk0Yem5H760o",
+        "pay_TjNFZowtVqfX6O",
+        "pay_TjNNnuqqzPSYv6",
+        "pay_TjOLPa9EbTZsmi",
+        "pay_TjOOcrUyBeqCk3",
+        "pay_TjOaTd9uNoTe7b",
+        "pay_TjOaZSO4bhjGxj",
+        "pay_TjOoXH90VYphMQ",
+        "pay_test_1791023187887",
+        "pay_TjPCyjQCuddj4n",
+        "pay_TjPR1aX37vzQLL",
+        "pay_TjPaz0GYv6HuWF",
+        "pay_TjPssxQaMeyqKt",
+        "pay_TjQbhfaowZ6Ljs",
+        "pay_TjQy42IN7UZTLc",
+        "pay_TjRLsfHKTGTNmV",
+        "pay_TjRVCpwQJnRSAS",
+        "pay_TjS4V0iw0LjtMB",
+        "pay_TjS7R5oN7oSuNd",
+        "pay_TjSiH7iH0UcvCa",
+        "pay_TjSnjBiho1euWX",
+        "pay_TjT4SNmA0GivRb",
+        "pay_TjT4es5O1PXM1q",
+        "pay_TjT568IvAY9NvX",
+        "pay_TjT86OyrG1GdRK",
+        "pay_TjT8kDHQs16NRH",
+        "pay_TjTQpSAMCg8Tzr",
+        "pay_TjUCjnV3OPkN8Y",
+        "pay_TjVgfv1di5uycI",
+        "pay_Tjj3n7p1eC2Msd"
+      ]
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "c911396e-abde-4441-b0e9-4d952a546c9f",
+  "activeVersionId": "c911396e-abde-4441-b0e9-4d952a546c9f",
+  "versionCounter": 50,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-10-05T14:03:50.686Z",
+    "createdAt": "2026-10-05T14:03:50.686Z",
+    "versionId": "c911396e-abde-4441-b0e9-4d952a546c9f",
+    "workflowId": "NiW3vl0a7dawrW6f",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "ai-influencer-leads",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "1b084931-15ee-45df-bcf5-99884a4ec410",
+        "name": "Webhook Trigger",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          220,
+          300
+        ],
+        "webhookId": "ai-influencer-leads"
+      },
+      {
+        "parameters": {
+          "jsCode": "const raw = $input.first().json.body || $input.first().json;\n\nlet item = raw;\nlet notes = {};\n\n// Handle direct Razorpay Webhook format if sent from Razorpay Dashboard\nif ((raw.event === 'payment.captured' || raw.event === 'order.paid') && raw.payload) {\n  const p = raw.payload.payment ? raw.payload.payment.entity : (raw.payload.order ? raw.payload.order.entity : {});\n  notes = p.notes || {};\n  const cleanPhone = (notes.phone || notes.contact || p.contact || '').replace(/\\\\D/g, '').slice(-10);\n  const amtNum = p.amount ? Math.round(p.amount / 100) : 29;\n  \n  // Guardrail: Filter out course purchases (>= ₹900) so they NEVER get dumped into workshop sheet\n  if (amtNum >= 900) {\n    return [];\n  }\n  \n  item = {\n    name: notes.name || notes.buyer_name || p.name || 'there',\n    number: cleanPhone,\n    email: notes.email || p.email || '',\n    amount: amtNum,\n    amount_formatted: '₹' + amtNum,\n    workshop_date: '8th October 2026 (Thursday) 7:00 PM IST',\n    has_call_booked: Boolean(notes.offers && notes.offers.includes('call')),\n    call_booked: (notes.offers && notes.offers.includes('call')) ? 'YES' : 'NO',\n    call_status: (notes.offers && notes.offers.includes('call')) ? 'Pending' : 'N/A',\n    recording_purchased: (notes.offers && notes.offers.includes('recording')) ? 'YES' : 'NO',\n    prompts_purchased: (notes.offers && notes.offers.includes('prompts')) ? 'YES' : 'NO',\n    razorpay_payment_id: p.id || '',\n    razorpay_order_id: p.order_id || '',\n    utm_source: notes.utm_source || '',\n    utm_campaign: notes.utm_campaign || '',\n    utm_content: notes.utm_content || '',\n    utm_term: notes.utm_term || '',\n    fb_click_id: notes.fbclid || '',\n    fbp: notes.fbp || '',\n    fbc: notes.fbc || ''\n  };\n}\n\nconst amtVal = parseInt(String(item.amount || '').replace(/\\\\D/g, '')) || 29;\nif (amtVal >= 900) {\n  return [];\n}\n\n// Deduplication safeguard: Prevent duplicate rows/emails if both website & Razorpay send webhooks\nconst paymentId = item.razorpay_payment_id || '';\ntry {\n  const staticData = $getWorkflowStaticData('global');\n  staticData.processedIds = staticData.processedIds || [];\n  if (paymentId && staticData.processedIds.includes(paymentId)) {\n    return [];\n  }\n  if (paymentId) {\n    staticData.processedIds.push(paymentId);\n    if (staticData.processedIds.length > 200) {\n      staticData.processedIds.shift();\n    }\n  }\n} catch (e) {\n  // safe\n}\n\nconst hasCall = item.has_call_booked === true || \n  item.call_booked === 'YES' ||\n  (Array.isArray(item.offers) && item.offers.includes('call')) ||\n  (typeof item.offers_label === 'string' && item.offers_label.toLowerCase().includes('call')) ||\n  amtVal === 528 || amtVal === 677 || amtVal === 727 || amtVal === 876;\n\nconst hasRecording = item.recording_purchased === 'YES' ||\n  (Array.isArray(item.offers) && item.offers.includes('recording')) ||\n  (typeof item.offers_label === 'string' && item.offers_label.toLowerCase().includes('recording')) ||\n  amtVal === 178 || amtVal === 377 || amtVal === 677 || amtVal === 876;\n\nconst hasPrompts = item.prompts_purchased === 'YES' ||\n  (Array.isArray(item.offers) && item.offers.includes('prompts')) ||\n  (typeof item.offers_label === 'string' && item.offers_label.toLowerCase().includes('prompts')) ||\n  amtVal === 228 || amtVal === 377 || amtVal === 727 || amtVal === 876;\n\nconst name = (item.name || 'there').trim();\nconst amount = item.amount_formatted || (item.amount ? '₹' + item.amount : '₹29');\nconst whatsappUrl = 'https://chat.whatsapp.com/FDLe6CBZxa66sEcHvhy1pD?mode=gi_t';\n\nconst emailHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for registering for the <strong>AI Influencer Workshop</strong>. Your seat is confirmed!</p>\n\n<p><strong>Please Note:</strong> You must join our WhatsApp group to attend the live workshop, as the Zoom meeting link and prompt guides will only be shared inside the WhatsApp group (we do not send the link over email to avoid unauthorized access).</p>\n\n<p>👉 <strong>Join WhatsApp Group here:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p><strong>Workshop Details:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Date:</strong> 8th October 2026 (Thursday)</li>\n  <li><strong>Time:</strong> 7:00 PM IST (Sharp)</li>\n  <li><strong>Location:</strong> Live on Zoom (Link shared in the WhatsApp group)</li>\n  <li><strong>Amount Paid:</strong> ${amount}</li>\n</ol>\n\n<p><strong>Next Steps:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li>Click the link above to join the WhatsApp group right now.</li>\n  <li>Pin the group on WhatsApp so you don't miss the Zoom link.</li>\n  <li>Keep your laptop ready on Thursday at 6:55 PM IST.</li>\n</ol>\n\n<div style=\"background-color: #fff9e6; border: 1px solid #ffe082; border-radius: 8px; padding: 14px; margin: 18px 0; font-size: 13px; color: #333333;\">\n  <p style=\"margin: 0 0 8px 0; font-weight: bold; color: #b78103; font-size: 14px;\">⚠️ Important Delivery &amp; Support Guidelines:</p>\n  <ul style=\"margin: 0; padding-left: 18px; line-height: 1.6;\">\n    <li><strong>Recording &amp; 300+ Prompts:</strong> If you purchased the Workshop Recording or Prompts Vault, they will be automatically delivered to this registered email within <strong>12 hours after the live workshop ends</strong>. Delivery is 100% automated, so please do not worry or panic.</li>\n    <li><strong>Check Spam / Promotions:</strong> If you do not see our delivery email in your Primary Inbox, kindly check your <strong>Spam folder</strong> or <strong>Promotions tab</strong>.</li>\n    <li><strong>1:1 Strategy Call:</strong> All 1-on-1 calls are conducted <strong>after the live workshop</strong>. Once the workshop ends, you can directly message the WhatsApp Group Admin to schedule your preferred 1:1 call slot.</li>\n  </ul>\n</div>\n\n<p>If you have any questions, feel free to reply directly to this email.</p>\n\n<p>Looking forward to seeing you live on Thursday.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`;\n\nconst regDate = item.date || new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' });\nconst regTime = item.time || new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });\n\nreturn [{\n  json: {\n    Name: item.name || '',\n    Number: item.number || item.phone || '',\n    Email: item.email || '',\n    'Date ': regDate,\n    Date: regDate,\n    Time: regTime,\n    Amount: amount,\n    'Workshop Date': item.workshop_date || '8th October 2026 (Thursday) 7:00 PM IST',\n    'Utm source': item.utm_source || '',\n    'Utm campaign': item.utm_campaign || '',\n    'Utm content': item.utm_content || '',\n    'Utm term': item.utm_term || '',\n    'FB Click ID': item.fb_click_id || item.fbclid || (notes && notes.fbclid) || '',\n    has_call_booked: Boolean(hasCall),\n    'Call Status': hasCall ? 'Pending' : 'N/A',\n    'Recording Purchased': hasRecording ? 'YES' : 'NO',\n    'Prompts Purchased': hasPrompts ? 'YES' : 'NO',\n    'Payment ID': item.razorpay_payment_id || '',\n    raw_amount: amtVal,\n    fbp: item.fbp || (notes && notes.fbp) || '',\n    fbc: item.fbc || (notes && notes.fbc) || '',\n    email_html: emailHtml\n  }\n}];\n"
+        },
+        "id": "9d81ff3a-8742-411a-8ce8-7be61309d57a",
+        "name": "Format Lead Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          460,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+            "mode": "list",
+            "cachedResultName": "AIF Workshop",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit#gid=0"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": []
+          },
+          "options": {},
+          "authentication": "serviceAccount"
+        },
+        "id": "70b55cfa-fa81-424a-9c7a-59427b0c36df",
+        "name": "Append to Main Lead Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          720,
+          200
+        ],
+        "credentials": {
+          "googleApi": {
+            "id": "SsEE517tRUiLR8pJ",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "979e2c40-0255-4679-b169-25f0a0d4c82b",
+                "leftValue": "={{ $json.has_call_booked }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "29f3459c-bbcc-46b6-a979-45e0d4bb8b9f",
+        "name": "Is 1:1 Call Booked?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          960,
+          320
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+            "mode": "list",
+            "cachedResultName": "AIF Workshop",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Call Bookings"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": []
+          },
+          "options": {},
+          "authentication": "serviceAccount"
+        },
+        "id": "0d2eb054-ff43-4cc0-9685-64d5bbbb9789",
+        "name": "Append to Call Bookings Tab",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          1220,
+          240
+        ],
+        "credentials": {
+          "googleApi": {
+            "id": "SsEE517tRUiLR8pJ",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
+          "toEmail": "={{ $json.Email }}",
+          "subject": "Seat Confirmed: Please Join WhatsApp Group for Zoom Link",
+          "html": "={{ $json.email_html }}",
+          "options": {
+            "replyTo": "workshop@prateekmayani.com"
+          }
+        },
+        "id": "e44c207b-871d-407b-99f5-7b567a147810",
+        "name": "Send Confirmation Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          720,
+          420
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "RmJjbVmoKL0wS3Bl",
+            "name": "SMTP account"
+          }
+        },
+        "webhookId": "11c506ad-c9cb-4460-aab8-c1f0fd0ee2c3"
+      },
+      {
+        "parameters": {
+          "jsCode": "function sha256(ascii) {\n  function rightRotate(value, amount) {\n    return (value>>>amount) | (value<<(32 - amount));\n  }\n  var mathPow = Math.pow;\n  var maxWord = mathPow(2, 32);\n  var lengthProperty = \"length\";\n  var i, j;\n  var result = \"\";\n  var words = [];\n  var asciiBitLength = ascii[lengthProperty]*8;\n  var hash = [];\n  var k = [];\n  var primeCounter = 0;\n\n  var isComposite = {};\n  for (var candidate = 2; primeCounter < 64; candidate++) {\n    if (!isComposite[candidate]) {\n      for (i = 0; i < 313; i += candidate) {\n        isComposite[i] = candidate;\n      }\n      hash[primeCounter] = (mathPow(candidate, .5)*maxWord)|0;\n      k[primeCounter++] = (mathPow(candidate, 1/3)*maxWord)|0;\n    }\n  }\n\n  ascii += \"\\x80\";\n  while (ascii[lengthProperty]%64 - 56) ascii += \"\\x00\";\n  for (i = 0; i < ascii[lengthProperty]; i++) {\n    j = ascii.charCodeAt(i);\n    if (j>>8) return;\n    words[i>>2] |= j << ((3 - i)%4)*8;\n  }\n  words[words[lengthProperty]] = ((asciiBitLength/maxWord)|0);\n  words[words[lengthProperty]] = (asciiBitLength);\n\n  for (j = 0; j < words[lengthProperty];) {\n    var w = words.slice(j, j += 16);\n    var oldHash = hash;\n    hash = hash.slice(0, 8);\n\n    for (i = 0; i < 64; i++) {\n      var i2 = i + j;\n      var w15 = w[i - 15], w2 = w[i - 2];\n      var a = hash[0], e = hash[4];\n      var temp1 = hash[7]\n        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))\n        + ((e & hash[5]) ^ ((~e) & hash[6]))\n        + k[i]\n        + (w[i] = (i < 16) ? w[i] : (\n            w[i - 16]\n            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15>>>3))\n            + w[i - 7]\n            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2>>>10))\n          )|0\n        );\n      var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))\n        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));\n\n      hash = [(temp1 + temp2)|0].concat(hash);\n      hash[4] = (hash[4] + temp1)|0;\n    }\n\n    for (i = 0; i < 8; i++) {\n      hash[i] = (hash[i] + oldHash[i])|0;\n    }\n  }\n\n  for (i = 0; i < 8; i++) {\n    for (j = 3; j >= 0; j--) {\n      var b = (hash[i]>>(j*8))&255;\n      result += ((b < 16) ? 0 : \"\") + b.toString(16);\n    }\n  }\n  return result;\n}\n\nconst item = $input.first().json;\nconst email = (item.Email || '').trim().toLowerCase();\nconst rawPhone = String(item.Number || '').replace(/\\D/g, '').slice(-10);\nconst phone = rawPhone.length === 10 ? '91' + rawPhone : rawPhone;\nconst fullName = (item.Name || '').trim();\nconst firstName = fullName.split(' ')[0].toLowerCase();\nconst paymentId = item['Payment ID'] || ('pay_' + Date.now());\nconst rawAmount = item.raw_amount || parseInt(String(item.Amount || '').replace(/\\D/g, '')) || 29;\n\nconst fbp = item.fbp || '';\nlet fbc = item.fbc || '';\nif (!fbc && item['FB Click ID']) {\n  fbc = 'fb.1.' + Date.now() + '.' + item['FB Click ID'];\n}\n\nconst userData = {};\nif (email && email.includes('@')) {\n  userData.em = [sha256(email)];\n}\nif (phone) {\n  userData.ph = [sha256(phone)];\n}\nif (firstName) {\n  userData.fn = [sha256(firstName)];\n}\nuserData.country = [sha256('in')];\nif (paymentId) {\n  userData.external_id = [sha256(paymentId)];\n}\nif (fbp) userData.fbp = fbp;\nif (fbc) userData.fbc = fbc;\n\nconst capiPayload = {\n  data: [\n    {\n      event_name: 'Purchase',\n      event_time: Math.floor(Date.now() / 1000),\n      event_id: paymentId,\n      event_source_url: 'https://aifworkshop.prateekmayani.com/thank-you-5034',\n      action_source: 'website',\n      user_data: userData,\n      custom_data: {\n        currency: 'INR',\n        value: rawAmount,\n        content_name: 'AI Influencer Workshop'\n      }\n    }\n  ]\n};\n\nreturn [{\n  json: {\n    capiPayload: capiPayload\n  }\n}];\n"
+        },
+        "name": "Prepare Meta CAPI Payload",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          540
+        ],
+        "id": "b46dca52-7158-4e62-a78e-27db8c5f316b"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://graph.facebook.com/v19.0/2359274784891947/events?access_token=EAAoYN6dNtekBSu9ToerUbQaM8evi7PVyQzqRdq27m1o0h5hcIT0v9UoXQ9pfbY06ZCgAkyqlmxnY5OhO7CUQzjaoW9wN5ncFNeoIBkZByeGhS93w3RqhubkYFp0goHACz5uynrlSXN7I7nY7MnMkbrubFBghx66zLNRXJyRjO6ELC81sTdcQ3B6OlDHwZC0lwZDZD",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.capiPayload }}",
+          "options": {}
+        },
+        "name": "Send Meta CAPI Purchase",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          980,
+          540
+        ],
+        "continueOnFail": true,
+        "id": "5bdf6f5d-a6e5-403b-ad1a-a0bd8b180bfa"
+      }
+    ],
+    "connections": {
+      "Webhook Trigger": {
+        "main": [
+          [
+            {
+              "node": "Format Lead Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Lead Data": {
+        "main": [
+          [
+            {
+              "node": "Append to Main Lead Sheet",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Is 1:1 Call Booked?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Send Confirmation Email",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Prepare Meta CAPI Payload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is 1:1 Call Booked?": {
+        "main": [
+          [
+            {
+              "node": "Append to Call Bookings Tab",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Prepare Meta CAPI Payload": {
+        "main": [
+          [
+            {
+              "node": "Send Meta CAPI Purchase",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Preetam Soni",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  }
+}

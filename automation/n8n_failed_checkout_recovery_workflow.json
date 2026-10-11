@@ -1,0 +1,347 @@
+{
+  "updatedAt": "2026-10-01T06:56:02.664Z",
+  "createdAt": "2026-10-01T06:34:54.722Z",
+  "id": "KNGFBNVLEMNFpdgj",
+  "name": "AI Influencer Workshop - Failed & Abandoned Checkout Recovery",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "failed-checkout-recovery",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "webhookId": "failed-checkout-recovery",
+      "id": "12aeb9a9-a2d3-4145-a41b-21445577d7d6"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+          "mode": "list"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "options": {},
+        "authentication": "serviceAccount"
+      },
+      "name": "Fetch Paid Attendees from Sheet1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        460,
+        300
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "SsEE517tRUiLR8pJ",
+          "name": "Google Sheets account"
+        }
+      },
+      "id": "a0f4ad88-e9ce-4caa-8c39-062877341dff"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $('Webhook Trigger').first().json.body || $('Webhook Trigger').first().json.query || $('Webhook Trigger').first().json || {};\n\n// 1. Extract payment entity from Razorpay payload or direct payload\nlet p = {};\nlet notes = {};\nif (raw.payload && raw.payload.payment) {\n  p = raw.payload.payment.entity || {};\n  notes = p.notes || {};\n} else {\n  p = raw;\n  notes = raw.notes || {};\n}\n\nconst isTest = raw.test_mode === true || raw.test_mode === 'true';\nconst eventType = raw.event || (isTest ? 'payment.failed' : '');\n\n// Safety 1: Only trigger on failed payments (or direct test trigger)\nif (eventType !== 'payment.failed' && !isTest) {\n  return [];\n}\n\nconst rawAmount = p.amount ? Math.round(p.amount / 100) : (raw.amount ? parseInt(raw.amount, 10) : 29);\n\n// Safety 2: Pure Amount Guard — Only recover workshop checkouts (< ₹2,000)\nif (rawAmount >= 2000) {\n  return []; // Skip high-ticket course purchases\n}\n\nconst email = (notes.email || p.email || raw.email || '').trim().toLowerCase();\nconst name = (notes.name || notes.buyer_name || p.name || raw.name || 'there').trim();\nconst rawPhone = notes.phone || notes.contact || p.contact || raw.phone || '';\nconst cleanPhone = String(rawPhone).replace(/\\D/g, '').slice(-10);\n\nif (!email || !email.includes('@')) {\n  return [];\n}\n\n// Safety 3: Check if customer ALREADY paid successfully in Google Sheet\nconst sheetAttendees = $input.all() || [];\nconst alreadyPaid = sheetAttendees.some(item => {\n  const rowEmail = (item.json.Email || item.json.email || '').trim().toLowerCase();\n  return rowEmail === email;\n});\n\nif (alreadyPaid && !isTest) {\n  // Customer already completed their registration on another attempt — do not send!\n  return [];\n}\n\n// Safety 4: Deduplication cooldown (Don't spam if customer fails multiple times in 24h)\ntry {\n  const staticData = $getWorkflowStaticData('global');\n  staticData.sentMap = staticData.sentMap || {};\n  const now = Date.now();\n  const lastSent = staticData.sentMap[email];\n  \n  if (lastSent && (now - lastSent < 24 * 60 * 60 * 1000) && !isTest) {\n    return []; // Already sent recovery email in the last 24 hours\n  }\n  \n  staticData.sentMap[email] = now;\n} catch (e) {\n  // safe fallback\n}\n\n// Option 1: 1-Click Smart Pre-fill Link\nconst prefillUrl = `https://aifworkshop.prateekmayani.com/checkout?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(cleanPhone)}`;\n\nconst emailSubject = \"did your payment go through?\";\n\nconst emailText = `Hey ${name},\n\nSaw that your payment didn't go through just now on the checkout.\n\nWanted to check if you ran into any issue?\n\nIn the workshop, we're going to cover the complete AI influencer funnel — generating bold images without restrictions, and scaling to 6 figures using just your mobile phone and completely free tools (no paid software needed).\n\nIf you still want to join, here is your direct link to complete your Rs 29 registration:\n${prefillUrl}\n\n(If money already got deducted from your bank, just reply to this email with the screenshot and I'll confirm your seat manually).\n\nBest,\nPrateek Mayani`;\n\nconst emailHtml = `<div style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #222222;\">\n<p>Hey ${name},</p>\n\n<p>Saw that your payment didn't go through just now on the checkout.</p>\n\n<p>Wanted to check if you ran into any issue?</p>\n\n<p>In the workshop, we're going to cover the complete AI influencer funnel — generating bold images without restrictions, and scaling to 6 figures using just your mobile phone and completely free tools (no paid software needed).</p>\n\n<p>If you still want to join, here is your direct link to complete your Rs 29 registration:<br>\n<a href=\"${prefillUrl}\" style=\"color: #0066cc; text-decoration: underline;\">${prefillUrl}</a></p>\n\n<p style=\"font-size: 13px; color: #555555;\">\n  <em>(If money already got deducted from your bank, just reply to this email with the screenshot and I'll confirm your seat manually).</em>\n</p>\n\n<p>Best,<br>\nPrateek Mayani</p>\n</div>`;\n\nreturn [{\n  json: {\n    recipientEmail: email,\n    recipientName: name,\n    emailSubject: emailSubject,\n    emailHtml: emailHtml,\n    emailText: emailText,\n    retryUrl: prefillUrl,\n    amount: rawAmount\n  }\n}];\n"
+      },
+      "name": "Process Failed Payment & Check Already Paid",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "id": "21ca1344-7df7-4882-bbc8-1489fbbd7f13"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Prateek Mayani <prateek@prateekmayani.com>",
+        "toEmail": "={{ $json.recipientEmail }}",
+        "subject": "={{ $json.emailSubject }}",
+        "html": "={{ $json.emailHtml }}",
+        "text": "={{ $json.emailText }}",
+        "options": {
+          "replyTo": "workshop@prateekmayani.com",
+          "appendAttribution": false
+        }
+      },
+      "name": "Send Recovery Email via SMTP",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        980,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "RmJjbVmoKL0wS3Bl",
+          "name": "SMTP account"
+        }
+      },
+      "id": "fa9cada2-0320-4fee-8771-34ea3ab5090a",
+      "webhookId": "375aa8e9-d36b-4a40-b02b-3ebbea9c1fff"
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Paid Attendees from Sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Paid Attendees from Sheet1": {
+      "main": [
+        [
+          {
+            "node": "Process Failed Payment & Check Already Paid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Failed Payment & Check Already Paid": {
+      "main": [
+        [
+          {
+            "node": "Send Recovery Email via SMTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "global": {
+      "sentMap": {
+        "prateekmayanii@gmail.com": 1790837772174
+      }
+    }
+  },
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "aaa609b2-ec56-42f7-9b1f-91b9845fc707",
+  "activeVersionId": "aaa609b2-ec56-42f7-9b1f-91b9845fc707",
+  "versionCounter": 5,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "shared": [
+    {
+      "updatedAt": "2026-10-01T06:34:54.745Z",
+      "createdAt": "2026-10-01T06:34:54.745Z",
+      "role": "workflow:owner",
+      "workflowId": "KNGFBNVLEMNFpdgj",
+      "projectId": "j1WUDbxvXeD5ceGA",
+      "project": {
+        "updatedAt": "2026-07-12T20:52:16.859Z",
+        "createdAt": "2026-07-12T19:50:55.652Z",
+        "id": "j1WUDbxvXeD5ceGA",
+        "name": "Preetam Soni <pritamsoni3317@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "cb834f62-f70a-4201-b686-b92c03452f25"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-10-01T06:56:02.666Z",
+    "createdAt": "2026-10-01T06:56:02.666Z",
+    "versionId": "aaa609b2-ec56-42f7-9b1f-91b9845fc707",
+    "workflowId": "KNGFBNVLEMNFpdgj",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "failed-checkout-recovery",
+          "responseMode": "onReceived",
+          "responseData": "allEntries",
+          "options": {}
+        },
+        "name": "Webhook Trigger",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          200,
+          300
+        ],
+        "webhookId": "failed-checkout-recovery",
+        "id": "12aeb9a9-a2d3-4145-a41b-21445577d7d6"
+      },
+      {
+        "parameters": {
+          "operation": "read",
+          "documentId": {
+            "__rl": true,
+            "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+            "mode": "list"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list"
+          },
+          "options": {},
+          "authentication": "serviceAccount"
+        },
+        "name": "Fetch Paid Attendees from Sheet1",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          460,
+          300
+        ],
+        "credentials": {
+          "googleApi": {
+            "id": "SsEE517tRUiLR8pJ",
+            "name": "Google Sheets account"
+          }
+        },
+        "id": "a0f4ad88-e9ce-4caa-8c39-062877341dff"
+      },
+      {
+        "parameters": {
+          "jsCode": "const raw = $('Webhook Trigger').first().json.body || $('Webhook Trigger').first().json.query || $('Webhook Trigger').first().json || {};\n\n// 1. Extract payment entity from Razorpay payload or direct payload\nlet p = {};\nlet notes = {};\nif (raw.payload && raw.payload.payment) {\n  p = raw.payload.payment.entity || {};\n  notes = p.notes || {};\n} else {\n  p = raw;\n  notes = raw.notes || {};\n}\n\nconst isTest = raw.test_mode === true || raw.test_mode === 'true';\nconst eventType = raw.event || (isTest ? 'payment.failed' : '');\n\n// Safety 1: Only trigger on failed payments (or direct test trigger)\nif (eventType !== 'payment.failed' && !isTest) {\n  return [];\n}\n\nconst rawAmount = p.amount ? Math.round(p.amount / 100) : (raw.amount ? parseInt(raw.amount, 10) : 29);\n\n// Safety 2: Pure Amount Guard — Only recover workshop checkouts (< ₹2,000)\nif (rawAmount >= 2000) {\n  return []; // Skip high-ticket course purchases\n}\n\nconst email = (notes.email || p.email || raw.email || '').trim().toLowerCase();\nconst name = (notes.name || notes.buyer_name || p.name || raw.name || 'there').trim();\nconst rawPhone = notes.phone || notes.contact || p.contact || raw.phone || '';\nconst cleanPhone = String(rawPhone).replace(/\\D/g, '').slice(-10);\n\nif (!email || !email.includes('@')) {\n  return [];\n}\n\n// Safety 3: Check if customer ALREADY paid successfully in Google Sheet\nconst sheetAttendees = $input.all() || [];\nconst alreadyPaid = sheetAttendees.some(item => {\n  const rowEmail = (item.json.Email || item.json.email || '').trim().toLowerCase();\n  return rowEmail === email;\n});\n\nif (alreadyPaid && !isTest) {\n  // Customer already completed their registration on another attempt — do not send!\n  return [];\n}\n\n// Safety 4: Deduplication cooldown (Don't spam if customer fails multiple times in 24h)\ntry {\n  const staticData = $getWorkflowStaticData('global');\n  staticData.sentMap = staticData.sentMap || {};\n  const now = Date.now();\n  const lastSent = staticData.sentMap[email];\n  \n  if (lastSent && (now - lastSent < 24 * 60 * 60 * 1000) && !isTest) {\n    return []; // Already sent recovery email in the last 24 hours\n  }\n  \n  staticData.sentMap[email] = now;\n} catch (e) {\n  // safe fallback\n}\n\n// Option 1: 1-Click Smart Pre-fill Link\nconst prefillUrl = `https://aifworkshop.prateekmayani.com/checkout?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(cleanPhone)}`;\n\nconst emailSubject = \"did your payment go through?\";\n\nconst emailText = `Hey ${name},\n\nSaw that your payment didn't go through just now on the checkout.\n\nWanted to check if you ran into any issue?\n\nIn the workshop, we're going to cover the complete AI influencer funnel — generating bold images without restrictions, and scaling to 6 figures using just your mobile phone and completely free tools (no paid software needed).\n\nIf you still want to join, here is your direct link to complete your Rs 29 registration:\n${prefillUrl}\n\n(If money already got deducted from your bank, just reply to this email with the screenshot and I'll confirm your seat manually).\n\nBest,\nPrateek Mayani`;\n\nconst emailHtml = `<div style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; line-height: 1.6; color: #222222;\">\n<p>Hey ${name},</p>\n\n<p>Saw that your payment didn't go through just now on the checkout.</p>\n\n<p>Wanted to check if you ran into any issue?</p>\n\n<p>In the workshop, we're going to cover the complete AI influencer funnel — generating bold images without restrictions, and scaling to 6 figures using just your mobile phone and completely free tools (no paid software needed).</p>\n\n<p>If you still want to join, here is your direct link to complete your Rs 29 registration:<br>\n<a href=\"${prefillUrl}\" style=\"color: #0066cc; text-decoration: underline;\">${prefillUrl}</a></p>\n\n<p style=\"font-size: 13px; color: #555555;\">\n  <em>(If money already got deducted from your bank, just reply to this email with the screenshot and I'll confirm your seat manually).</em>\n</p>\n\n<p>Best,<br>\nPrateek Mayani</p>\n</div>`;\n\nreturn [{\n  json: {\n    recipientEmail: email,\n    recipientName: name,\n    emailSubject: emailSubject,\n    emailHtml: emailHtml,\n    emailText: emailText,\n    retryUrl: prefillUrl,\n    amount: rawAmount\n  }\n}];\n"
+        },
+        "name": "Process Failed Payment & Check Already Paid",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          300
+        ],
+        "id": "21ca1344-7df7-4882-bbc8-1489fbbd7f13"
+      },
+      {
+        "parameters": {
+          "fromEmail": "Prateek Mayani <prateek@prateekmayani.com>",
+          "toEmail": "={{ $json.recipientEmail }}",
+          "subject": "={{ $json.emailSubject }}",
+          "html": "={{ $json.emailHtml }}",
+          "text": "={{ $json.emailText }}",
+          "options": {
+            "replyTo": "workshop@prateekmayani.com",
+            "appendAttribution": false
+          }
+        },
+        "name": "Send Recovery Email via SMTP",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          980,
+          300
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "RmJjbVmoKL0wS3Bl",
+            "name": "SMTP account"
+          }
+        },
+        "id": "fa9cada2-0320-4fee-8771-34ea3ab5090a",
+        "webhookId": "375aa8e9-d36b-4a40-b02b-3ebbea9c1fff"
+      }
+    ],
+    "connections": {
+      "Webhook Trigger": {
+        "main": [
+          [
+            {
+              "node": "Fetch Paid Attendees from Sheet1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Paid Attendees from Sheet1": {
+        "main": [
+          [
+            {
+              "node": "Process Failed Payment & Check Already Paid",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Process Failed Payment & Check Already Paid": {
+        "main": [
+          [
+            {
+              "node": "Send Recovery Email via SMTP",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Preetam Soni",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-10-01T06:56:02.727Z",
+        "id": 107,
+        "workflowId": "KNGFBNVLEMNFpdgj",
+        "versionId": "aaa609b2-ec56-42f7-9b1f-91b9845fc707",
+        "event": "activated",
+        "userId": "cb834f62-f70a-4201-b686-b92c03452f25"
+      },
+      {
+        "createdAt": "2026-10-01T06:56:03.177Z",
+        "id": 109,
+        "workflowId": "KNGFBNVLEMNFpdgj",
+        "versionId": "aaa609b2-ec56-42f7-9b1f-91b9845fc707",
+        "event": "activated",
+        "userId": "cb834f62-f70a-4201-b686-b92c03452f25"
+      },
+      {
+        "createdAt": "2026-10-01T06:56:02.712Z",
+        "id": 106,
+        "workflowId": "KNGFBNVLEMNFpdgj",
+        "versionId": "aaa609b2-ec56-42f7-9b1f-91b9845fc707",
+        "event": "deactivated",
+        "userId": "cb834f62-f70a-4201-b686-b92c03452f25"
+      },
+      {
+        "createdAt": "2026-10-01T06:56:03.064Z",
+        "id": 108,
+        "workflowId": "KNGFBNVLEMNFpdgj",
+        "versionId": "aaa609b2-ec56-42f7-9b1f-91b9845fc707",
+        "event": "deactivated",
+        "userId": "cb834f62-f70a-4201-b686-b92c03452f25"
+      }
+    ]
+  }
+}

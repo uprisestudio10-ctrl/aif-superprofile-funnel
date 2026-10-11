@@ -1,0 +1,1191 @@
+{
+  "updatedAt": "2026-10-05T13:39:38.876Z",
+  "createdAt": "2026-09-28T14:10:02.597Z",
+  "id": "EyIU5NrvUhsE9dVe",
+  "name": "AI Influencer Workshop - 6-Stage Email Reminders Broadcast",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 19 7 10 *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-1-day-to-go",
+      "name": "Schedule: 1 Day To Go (7/10, 7:00 PM IST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 8 10 *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-12-hours-to-go",
+      "name": "Schedule: 12 Hours To Go (8/10, 7:00 AM IST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 16 8 10 *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-3-hours-to-go",
+      "name": "Schedule: 3 Hours To Go (8/10, 4:00 PM IST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 18 8 10 *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-1-hour-to-go",
+      "name": "Schedule: 1 Hour To Go (8/10, 6:00 PM IST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "45 18 8 10 *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-15-mins-to-go",
+      "name": "Schedule: 15 Mins To Go (8/10, 6:45 PM IST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 19 8 10 *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-we-are-live",
+      "name": "Schedule: We Are LIVE! (8/10, 7:00 PM IST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        100,
+        900
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "manual-test-trigger",
+      "name": "Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { milestone: \"1_day_to_go\" } }];"
+      },
+      "id": "set-1-day-to-go",
+      "name": "Set: 1 Day To Go",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { milestone: \"12_hours_to_go\" } }];"
+      },
+      "id": "set-12-hours-to-go",
+      "name": "Set: 12 Hours To Go",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { milestone: \"3_hours_to_go\" } }];"
+      },
+      "id": "set-3-hours-to-go",
+      "name": "Set: 3 Hours To Go",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { milestone: \"1_hour_to_go\" } }];"
+      },
+      "id": "set-1-hour-to-go",
+      "name": "Set: 1 Hour To Go",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { milestone: \"15_mins_to_go\" } }];"
+      },
+      "id": "set-15-mins-to-go",
+      "name": "Set: 15 Mins To Go",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        740
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { milestone: \"we_are_live\" } }];"
+      },
+      "id": "set-we-are-live",
+      "name": "Set: We Are LIVE",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { milestone: \"test_preview\" } }];"
+      },
+      "id": "set-test-preview",
+      "name": "Set: Test Preview",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        360,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first() ? $input.first().json : {};\nconst query = item.query || {};\nconst body = item.body || {};\nconst ms = query.milestone || body.milestone || item.milestone || \"1_day_to_go\";\nreturn [{ json: { milestone: ms } }];"
+      },
+      "id": "capture-milestone",
+      "name": "Capture Milestone",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+          "mode": "list",
+          "cachedResultName": "AIF Workshop",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit#gid=0"
+        },
+        "options": {},
+        "authentication": "serviceAccount"
+      },
+      "id": "fetch-attendees-google-sheets",
+      "name": "Fetch All Attendees from Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        820,
+        420
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "SsEE517tRUiLR8pJ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Retrieve the milestone captured before fetching attendees\nconst milestoneData = $('Capture Milestone').first().json || {};\nconst milestone = milestoneData.milestone || 'test_preview';\n\nconst whatsappUrl = \"https://chat.whatsapp.com/FDLe6CBZxa66sEcHvhy1pD?mode=gi_t\";\nconst workshopName = \"AI Influencer Workshop\";\nconst workshopDate = \"8th October 2026 (Thursday)\";\nconst workshopTime = \"7:00 PM IST\";\n\n// 2. Clean, plain text, Easebuzz-style email templates for high deliverability (0% spam)\nfunction getEmailBody(name, milestoneKey) {\n  switch (milestoneKey) {\n    case '1_day_to_go':\n      return {\n        subject: `⏰ 24 Hours to Go: ${workshopName} tomorrow at 7:00 PM`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>This is a quick reminder that our live <strong>${workshopName}</strong> is happening tomorrow: <strong>${workshopDate} at ${workshopTime} (Sharp)</strong>.</p>\n\n<p><strong>Important:</strong> If you haven't joined our private WhatsApp community yet, please join now. The live Zoom meeting link, password, and prompts will only be shared inside this WhatsApp group (we do not send the link over email to avoid unauthorized access):</p>\n\n<p>👉 <strong>Join WhatsApp Group here:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p><strong>Workshop Schedule:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Date:</strong> ${workshopDate}</li>\n  <li><strong>Time:</strong> ${workshopTime} (Sharp)</li>\n  <li><strong>Location:</strong> Live on Zoom (Link inside WhatsApp group)</li>\n  <li><strong>Duration:</strong> ~2 Hours</li>\n</ol>\n\n<p><strong>Quick Checklist to Prepare:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li>Join the WhatsApp group above and pin it on your chat list.</li>\n  <li>Keep your laptop or PC ready (desktop view is best for learning the workflows).</li>\n  <li>Make sure you have the Zoom app installed and updated.</li>\n</ol>\n\n<p>If you have any questions, feel free to reply directly to this email.</p>\n\n<p>See you tomorrow at 7:00 PM!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case '12_hours_to_go':\n      return {\n        subject: `🌅 Tonight at 7:00 PM IST: Your Live ${workshopName} is today!`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Good morning ${name},</p>\n\n<p>Today is the day! Our live <strong>${workshopName}</strong> begins tonight at <strong>${workshopTime} (Sharp)</strong>.</p>\n\n<p>We will be building hyper-realistic AI influencers from scratch, generating consistent faces, cloning voices, syncing lip movement, and setting up automated content pipelines.</p>\n\n<p><strong>Access Details:</strong><br>\nThe live Zoom room details and prompt cheat sheets will be published exclusively inside our private WhatsApp community. Please make sure you are in the group:</p>\n\n<p>👉 <strong>Join WhatsApp Group for Zoom Link:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p><strong>Session Summary:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>When:</strong> Today, ${workshopDate}</li>\n  <li><strong>Time:</strong> ${workshopTime} (Doors open at 6:45 PM)</li>\n  <li><strong>Where:</strong> Zoom (Direct link in WhatsApp group)</li>\n</ol>\n\n<p>Block your calendar for 7:00 PM to 9:00 PM tonight. Settle down with your laptop and notes.</p>\n\n<p>Looking forward to meeting you live tonight!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case '3_hours_to_go':\n      return {\n        subject: `🔥 3 Hours to Go: Live ${workshopName} starts at 7:00 PM`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>The countdown is on! In just 3 hours — <strong>at 7:00 PM IST sharp</strong> — we go live with the <strong>${workshopName}</strong>.</p>\n\n<p>We have hundreds of registered creators, and Zoom room capacity is capped. To make sure you get in without delay, please join the WhatsApp group where the direct Zoom link will be pinned:</p>\n\n<p>👉 <strong>Get Live Zoom Details on WhatsApp:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p><strong>What we are covering live:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li>Consistent AI character face generation</li>\n  <li>Ultra-realistic clothing and background prompt engineering</li>\n  <li>Voice cloning and dynamic lip-sync automation</li>\n  <li>Monetization models: brand deals, digital products, and fan platforms</li>\n</ul>\n\n<p>Keep your notebook and laptop ready. See you in 3 hours!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case '1_hour_to_go':\n      return {\n        subject: `⏳ 1 Hour to Go: Zoom Link inside WhatsApp [${workshopName}]`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>We are starting in exactly 60 minutes (<strong>${workshopTime} sharp</strong>)!</p>\n\n<p>Grab a coffee, set your phone on DND, and open your laptop.</p>\n\n<p><strong>Zoom Joining Link:</strong><br>\nThe official Zoom link has been posted inside our private WhatsApp group. Click below to grab your entry link:</p>\n\n<p>👉 <strong>Join WhatsApp Group for Zoom Link:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p>The waiting room opens in 45 minutes (6:45 PM IST). We recommend joining early so you get a smooth audio/video connection.</p>\n\n<p>See you in an hour!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case '15_mins_to_go':\n      return {\n        subject: `🚪 Starting in 15 Minutes: Zoom Waiting Room is OPEN!`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>The Zoom waiting room is officially <strong>OPEN</strong>! We begin sharp at 7:00 PM IST.</p>\n\n<p>Prateek and the team are setting up the screen share and mic check right now.</p>\n\n<p>👉 <strong>Click here to get the Zoom link from WhatsApp:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p>Join the waiting room right now so you don't miss the opening session on AI character generation!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case 'we_are_live':\n      return {\n        subject: `🔴 WE ARE LIVE! Join the ${workshopName} right now`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p><strong>WE ARE LIVE RIGHT NOW ON ZOOM!</strong></p>\n\n<p>Prateek has started the session. Don't miss the initial walkthrough and prompt breakdowns.</p>\n\n<p>👉 <strong>Click here to join the live session via WhatsApp:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p>Hop in right away before we close entry!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case 'test_preview':\n    default:\n      return {\n        subject: `🧪 [TEST PREVIEW] ${workshopName} Reminder Test`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>This is a test preview to verify your email deliverability and setup for the <strong>${workshopName}</strong> reminders.</p>\n\n<p><strong>WhatsApp Group Link:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p>If you are reading this in your Primary inbox, your Resend SMTP setup and email deliverability are working 100%.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n  }\n}\n\n// 3. Process recipients safely\nconst output = [];\n\nif (milestone === 'test_preview') {\n  // Safe test mode: only send to verified test accounts\n  const testRecipients = [\n    { email: 'prateekmayanii@gmail.com', name: 'Prateek' },\n    { email: 'uprisestudio10@gmail.com', name: 'Prateek Team' }\n  ];\n\n  for (const r of testRecipients) {\n    const tpl = getEmailBody(r.name, 'test_preview');\n    output.push({\n      json: {\n        recipientEmail: r.email,\n        recipientName: r.name,\n        emailSubject: tpl.subject,\n        emailHtml: tpl.html,\n        milestone: milestone\n      }\n    });\n  }\n} else {\n  // Scheduled live broadcast: send to all real attendees from Google Sheets\n  const items = $input.all() || [];\n  const seenEmails = new Set();\n  const searchPattern = \"8 oct\";\n\n  for (const item of items) {\n    const data = item.json || {};\n    const email = (data.Email || data.email || '').trim().toLowerCase();\n    const name = (data.Name || data.name || 'there').trim();\n\n    // Filter: Only include attendees who registered for THIS specific workshop\n    const wsDate = (data['Workshop Date'] || data['workshop_date'] || '').toLowerCase().trim();\n    const isThisWorkshop = wsDate.includes(\"8th oct\") || wsDate.includes(\"8 oct\") || wsDate.includes(\"8th october\") || wsDate.includes(\"7th oct\") || wsDate.includes(\"7 oct\");\n    if (!isThisWorkshop) {\n      continue; // Strictly skip other batch attendees!\n    }\n\n    if (!email || !email.includes(\"@\") || email.includes(\"example.com\") || seenEmails.has(email)) {\n      continue;\n    }\n    seenEmails.add(email);\n\n    const tpl = getEmailBody(name, milestone);\n    output.push({\n      json: {\n        recipientEmail: email,\n        recipientName: name,\n        emailSubject: tpl.subject,\n        emailHtml: tpl.html,\n        milestone: milestone\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "id": "generate-reminder-emails-code",
+      "name": "Generate Reminder Emails",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
+        "toEmail": "={{ $json.recipientEmail }}",
+        "subject": "={{ $json.emailSubject }}",
+        "html": "={{ $json.emailHtml }}",
+        "options": {
+          "replyTo": "workshop@prateekmayani.com"
+        }
+      },
+      "id": "send-reminder-email-smtp",
+      "name": "Send Reminder Emails via SMTP",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1300,
+        420
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "RmJjbVmoKL0wS3Bl",
+          "name": "SMTP account"
+        }
+      },
+      "webhookId": "33158dc6-7869-4b7e-b29b-fc85ef06261c"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "trigger-workshop-reminder",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-manual-reminder",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        -200
+      ],
+      "webhookId": "trigger-workshop-reminder"
+    }
+  ],
+  "connections": {
+    "Manual Test Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set: Test Preview",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: Test Preview": {
+      "main": [
+        [
+          {
+            "node": "Capture Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: 1 Day To Go": {
+      "main": [
+        [
+          {
+            "node": "Capture Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: 12 Hours To Go": {
+      "main": [
+        [
+          {
+            "node": "Capture Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: 3 Hours To Go": {
+      "main": [
+        [
+          {
+            "node": "Capture Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: 1 Hour To Go": {
+      "main": [
+        [
+          {
+            "node": "Capture Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: 15 Mins To Go": {
+      "main": [
+        [
+          {
+            "node": "Capture Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set: We Are LIVE": {
+      "main": [
+        [
+          {
+            "node": "Capture Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture Milestone": {
+      "main": [
+        [
+          {
+            "node": "Fetch All Attendees from Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch All Attendees from Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Generate Reminder Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Reminder Emails": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder Emails via SMTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Capture Milestone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule: 1 Day To Go (7/10, 7:00 PM IST)": {
+      "main": [
+        [
+          {
+            "node": "Set: 1 Day To Go",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule: 12 Hours To Go (8/10, 7:00 AM IST)": {
+      "main": [
+        [
+          {
+            "node": "Set: 12 Hours To Go",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule: 3 Hours To Go (8/10, 4:00 PM IST)": {
+      "main": [
+        [
+          {
+            "node": "Set: 3 Hours To Go",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule: 1 Hour To Go (8/10, 6:00 PM IST)": {
+      "main": [
+        [
+          {
+            "node": "Set: 1 Hour To Go",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule: 15 Mins To Go (8/10, 6:45 PM IST)": {
+      "main": [
+        [
+          {
+            "node": "Set: 15 Mins To Go",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule: We Are LIVE! (8/10, 7:00 PM IST)": {
+      "main": [
+        [
+          {
+            "node": "Set: We Are LIVE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timezone": "Asia/Kolkata"
+  },
+  "staticData": {
+    "node:Schedule: 1 Day To Go (Oct 2, 7:00 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: 12 Hours To Go (Oct 3, 7:00 AM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: 3 Hours To Go (Oct 3, 4:00 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: 1 Hour To Go (Oct 3, 6:00 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: 15 Mins To Go (Oct 3, 6:45 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: We Are LIVE! (Oct 3, 7:00 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: 1 Day To Go (2/10, 7:00 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: 12 Hours To Go (3/10, 7:00 AM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: 3 Hours To Go (3/10, 4:00 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: 1 Hour To Go (3/10, 6:00 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: 15 Mins To Go (3/10, 6:45 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "node:Schedule: We Are LIVE! (3/10, 7:00 PM IST)": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "6185e208-f764-423e-b433-fb585bf7cbc6",
+  "activeVersionId": "6185e208-f764-423e-b433-fb585bf7cbc6",
+  "versionCounter": 19,
+  "triggerCount": 7,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-10-05T13:39:38.879Z",
+    "createdAt": "2026-10-05T13:39:38.879Z",
+    "versionId": "6185e208-f764-423e-b433-fb585bf7cbc6",
+    "workflowId": "EyIU5NrvUhsE9dVe",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 19 7 10 *"
+              }
+            ]
+          }
+        },
+        "id": "schedule-1-day-to-go",
+        "name": "Schedule: 1 Day To Go (7/10, 7:00 PM IST)",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          100
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 7 8 10 *"
+              }
+            ]
+          }
+        },
+        "id": "schedule-12-hours-to-go",
+        "name": "Schedule: 12 Hours To Go (8/10, 7:00 AM IST)",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          260
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 16 8 10 *"
+              }
+            ]
+          }
+        },
+        "id": "schedule-3-hours-to-go",
+        "name": "Schedule: 3 Hours To Go (8/10, 4:00 PM IST)",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          420
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 18 8 10 *"
+              }
+            ]
+          }
+        },
+        "id": "schedule-1-hour-to-go",
+        "name": "Schedule: 1 Hour To Go (8/10, 6:00 PM IST)",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          580
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "45 18 8 10 *"
+              }
+            ]
+          }
+        },
+        "id": "schedule-15-mins-to-go",
+        "name": "Schedule: 15 Mins To Go (8/10, 6:45 PM IST)",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          740
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "0 19 8 10 *"
+              }
+            ]
+          }
+        },
+        "id": "schedule-we-are-live",
+        "name": "Schedule: We Are LIVE! (8/10, 7:00 PM IST)",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          100,
+          900
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "manual-test-trigger",
+        "name": "Manual Test Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          100,
+          -60
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{ json: { milestone: \"1_day_to_go\" } }];"
+        },
+        "id": "set-1-day-to-go",
+        "name": "Set: 1 Day To Go",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          360,
+          100
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{ json: { milestone: \"12_hours_to_go\" } }];"
+        },
+        "id": "set-12-hours-to-go",
+        "name": "Set: 12 Hours To Go",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          360,
+          260
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{ json: { milestone: \"3_hours_to_go\" } }];"
+        },
+        "id": "set-3-hours-to-go",
+        "name": "Set: 3 Hours To Go",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          360,
+          420
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{ json: { milestone: \"1_hour_to_go\" } }];"
+        },
+        "id": "set-1-hour-to-go",
+        "name": "Set: 1 Hour To Go",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          360,
+          580
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{ json: { milestone: \"15_mins_to_go\" } }];"
+        },
+        "id": "set-15-mins-to-go",
+        "name": "Set: 15 Mins To Go",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          360,
+          740
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{ json: { milestone: \"we_are_live\" } }];"
+        },
+        "id": "set-we-are-live",
+        "name": "Set: We Are LIVE",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          360,
+          900
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{ json: { milestone: \"test_preview\" } }];"
+        },
+        "id": "set-test-preview",
+        "name": "Set: Test Preview",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          360,
+          -60
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const item = $input.first() ? $input.first().json : {};\nconst query = item.query || {};\nconst body = item.body || {};\nconst ms = query.milestone || body.milestone || item.milestone || \"1_day_to_go\";\nreturn [{ json: { milestone: ms } }];"
+        },
+        "id": "capture-milestone",
+        "name": "Capture Milestone",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          600,
+          420
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "read",
+          "documentId": {
+            "__rl": true,
+            "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+            "mode": "list",
+            "cachedResultName": "AIF Workshop",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "Sheet1",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA/edit#gid=0"
+          },
+          "options": {},
+          "authentication": "serviceAccount"
+        },
+        "id": "fetch-attendees-google-sheets",
+        "name": "Fetch All Attendees from Google Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          820,
+          420
+        ],
+        "credentials": {
+          "googleApi": {
+            "id": "SsEE517tRUiLR8pJ",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// 1. Retrieve the milestone captured before fetching attendees\nconst milestoneData = $('Capture Milestone').first().json || {};\nconst milestone = milestoneData.milestone || 'test_preview';\n\nconst whatsappUrl = \"https://chat.whatsapp.com/FDLe6CBZxa66sEcHvhy1pD?mode=gi_t\";\nconst workshopName = \"AI Influencer Workshop\";\nconst workshopDate = \"8th October 2026 (Thursday)\";\nconst workshopTime = \"7:00 PM IST\";\n\n// 2. Clean, plain text, Easebuzz-style email templates for high deliverability (0% spam)\nfunction getEmailBody(name, milestoneKey) {\n  switch (milestoneKey) {\n    case '1_day_to_go':\n      return {\n        subject: `⏰ 24 Hours to Go: ${workshopName} tomorrow at 7:00 PM`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>This is a quick reminder that our live <strong>${workshopName}</strong> is happening tomorrow: <strong>${workshopDate} at ${workshopTime} (Sharp)</strong>.</p>\n\n<p><strong>Important:</strong> If you haven't joined our private WhatsApp community yet, please join now. The live Zoom meeting link, password, and prompts will only be shared inside this WhatsApp group (we do not send the link over email to avoid unauthorized access):</p>\n\n<p>👉 <strong>Join WhatsApp Group here:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p><strong>Workshop Schedule:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Date:</strong> ${workshopDate}</li>\n  <li><strong>Time:</strong> ${workshopTime} (Sharp)</li>\n  <li><strong>Location:</strong> Live on Zoom (Link inside WhatsApp group)</li>\n  <li><strong>Duration:</strong> ~2 Hours</li>\n</ol>\n\n<p><strong>Quick Checklist to Prepare:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li>Join the WhatsApp group above and pin it on your chat list.</li>\n  <li>Keep your laptop or PC ready (desktop view is best for learning the workflows).</li>\n  <li>Make sure you have the Zoom app installed and updated.</li>\n</ol>\n\n<p>If you have any questions, feel free to reply directly to this email.</p>\n\n<p>See you tomorrow at 7:00 PM!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case '12_hours_to_go':\n      return {\n        subject: `🌅 Tonight at 7:00 PM IST: Your Live ${workshopName} is today!`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Good morning ${name},</p>\n\n<p>Today is the day! Our live <strong>${workshopName}</strong> begins tonight at <strong>${workshopTime} (Sharp)</strong>.</p>\n\n<p>We will be building hyper-realistic AI influencers from scratch, generating consistent faces, cloning voices, syncing lip movement, and setting up automated content pipelines.</p>\n\n<p><strong>Access Details:</strong><br>\nThe live Zoom room details and prompt cheat sheets will be published exclusively inside our private WhatsApp community. Please make sure you are in the group:</p>\n\n<p>👉 <strong>Join WhatsApp Group for Zoom Link:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p><strong>Session Summary:</strong></p>\n<ol style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>When:</strong> Today, ${workshopDate}</li>\n  <li><strong>Time:</strong> ${workshopTime} (Doors open at 6:45 PM)</li>\n  <li><strong>Where:</strong> Zoom (Direct link in WhatsApp group)</li>\n</ol>\n\n<p>Block your calendar for 7:00 PM to 9:00 PM tonight. Settle down with your laptop and notes.</p>\n\n<p>Looking forward to meeting you live tonight!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case '3_hours_to_go':\n      return {\n        subject: `🔥 3 Hours to Go: Live ${workshopName} starts at 7:00 PM`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>The countdown is on! In just 3 hours — <strong>at 7:00 PM IST sharp</strong> — we go live with the <strong>${workshopName}</strong>.</p>\n\n<p>We have hundreds of registered creators, and Zoom room capacity is capped. To make sure you get in without delay, please join the WhatsApp group where the direct Zoom link will be pinned:</p>\n\n<p>👉 <strong>Get Live Zoom Details on WhatsApp:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p><strong>What we are covering live:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li>Consistent AI character face generation</li>\n  <li>Ultra-realistic clothing and background prompt engineering</li>\n  <li>Voice cloning and dynamic lip-sync automation</li>\n  <li>Monetization models: brand deals, digital products, and fan platforms</li>\n</ul>\n\n<p>Keep your notebook and laptop ready. See you in 3 hours!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case '1_hour_to_go':\n      return {\n        subject: `⏳ 1 Hour to Go: Zoom Link inside WhatsApp [${workshopName}]`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>We are starting in exactly 60 minutes (<strong>${workshopTime} sharp</strong>)!</p>\n\n<p>Grab a coffee, set your phone on DND, and open your laptop.</p>\n\n<p><strong>Zoom Joining Link:</strong><br>\nThe official Zoom link has been posted inside our private WhatsApp group. Click below to grab your entry link:</p>\n\n<p>👉 <strong>Join WhatsApp Group for Zoom Link:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p>The waiting room opens in 45 minutes (6:45 PM IST). We recommend joining early so you get a smooth audio/video connection.</p>\n\n<p>See you in an hour!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case '15_mins_to_go':\n      return {\n        subject: `🚪 Starting in 15 Minutes: Zoom Waiting Room is OPEN!`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>The Zoom waiting room is officially <strong>OPEN</strong>! We begin sharp at 7:00 PM IST.</p>\n\n<p>Prateek and the team are setting up the screen share and mic check right now.</p>\n\n<p>👉 <strong>Click here to get the Zoom link from WhatsApp:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p>Join the waiting room right now so you don't miss the opening session on AI character generation!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case 'we_are_live':\n      return {\n        subject: `🔴 WE ARE LIVE! Join the ${workshopName} right now`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p><strong>WE ARE LIVE RIGHT NOW ON ZOOM!</strong></p>\n\n<p>Prateek has started the session. Don't miss the initial walkthrough and prompt breakdowns.</p>\n\n<p>👉 <strong>Click here to join the live session via WhatsApp:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p>Hop in right away before we close entry!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n\n    case 'test_preview':\n    default:\n      return {\n        subject: `🧪 [TEST PREVIEW] ${workshopName} Reminder Test`,\n        html: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>This is a test preview to verify your email deliverability and setup for the <strong>${workshopName}</strong> reminders.</p>\n\n<p><strong>WhatsApp Group Link:</strong><br>\n<a href=\"${whatsappUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${whatsappUrl}</a></p>\n\n<p>If you are reading this in your Primary inbox, your Resend SMTP setup and email deliverability are working 100%.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\n${workshopName}</p>\n</div>`\n      };\n  }\n}\n\n// 3. Process recipients safely\nconst output = [];\n\nif (milestone === 'test_preview') {\n  // Safe test mode: only send to verified test accounts\n  const testRecipients = [\n    { email: 'prateekmayanii@gmail.com', name: 'Prateek' },\n    { email: 'uprisestudio10@gmail.com', name: 'Prateek Team' }\n  ];\n\n  for (const r of testRecipients) {\n    const tpl = getEmailBody(r.name, 'test_preview');\n    output.push({\n      json: {\n        recipientEmail: r.email,\n        recipientName: r.name,\n        emailSubject: tpl.subject,\n        emailHtml: tpl.html,\n        milestone: milestone\n      }\n    });\n  }\n} else {\n  // Scheduled live broadcast: send to all real attendees from Google Sheets\n  const items = $input.all() || [];\n  const seenEmails = new Set();\n  const searchPattern = \"8 oct\";\n\n  for (const item of items) {\n    const data = item.json || {};\n    const email = (data.Email || data.email || '').trim().toLowerCase();\n    const name = (data.Name || data.name || 'there').trim();\n\n    // Filter: Only include attendees who registered for THIS specific workshop\n    const wsDate = (data['Workshop Date'] || data['workshop_date'] || '').toLowerCase().trim();\n    const isThisWorkshop = wsDate.includes(\"8th oct\") || wsDate.includes(\"8 oct\") || wsDate.includes(\"8th october\") || wsDate.includes(\"7th oct\") || wsDate.includes(\"7 oct\");\n    if (!isThisWorkshop) {\n      continue; // Strictly skip other batch attendees!\n    }\n\n    if (!email || !email.includes(\"@\") || email.includes(\"example.com\") || seenEmails.has(email)) {\n      continue;\n    }\n    seenEmails.add(email);\n\n    const tpl = getEmailBody(name, milestone);\n    output.push({\n      json: {\n        recipientEmail: email,\n        recipientName: name,\n        emailSubject: tpl.subject,\n        emailHtml: tpl.html,\n        milestone: milestone\n      }\n    });\n  }\n}\n\nreturn output;\n"
+        },
+        "id": "generate-reminder-emails-code",
+        "name": "Generate Reminder Emails",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1060,
+          420
+        ]
+      },
+      {
+        "parameters": {
+          "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
+          "toEmail": "={{ $json.recipientEmail }}",
+          "subject": "={{ $json.emailSubject }}",
+          "html": "={{ $json.emailHtml }}",
+          "options": {
+            "replyTo": "workshop@prateekmayani.com"
+          }
+        },
+        "id": "send-reminder-email-smtp",
+        "name": "Send Reminder Emails via SMTP",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1300,
+          420
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "RmJjbVmoKL0wS3Bl",
+            "name": "SMTP account"
+          }
+        },
+        "webhookId": "33158dc6-7869-4b7e-b29b-fc85ef06261c"
+      },
+      {
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "trigger-workshop-reminder",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "webhook-manual-reminder",
+        "name": "Webhook Trigger",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          100,
+          -200
+        ],
+        "webhookId": "trigger-workshop-reminder"
+      }
+    ],
+    "connections": {
+      "Manual Test Trigger": {
+        "main": [
+          [
+            {
+              "node": "Set: Test Preview",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set: Test Preview": {
+        "main": [
+          [
+            {
+              "node": "Capture Milestone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set: 1 Day To Go": {
+        "main": [
+          [
+            {
+              "node": "Capture Milestone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set: 12 Hours To Go": {
+        "main": [
+          [
+            {
+              "node": "Capture Milestone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set: 3 Hours To Go": {
+        "main": [
+          [
+            {
+              "node": "Capture Milestone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set: 1 Hour To Go": {
+        "main": [
+          [
+            {
+              "node": "Capture Milestone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set: 15 Mins To Go": {
+        "main": [
+          [
+            {
+              "node": "Capture Milestone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set: We Are LIVE": {
+        "main": [
+          [
+            {
+              "node": "Capture Milestone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Capture Milestone": {
+        "main": [
+          [
+            {
+              "node": "Fetch All Attendees from Google Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch All Attendees from Google Sheet": {
+        "main": [
+          [
+            {
+              "node": "Generate Reminder Emails",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Reminder Emails": {
+        "main": [
+          [
+            {
+              "node": "Send Reminder Emails via SMTP",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook Trigger": {
+        "main": [
+          [
+            {
+              "node": "Capture Milestone",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule: 1 Day To Go (7/10, 7:00 PM IST)": {
+        "main": [
+          [
+            {
+              "node": "Set: 1 Day To Go",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule: 12 Hours To Go (8/10, 7:00 AM IST)": {
+        "main": [
+          [
+            {
+              "node": "Set: 12 Hours To Go",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule: 3 Hours To Go (8/10, 4:00 PM IST)": {
+        "main": [
+          [
+            {
+              "node": "Set: 3 Hours To Go",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule: 1 Hour To Go (8/10, 6:00 PM IST)": {
+        "main": [
+          [
+            {
+              "node": "Set: 1 Hour To Go",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule: 15 Mins To Go (8/10, 6:45 PM IST)": {
+        "main": [
+          [
+            {
+              "node": "Set: 15 Mins To Go",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule: We Are LIVE! (8/10, 7:00 PM IST)": {
+        "main": [
+          [
+            {
+              "node": "Set: We Are LIVE",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Preetam Soni",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  }
+}

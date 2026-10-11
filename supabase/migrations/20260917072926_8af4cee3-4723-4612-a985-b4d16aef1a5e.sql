@@ -1,0 +1,1 @@
+CREATE POLICY "No direct client access to orders" ON public.orders FOR ALL TO anon, authenticated USING (false) WITH CHECK (false);
