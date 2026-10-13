@@ -179,6 +179,7 @@ function CheckoutPage() {
 
       // Build target redirect URL with all tracking parameters
       const targetUrl = new URL(targetSuperprofileBaseUrl);
+      targetUrl.searchParams.set("checkout", "true");
       const tracking = getTrackingParams();
       if (tracking.utm_source) targetUrl.searchParams.set("utm_source", tracking.utm_source);
       if (tracking.utm_medium) targetUrl.searchParams.set("utm_medium", tracking.utm_medium);
