@@ -286,7 +286,7 @@ function Cta({ label = "Register For Live Workshop 👉" }: { label?: string }) 
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <span className="mx-auto mb-3 block w-fit rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">
+    <span className="mx-auto mb-3 flex w-fit items-center gap-1.5 rounded-full border border-primary/35 bg-gradient-to-r from-primary/15 to-primary/5 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-widest text-primary shadow-sm shadow-primary/10 backdrop-blur-sm">
       {children}
     </span>
   );
@@ -517,28 +517,28 @@ function Landing() {
           <span className="text-ai-blue">Bold Images</span>
         </h1>
 
-        <p className="mt-3 text-center text-[13px] leading-relaxed text-muted-foreground sm:text-[14.5px] font-medium max-w-[410px] mx-auto">
-          There’s a secret AI tool that can create the kind of bold AI influencer images you’re unable to generate with tools like Higgsfield, Seedance, Google Nano Banana &amp; more.
+        <p className="mt-3 text-center text-[13px] leading-relaxed text-muted-foreground sm:text-[14.5px] font-medium max-w-[420px] mx-auto">
+          There’s a <strong className="text-foreground font-semibold">secret AI tool</strong> that can create the kind of <span className="text-primary font-bold">bold AI influencer images</span> you’re unable to generate with tools like <span className="text-muted-foreground/85 underline decoration-destructive/40">Higgsfield, Seedance, Google Nano Banana &amp; more</span>.
         </p>
 
         {/* 3 Key Highlights requested by user */}
         <div className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
-          <div className="rounded-xl border border-primary/25 bg-secondary/80 px-1.5 py-2 shadow-sm">
+          <div className="rounded-xl border border-money/30 bg-card/80 px-1.5 py-2.5 shadow-sm transition-all hover:border-money/50">
             <span className="text-sm">⚡</span>
             <p className="mt-0.5 text-[10.5px] font-bold leading-tight text-foreground sm:text-xs">
-              Generate Images<br /><span className="text-money font-extrabold">100% Free</span>
+              Generate Images<br /><span className="mt-0.5 inline-block rounded-md bg-money/15 px-1.5 py-0.5 text-money font-black">100% Free</span>
             </p>
           </div>
-          <div className="rounded-xl border border-primary/25 bg-secondary/80 px-1.5 py-2 shadow-sm">
+          <div className="rounded-xl border border-primary/30 bg-card/80 px-1.5 py-2.5 shadow-sm transition-all hover:border-primary/50">
             <span className="text-sm">📱</span>
             <p className="mt-0.5 text-[10.5px] font-bold leading-tight text-foreground sm:text-xs">
-              No Laptop<br /><span className="text-neon font-extrabold">Needed (Mobile)</span>
+              No Laptop<br /><span className="mt-0.5 inline-block rounded-md bg-primary/15 px-1.5 py-0.5 text-primary font-black">Needed (Mobile)</span>
             </p>
           </div>
-          <div className="rounded-xl border border-primary/25 bg-secondary/80 px-1.5 py-2 shadow-sm">
+          <div className="rounded-xl border border-gold/30 bg-card/80 px-1.5 py-2.5 shadow-sm transition-all hover:border-gold/50">
             <span className="text-sm">⏱️</span>
             <p className="mt-0.5 text-[10.5px] font-bold leading-tight text-foreground sm:text-xs">
-              Work Only<br /><span className="text-gold font-extrabold">1 Hour / Day</span>
+              Work Only<br /><span className="mt-0.5 inline-block rounded-md bg-gold/15 px-1.5 py-0.5 text-gold font-black">1 Hour / Day</span>
             </p>
           </div>
         </div>
@@ -556,18 +556,53 @@ function Landing() {
           />
         </div>
 
-        {/* Compact Scroll Hook Banner (Minimal vertical space, high urgency & scroll trigger) */}
+        {/* HERO PROOF & GALLERY TEASER (Curiosity hook to scroll the full page) */}
         <a
           href="#results"
-          className="mt-3 block w-full rounded-xl border border-primary/40 bg-secondary/80 px-3 py-2 text-center shadow-md transition-all hover:border-primary hover:bg-secondary active:scale-[0.99]"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById("results")?.scrollIntoView({ behavior: "smooth" });
+          }}
+          className="group mt-3.5 block overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-r from-card/95 via-[#180d2c]/90 to-card/95 p-3 sm:p-3.5 shadow-lg shadow-black/30 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:shadow-primary/10 active:scale-[0.99]"
         >
-          <p className="text-[12px] sm:text-[13px] font-bold text-foreground leading-tight">
-            Scroll Down To See The <span className="text-neon font-extrabold">AI Influencer Pages</span> Making <span className="text-gold font-extrabold">₹50K–₹1L+ Every Month</span>
-          </p>
-          <p className="mt-0.5 text-[11px] sm:text-[11.5px] font-semibold text-ai-blue leading-tight flex items-center justify-center gap-1">
-            <span>, And See The Bold Images You’ll Be Able To Generate</span>
-            <span className="inline-block animate-bounce text-ai-blue font-extrabold">↓</span>
-          </p>
+          <div className="flex items-center gap-3">
+            {/* Pulsing indicator badge */}
+            <div className="relative flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-ai-blue/15 border border-primary/30 shadow-inner">
+              <span className="text-base sm:text-lg">🔥</span>
+              <span className="absolute -top-1 -right-1 flex size-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex size-2.5 rounded-full bg-primary" />
+              </span>
+            </div>
+
+            {/* Hook text */}
+            <div className="min-w-0 flex-1 text-left">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-primary">
+                  Live Proof &amp; Image Gallery
+                </span>
+                <span className="text-[9.5px] font-semibold text-muted-foreground/80">• Scroll to explore</span>
+              </div>
+              <p className="mt-0.5 text-[12px] sm:text-[13px] font-bold text-foreground leading-snug">
+                Scroll Down To See AI Pages Making <span className="text-gold font-extrabold">₹50K–₹1L+/Mo</span> &amp; The <span className="text-ai-blue font-extrabold">Bold Images</span> You Can Create
+              </p>
+            </div>
+
+            {/* Bouncing down arrow CTA chip */}
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/25 text-primary group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-200">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-4 animate-bounce"
+              >
+                <path d="M12 5v14M19 12l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </a>
       </Section>
 
@@ -575,57 +610,58 @@ function Landing() {
       <Section id="join" className="pt-2 pb-7">
         <div ref={joinRef} className="surface p-4 sm:p-5">
           {/* Urgency message requested: Early Mover Advantage */}
-          <div className="mb-3.5 rounded-xl border border-gold/40 bg-gradient-to-r from-gold/15 via-gold/10 to-gold/15 p-2.5 text-center">
+          <div className="mb-3.5 rounded-xl border border-gold/50 bg-gradient-to-r from-gold/20 via-gold/10 to-gold/20 p-2.5 text-center shadow-md shadow-gold/5">
             <p className="text-[12px] font-extrabold tracking-wide text-gold flex items-center justify-center gap-1.5">
-              <span>⚡</span>
+              <span className="animate-pulse">⚡</span>
               <span>EARLY MOVER ADVANTAGE</span>
             </p>
-            <p className="mt-0.5 text-[11px] font-medium text-foreground/90">
-              Nobody knows how to do this yet. Grab ₹29 access before it blows up!
+            <p className="mt-0.5 text-[11.5px] font-medium text-foreground/90">
+              Nobody knows how to do this yet. Grab <span className="text-gold font-bold underline decoration-gold/60">₹29 access</span> before it blows up!
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <div className="rounded-xl bg-secondary/60 p-2.5 text-center sm:p-3">
+            <div className="rounded-xl border border-white/5 bg-secondary/80 p-2.5 text-center sm:p-3">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 📅 Date
               </p>
-              <p className="mt-0.5 font-display text-[14px] font-bold sm:text-[15px]">16th October (Friday)</p>
+              <p className="mt-0.5 font-display text-[14px] font-extrabold sm:text-[15px] text-foreground">16th October (Friday)</p>
             </div>
-            <div className="rounded-xl bg-secondary/60 p-2.5 text-center sm:p-3">
+            <div className="rounded-xl border border-white/5 bg-secondary/80 p-2.5 text-center sm:p-3">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 ⏰ Time
               </p>
-              <p className="mt-0.5 font-display text-[14px] font-bold sm:text-[15px]">7:00 PM</p>
+              <p className="mt-0.5 font-display text-[14px] font-extrabold sm:text-[15px] text-gold">7:00 PM</p>
             </div>
-            <div className="rounded-xl bg-secondary/60 p-2.5 text-center sm:p-3">
+            <div className="rounded-xl border border-white/5 bg-secondary/80 p-2.5 text-center sm:p-3">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 💻 Platform
               </p>
-              <p className="mt-0.5 font-display text-[14px] font-bold sm:text-[15px]">Zoom (Live)</p>
+              <p className="mt-0.5 font-display text-[14px] font-extrabold sm:text-[15px] text-foreground">Zoom (Live)</p>
             </div>
-            <div className="rounded-xl bg-secondary/60 p-2.5 text-center sm:p-3">
+            <div className="rounded-xl border border-white/5 bg-secondary/80 p-2.5 text-center sm:p-3">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 🗣️ Language
               </p>
-              <p className="mt-0.5 font-display text-[14px] font-bold sm:text-[15px]">Hindi + English</p>
+              <p className="mt-0.5 font-display text-[14px] font-extrabold sm:text-[15px] text-foreground">Hindi + English</p>
             </div>
           </div>
 
-          <p className="mt-3.5 text-center">
-            <span className="price-before text-sm">₹499</span>{" "}
-            <span className="font-display text-3xl font-extrabold text-gold-grad">₹29</span>{" "}
+          <div className="mt-4 text-center flex items-center justify-center gap-2.5">
+            <span className="price-before text-sm font-bold text-muted-foreground/80">₹499</span>{" "}
+            <span className="font-display text-3xl sm:text-4xl font-extrabold text-gold-grad tracking-tight">₹29</span>{" "}
             <span className="text-sm font-semibold text-muted-foreground">Only</span>
-          </p>
+            <span className="ml-1 rounded-full bg-primary/20 border border-primary/40 px-2 py-0.5 text-[10px] font-extrabold text-primary uppercase tracking-wide">94% OFF • EARLY BIRD</span>
+          </div>
           <div className="mt-3.5">
             <Cta />
           </div>
           <div className="mt-3 flex flex-col items-center justify-center text-center text-[11px] font-medium text-muted-foreground">
-            <div className="inline-flex items-center justify-center gap-1.5 text-center">
+            <div className="inline-flex items-center justify-center gap-1.5 text-center text-emerald-400 font-semibold">
               <img src={razorpayMark} alt="Razorpay" width={15} height={15} className="size-3.5 shrink-0" />
-              <span className="font-semibold text-foreground/80">100% Secure Checkout</span>
+              <span>100% Secure Checkout</span>
             </div>
-            <p className="mt-1 text-[10.5px] leading-normal text-muted-foreground text-center">
+            <p className="mt-0.5 text-[10.5px] leading-normal text-muted-foreground text-center">
               UPI (GPay, PhonePe, Paytm), Cards &amp; NetBanking
             </p>
           </div>
@@ -731,8 +767,9 @@ function Landing() {
           <span className="text-neon">After The Workshop</span>
         </h2>
         <p className="mt-2 text-center text-[13px] text-muted-foreground">
-          Take a look yourself, 100% realistic images, with no plastic skin
-          and no visible traces of AI.
+          Take a look yourself, <strong className="text-foreground font-bold">100% realistic images</strong>, with{" "}
+          <span className="text-primary font-bold">no plastic skin</span> and{" "}
+          <span className="text-ai-blue font-bold">no visible traces of AI</span>.
         </p>
         <div className="mt-5">
           <GalleryGrid images={GALLERY} onOpen={setOpenGalleryImage} />
@@ -910,25 +947,40 @@ function Landing() {
             Everything else, we hand you ready-made 👇
           </p>
           <ul className="mt-3 space-y-2.5 text-[13.5px] leading-relaxed text-foreground/90">
-            <li>
-              ✅ <strong className="text-foreground">Ready-made prompts</strong>, your AI
-              influencer’s character is generated for you, just copy-paste
+            <li className="flex items-start gap-2">
+              <span className="text-money font-bold shrink-0">✅</span>
+              <div>
+                <strong className="text-foreground">Ready-made prompts</strong>, your AI
+                influencer’s character is generated for you, just copy-paste
+              </div>
             </li>
-            <li>
-              ✅ <strong className="text-foreground">Full setup done with you</strong>, her look,
-              her name, her page, step by step in the class
+            <li className="flex items-start gap-2">
+              <span className="text-money font-bold shrink-0">✅</span>
+              <div>
+                <strong className="text-foreground">Full setup done with you</strong>, her look,
+                her name, her page, step by step in the class
+              </div>
             </li>
-            <li>
-              ✅ <strong className="text-foreground">Unlimited images from day one</strong> , 
-              generate her content yourself, everything in your control
+            <li className="flex items-start gap-2">
+              <span className="text-money font-bold shrink-0">✅</span>
+              <div>
+                <strong className="text-foreground">Unlimited images from day one</strong> , 
+                generate her content yourself, everything in your control
+              </div>
             </li>
-            <li>
-              ✅ <strong className="text-foreground">Monetization handled</strong>, 5+ income
-              methods explained and mapped out, so you never figure it out alone
+            <li className="flex items-start gap-2">
+              <span className="text-money font-bold shrink-0">✅</span>
+              <div>
+                <strong className="text-foreground">Monetization handled</strong>, 5+ income
+                methods explained and mapped out, so you never figure it out alone
+              </div>
             </li>
-            <li>
-              ✅ Pay just <strong className="text-gold-grad">₹29</strong> , {" "}
-              <strong className="text-foreground">we take care of the rest</strong>
+            <li className="flex items-start gap-2">
+              <span className="text-money font-bold shrink-0">✅</span>
+              <div>
+                Pay just <strong className="text-gold-grad font-black text-sm">₹29</strong> , {" "}
+                <strong className="text-foreground">we take care of the rest</strong>
+              </div>
             </li>
           </ul>
         </div>

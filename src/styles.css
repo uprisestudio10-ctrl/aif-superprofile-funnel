@@ -18,8 +18,8 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -47,57 +47,59 @@
 
 :root {
   --radius: 1rem;
-  --background: oklch(0.16 0.035 300);
-  --foreground: oklch(0.97 0.008 320);
-  --card: oklch(0.22 0.045 300);
-  --card-foreground: oklch(0.97 0.008 320);
-  --popover: oklch(0.19 0.04 300);
-  --popover-foreground: oklch(0.97 0.008 320);
-  --primary: oklch(0.68 0.24 348);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.28 0.06 295);
-  --secondary-foreground: oklch(0.97 0.008 320);
-  --muted: oklch(0.25 0.05 298);
-  --muted-foreground: oklch(0.74 0.03 315);
-  --accent: oklch(0.62 0.22 300);
-  --accent-foreground: oklch(0.99 0 0);
-  --ai-blue: oklch(0.82 0.14 220);
-  --gold: oklch(0.85 0.15 88);
-  --money: oklch(0.75 0.19 150);
-  --alert: oklch(0.62 0.24 22);
-  --destructive: oklch(0.62 0.24 22);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.35 0.06 300);
-  --input: oklch(0.3 0.05 300);
-  --ring: oklch(0.68 0.24 348);
+  --background: oklch(0.10 0.02 295);
+  --foreground: oklch(0.985 0.005 280);
+  --card: oklch(0.145 0.025 295);
+  --card-foreground: oklch(0.985 0.005 280);
+  --popover: oklch(0.14 0.025 295);
+  --popover-foreground: oklch(0.985 0.005 280);
+  --primary: oklch(0.66 0.28 356);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.19 0.032 295);
+  --secondary-foreground: oklch(0.98 0.005 280);
+  --muted: oklch(0.18 0.025 295);
+  --muted-foreground: oklch(0.76 0.02 280);
+  --accent: oklch(0.62 0.24 300);
+  --accent-foreground: oklch(1 0 0);
+  --ai-blue: oklch(0.82 0.16 215);
+  --gold: oklch(0.88 0.18 85);
+  --money: oklch(0.80 0.22 145);
+  --alert: oklch(0.65 0.24 25);
+  --destructive: oklch(0.65 0.24 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.24 0.035 295);
+  --input: oklch(0.20 0.03 295);
+  --ring: oklch(0.66 0.28 356);
 
   --gradient-glow: radial-gradient(
     120% 80% at 50% 0%,
-    oklch(0.45 0.19 320 / 55%) 0%,
-    oklch(0.16 0.035 300 / 0%) 70%
+    oklch(0.42 0.24 350 / 40%) 0%,
+    oklch(0.10 0.02 295 / 0%) 70%
   );
   --gradient-hero: radial-gradient(
-      90% 42% at 8% 6%,
-      oklch(0.6 0.2 230 / 22%) 0%,
-      oklch(0.16 0.035 300 / 0%) 72%
+      90% 45% at 15% 8%,
+      oklch(0.55 0.18 220 / 22%) 0%,
+      oklch(0.10 0.02 295 / 0%) 70%
     ),
     radial-gradient(
-      95% 50% at 92% 22%,
-      oklch(0.55 0.24 340 / 28%) 0%,
-      oklch(0.16 0.035 300 / 0%) 72%
+      95% 50% at 85% 18%,
+      oklch(0.56 0.28 355 / 35%) 0%,
+      oklch(0.10 0.02 295 / 0%) 72%
     );
   --gradient-cta: linear-gradient(
-    100deg,
-    oklch(0.66 0.25 350),
-    oklch(0.62 0.24 305)
+    110deg,
+    oklch(0.66 0.28 355) 0%,
+    oklch(0.62 0.26 340) 45%,
+    oklch(0.56 0.25 305) 100%
   );
   --gradient-gold: linear-gradient(
-    100deg,
-    oklch(0.88 0.14 92),
-    oklch(0.78 0.16 60)
+    110deg,
+    oklch(0.92 0.15 95) 0%,
+    oklch(0.85 0.18 82) 50%,
+    oklch(0.78 0.18 68) 100%
   );
-  --shadow-glow: 0 10px 40px -12px oklch(0.68 0.24 348 / 65%);
-  --shadow-card: 0 8px 30px -14px oklch(0 0 0 / 70%);
+  --shadow-glow: 0 10px 40px -10px oklch(0.66 0.28 355 / 55%);
+  --shadow-card: 0 12px 36px -12px oklch(0 0 0 / 80%);
 }
 
 @layer base {
@@ -178,11 +180,13 @@
   padding: 0.95rem 1.25rem;
   font-family: var(--font-display);
   font-size: 1.0625rem;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   line-height: 1.25;
-  color: var(--color-primary-foreground);
-  box-shadow: var(--shadow-glow);
-  animation: cta-pulse 2.4s ease-in-out infinite;
+  color: #ffffff;
+  box-shadow: 0 10px 36px -6px oklch(0.66 0.28 355 / 65%), inset 0 1.5px 0 rgba(255, 255, 255, 0.4);
+  animation: cta-pulse 2.2s ease-in-out infinite;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 @utility surface {
