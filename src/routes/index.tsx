@@ -562,7 +562,7 @@ function Landing() {
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 📅 Date
               </p>
-              <p className="mt-0.5 font-display text-[14px] font-bold sm:text-[15px]">8th October (Thursday)</p>
+              <p className="mt-0.5 font-display text-[14px] font-bold sm:text-[15px]">16th October (Friday)</p>
             </div>
             <div className="rounded-xl bg-secondary/60 p-2.5 text-center sm:p-3">
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">

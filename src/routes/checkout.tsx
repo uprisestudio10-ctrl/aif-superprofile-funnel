@@ -1,72 +1,64 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, type FormEvent } from "react";
-import {
-  createOrder,
-  verifyPayment,
-  WORKSHOP_PRICE_PAISE,
-  OFFER_CATALOG,
-  type OfferId,
-} from "@/lib/checkout.functions";
-import razorpayMark from "@/assets/razorpay-mark.svg";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Secure Your Workshop Access, AI Influencer Workshop ₹29" },
+      { title: "Secure Your Workshop Access | AI Influencer Workshop ₹29" },
       {
         name: "description",
         content:
-          "Final step: secure your seat for the live AI Influencer Workshop on 8th October (Thursday), 7:00 PM. Pay ₹29 securely with Razorpay.",
+          "Final step: secure your seat for the live AI Influencer Workshop on 16th October (Friday), 7:00 PM. Pay securely via Superprofile.",
       },
     ],
   }),
   component: CheckoutPage,
 });
 
-declare global {
-  interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
-  }
-}
+type OfferId = "recording" | "prompts" | "combo";
 
-function loadRazorpayScript(): Promise<void> {
-  if (typeof window !== "undefined" && window.Razorpay) return Promise.resolve();
-  return new Promise((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error("Could not load Razorpay. Check your connection."));
-    document.body.appendChild(s);
-  });
-}
+const SUPERPROFILE_LINKS = {
+  basic: "https://superprofile.bio/e/SoK1AxJQ", // ₹29
+  recording: "https://superprofile.bio/e/qlonB0yj", // ₹178
+  prompts: "https://superprofile.bio/e/LirmFFgB", // ₹228
+  combo: "https://superprofile.bio/e/6LfPN8jn", // ₹248
+} as const;
 
-const rupee = (paise: number) => `₹${(paise / 100).toLocaleString("en-IN")}`;
-
-// ---- Offer data (client-safe copy for the three add-ons) ----
+const WORKSHOP_BASE_PRICE = 29;
 
 const OFFERS: Array<{
   id: OfferId;
   checkbox: string;
   headline: string;
   body: string;
+  addonPrice: number;
+  priceLabel: string;
+  badge?: string;
 }> = [
   {
     id: "recording",
     checkbox: "Yes! I want the Workshop Recording + Notes @ ₹149/-",
     headline: "83% Of Attendees Choose This To Get 2x Value!",
     body: "Stop worrying about missing steps inside the workshop, get access to the full workshop recording to watch it again anytime you want, plus the complete step-by-step notes PDF.",
+    addonPrice: 149,
+    priceLabel: "Add for ₹149",
   },
   {
     id: "prompts",
     checkbox: "Yes! I want 300+ Ready-To-Use Prompts To Generate Realistic Images @ ₹199/-",
     headline: "71% Attendees Choose This To Get 3x Results With Half The Effort",
     body: "Don't waste weeks testing prompts yourself, just copy-paste from our proven library of 300+ prompts to create scroll-stopping realistic AI influencer images in different poses, outfits, backgrounds & styles that instantly grab attention.",
+    addonPrice: 199,
+    priceLabel: "Add for ₹199",
   },
   {
-    id: "call",
-    checkbox: "Yes! I want a 1:1 Call With The Monetization Expert @ ₹499/-",
-    headline: "Monetize Your Page 2x Faster After This 1:1 Call",
-    body: "After the workshop, solve your doubts personally with our expert, get your setup reviewed and your fastest monetization plan mapped out, so you can start earning in days, not months.",
+    id: "combo",
+    checkbox: "🔥 VIP Bundle: Get BOTH Recordings + 300+ Prompts @ Discounted Price",
+    headline: "78% Attendees Choose This To Get Everything & Save ₹129!",
+    body: "Get full lifetime workshop recordings with step-by-step notes PLUS the complete 300+ viral prompt vault together at an exclusive bundle discount. Best value!",
+    addonPrice: 219,
+    priceLabel: "Add for ₹219 (Save ₹129 · Regular ₹348)",
+    badge: "BEST VALUE",
   },
 ];
 
@@ -109,7 +101,14 @@ function LockIcon({ className }: { className?: string }) {
 
 function getTrackingParams() {
   if (typeof window === "undefined") {
-    return { utm_source: "", utm_campaign: "", utm_content: "", utm_term: "", fbclid: "", fbp: "", fbc: "", user_agent: "" };
+    return {
+      utm_source: "",
+      utm_medium: "",
+      utm_campaign: "",
+      utm_content: "",
+      utm_term: "",
+      fbclid: "",
+    };
   }
   const rawSearch =
     window.location.search ||
@@ -117,23 +116,14 @@ function getTrackingParams() {
     localStorage.getItem("ad_tracking_params") ||
     "";
   const params = new URLSearchParams(rawSearch.startsWith("?") ? rawSearch : `?${rawSearch}`);
-  const fbclid = params.get("fbclid") || "";
-
-  // Extract first-party Meta cookies
-  const fbpMatch = document.cookie.match(/(?:^|;\s*)_fbp=([^;]+)/);
-  const fbcMatch = document.cookie.match(/(?:^|;\s*)_fbc=([^;]+)/);
-  const fbp = fbpMatch ? decodeURIComponent(fbpMatch[1]) : "";
-  const fbc = fbcMatch ? decodeURIComponent(fbcMatch[1]) : (fbclid ? `fb.1.${Date.now()}.${fbclid}` : "");
 
   return {
     utm_source: params.get("utm_source") || "",
+    utm_medium: params.get("utm_medium") || "",
     utm_campaign: params.get("utm_campaign") || "",
     utm_content: params.get("utm_content") || "",
     utm_term: params.get("utm_term") || "",
-    fbclid,
-    fbp,
-    fbc,
-    user_agent: navigator.userAgent || "",
+    fbclid: params.get("fbclid") || "",
   };
 }
 
@@ -162,22 +152,60 @@ function CheckoutPage() {
     if (e && !email) setEmail(e);
     if (p && !phone) setPhone(p);
   }, []);
+
   const [step, setStep] = useState<1 | 2>(1);
   const [selected, setSelected] = useState<Record<OfferId, boolean>>({
     recording: false,
     prompts: false,
-    call: false,
+    combo: false,
   });
-  const [status, setStatus] = useState<"form" | "paying">("form");
-  const navigate = useNavigate();
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedIds = OFFERS.filter((o) => selected[o.id]).map((o) => o.id);
-  const offersTotal = selectedIds.reduce((s, id) => s + OFFER_CATALOG[id].paise, 0);
-  const total = WORKSHOP_PRICE_PAISE + offersTotal;
+  // Compute active combination & total price
+  let total = WORKSHOP_BASE_PRICE;
+  let targetSuperprofileBaseUrl = SUPERPROFILE_LINKS.basic;
+  let activeOfferLabel = "Workshop Basic Pass";
+
+  if (selected.combo) {
+    total = WORKSHOP_BASE_PRICE + 219; // ₹248
+    targetSuperprofileBaseUrl = SUPERPROFILE_LINKS.combo;
+    activeOfferLabel = "Workshop + VIP All-Access Bundle";
+  } else if (selected.recording) {
+    total = WORKSHOP_BASE_PRICE + 149; // ₹178
+    targetSuperprofileBaseUrl = SUPERPROFILE_LINKS.recording;
+    activeOfferLabel = "Workshop + Lifetime Recordings";
+  } else if (selected.prompts) {
+    total = WORKSHOP_BASE_PRICE + 199; // ₹228
+    targetSuperprofileBaseUrl = SUPERPROFILE_LINKS.prompts;
+    activeOfferLabel = "Workshop + 300+ Prompts Vault";
+  }
 
   function toggle(id: OfferId) {
-    setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
+    setSelected((prev) => {
+      if (id === "combo") {
+        const nextCombo = !prev.combo;
+        return {
+          recording: false,
+          prompts: false,
+          combo: nextCombo,
+        };
+      }
+      const next = {
+        ...prev,
+        combo: false,
+        [id]: !prev[id],
+      };
+      // If user checks both recordings and prompts, auto bundle into combo!
+      if (next.recording && next.prompts) {
+        return {
+          recording: false,
+          prompts: false,
+          combo: true,
+        };
+      }
+      return next;
+    });
   }
 
   function validate(): string | null {
@@ -213,80 +241,49 @@ function CheckoutPage() {
     }
   }
 
-  async function onPay(e: FormEvent) {
+  function onProceedToPayment(e: FormEvent) {
     e.preventDefault();
     setError(null);
     const cleanPhone = phone.replace(/\D/g, "").slice(-10);
 
-    setStatus("paying");
+    setIsRedirecting(true);
+
     try {
-      await loadRazorpayScript();
-      const order = await createOrder({
-        data: {
-          name: name.trim() || "Workshop Attendee",
-          email: email.trim(),
-          phone: cleanPhone,
-          offers: selectedIds,
-          tracking: getTrackingParams(),
-        },
-      });
-      const rzpKey = order.keyId || "rzp_live_TjpSDnPQldisku";
-      const rzp = new window.Razorpay!({
-        key: rzpKey,
-        order_id: order.orderId,
-        amount: order.amount,
-        currency: order.currency,
-        name: "AI Influencer Workshop",
-        description: "Live Workshop, 8th October (Thursday), 7:00 PM",
-        prefill: { name: name.trim(), email: email.trim(), contact: `+91${cleanPhone}` },
-        theme: { color: "#e0336e" },
-        handler: async (response: {
-          razorpay_order_id: string;
-          razorpay_payment_id: string;
-          razorpay_signature: string;
-        }) => {
-          try {
-            await verifyPayment({
-              data: {
-                ...response,
-                customer: {
-                  name: name.trim(),
-                  email: email.trim(),
-                  phone: cleanPhone,
-                  offers: selectedIds,
-                  amount: total,
-                  tracking: getTrackingParams(),
-                },
-              },
-            });
-            if (typeof window !== "undefined") {
-              sessionStorage.setItem("last_payment_id", response.razorpay_payment_id);
-              sessionStorage.setItem("last_payment_amount", String(total));
+      if (typeof window !== "undefined" && (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq) {
+        try {
+          (window as unknown as { fbq: (...args: unknown[]) => void }).fbq(
+            "track",
+            "InitiateCheckout",
+            {
+              value: Number(total),
+              currency: "INR",
+              content_name: activeOfferLabel,
             }
-            navigate({
-              to: "/thank-you-5034",
-              search: {
-                payment_id: response.razorpay_payment_id,
-                amount: total,
-              },
-              replace: true,
-            });
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "Verification failed.");
-            setStatus("form");
-          }
-        },
-        modal: {
-          ondismiss: () => {
-            setStatus("form");
-            setError("Payment cancelled, your seat is not booked yet.");
-          },
-        },
-      });
-      rzp.open();
+          );
+        } catch (pixelErr) {
+          console.error("Meta pixel track error:", pixelErr);
+        }
+      }
+
+      // Build target redirect URL with contact info & all tracking parameters
+      const targetUrl = new URL(targetSuperprofileBaseUrl);
+      if (name.trim()) targetUrl.searchParams.set("name", name.trim());
+      if (email.trim()) targetUrl.searchParams.set("email", email.trim());
+      if (cleanPhone) targetUrl.searchParams.set("phone", cleanPhone);
+
+      const tracking = getTrackingParams();
+      if (tracking.utm_source) targetUrl.searchParams.set("utm_source", tracking.utm_source);
+      if (tracking.utm_medium) targetUrl.searchParams.set("utm_medium", tracking.utm_medium);
+      if (tracking.utm_campaign) targetUrl.searchParams.set("utm_campaign", tracking.utm_campaign);
+      if (tracking.utm_content) targetUrl.searchParams.set("utm_content", tracking.utm_content);
+      if (tracking.utm_term) targetUrl.searchParams.set("utm_term", tracking.utm_term);
+      if (tracking.fbclid) targetUrl.searchParams.set("fbclid", tracking.fbclid);
+
+      // Redirect directly to Superprofile Checkout
+      window.location.href = targetUrl.toString();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-      setStatus("form");
+      setError(err instanceof Error ? err.message : "Redirect failed. Please try again.");
+      setIsRedirecting(false);
     }
   }
 
@@ -296,7 +293,7 @@ function CheckoutPage() {
         ← Back
       </Link>
 
-      {/* Header, mirrors the reference "Final Step" opening view */}
+      {/* Header */}
       <div className="surface mt-4 p-5 text-center">
         <h1 className="font-display text-[24px] font-extrabold leading-tight">
           <span className="text-gold-grad">Final Step:</span> Secure Your Workshop Access
@@ -386,7 +383,7 @@ function CheckoutPage() {
       )}
 
       {step === 2 && (
-        <form onSubmit={onPay} className="mt-4 space-y-4">
+        <form onSubmit={onProceedToPayment} className="mt-4 space-y-4">
           {/* Order summary */}
           <div className="surface flex items-center justify-between p-4">
             <div>
@@ -398,15 +395,20 @@ function CheckoutPage() {
             <p className="font-display text-[18px] font-extrabold text-gold-grad">₹29</p>
           </div>
 
-          {/* The three checkbox offers, dashed border style from the reference */}
+          {/* The three checkbox offers */}
           <div className="space-y-4">
             {OFFERS.map((offer) => {
               const on = selected[offer.id];
+              const isCombo = offer.id === "combo";
               return (
                 <div
                   key={offer.id}
-                  className={`overflow-hidden rounded-xl border-2 border-dashed transition-colors ${
-                    on ? "border-primary" : "border-destructive/60"
+                  className={`overflow-hidden rounded-xl border-2 transition-all ${
+                    on
+                      ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
+                      : isCombo
+                      ? "border-amber-500/70 border-dashed bg-amber-500/[0.03]"
+                      : "border-destructive/60 border-dashed"
                   }`}
                 >
                   <button
@@ -416,14 +418,14 @@ function CheckoutPage() {
                   >
                     <svg
                       viewBox="0 0 24 24"
-                      className="size-5 shrink-0 text-destructive"
+                      className={`size-5 shrink-0 ${isCombo ? "text-amber-400" : "text-destructive"}`}
                       fill="currentColor"
                       aria-hidden
                     >
                       <path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2Z" />
                     </svg>
                     <span
-                      className={`flex size-5 shrink-0 items-center justify-center rounded border-2 ${
+                      className={`flex size-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
                         on ? "border-primary bg-primary" : "border-muted-foreground/50"
                       }`}
                     >
@@ -439,20 +441,25 @@ function CheckoutPage() {
                         </svg>
                       )}
                     </span>
-                    <span className="text-[14px] font-bold text-foreground">
+                    <span className="flex-1 text-[13.5px] font-bold text-foreground leading-snug">
                       {offer.checkbox}
                     </span>
+                    {offer.badge && (
+                      <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-extrabold tracking-wide text-amber-300 uppercase">
+                        {offer.badge}
+                      </span>
+                    )}
                   </button>
-                  <div className="border-t-2 border-dashed border-destructive/60 p-4">
-                    <p className="font-display text-[17px] font-extrabold leading-snug text-destructive">
+                  <div className={`border-t-2 border-dashed p-4 ${isCombo ? "border-amber-500/40" : "border-destructive/60"}`}>
+                    <p className={`font-display text-[16px] font-extrabold leading-snug ${isCombo ? "text-amber-400" : "text-destructive"}`}>
                       {offer.headline}
                     </p>
                     <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
                       {offer.body}
                     </p>
-                    <p className="mt-2 text-[12px] font-semibold text-muted-foreground">
+                    <p className="mt-2.5 text-[12.5px] font-semibold text-muted-foreground">
                       <span className="text-gold-grad font-extrabold">
-                        Add for {rupee(OFFER_CATALOG[offer.id].paise)}
+                        {offer.priceLabel}
                       </span>
                     </p>
                   </div>
@@ -464,13 +471,18 @@ function CheckoutPage() {
           {/* Payment panel */}
           <div className="surface space-y-4 p-5">
             <div className="rounded-xl bg-secondary/60 p-4">
-              <p className="text-[14px] font-semibold text-foreground">
-                UPI / Credit Card / Debit Card / NetBanking
+              <p className="text-[13px] font-semibold text-foreground">
+                Payment Method: Instant Checkout
               </p>
-              <p className="mt-2 flex items-center gap-2 text-[15px] font-bold text-foreground">
-                <img src={razorpayMark} alt="Razorpay" width={22} height={22} className="size-6" />
-                Pay by Razorpay
-              </p>
+              <div className="mt-2 flex items-center justify-between text-[13px] font-bold text-foreground">
+                <span className="flex items-center gap-2">
+                  <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                  UPI / GPay / PhonePe / Cards / NetBanking
+                </span>
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  via Superprofile
+                </span>
+              </div>
             </div>
 
             <p className="text-[11px] leading-relaxed text-muted-foreground">
@@ -483,9 +495,9 @@ function CheckoutPage() {
             </p>
 
             <div className="flex items-center justify-between border-t border-border pt-3.5">
-              <span className="text-[14px] font-bold text-foreground">Total</span>
-              <span className="font-display text-[22px] font-extrabold text-gold-grad">
-                {rupee(total)}
+              <span className="text-[14px] font-bold text-foreground">Total Payable</span>
+              <span className="font-display text-[24px] font-extrabold text-gold-grad">
+                ₹{total}
               </span>
             </div>
 
@@ -495,21 +507,26 @@ function CheckoutPage() {
               </p>
             )}
 
-            <button type="submit" disabled={status === "paying"} className="btn-cta w-full">
-              <span className="inline-flex items-center gap-2">
-                <LockIcon className="size-4" />
-                {status === "paying" ? "Opening Razorpay…" : `Place Order ${rupee(total)}`}
+            <button
+              type="submit"
+              disabled={isRedirecting}
+              className="btn-cta w-full flex items-center justify-center gap-2 py-3.5"
+            >
+              <LockIcon className="size-4" />
+              <span>
+                {isRedirecting
+                  ? "Redirecting to Secure Checkout…"
+                  : `Proceed to Pay ₹${total} →`}
               </span>
             </button>
 
             <div className="text-center">
-              <p className="flex items-center justify-center gap-2 text-[15px] font-extrabold text-foreground">
-                <LockIcon className="size-5 text-[var(--money)]" />
-                Secure Processing
+              <p className="flex items-center justify-center gap-2 text-[14px] font-extrabold text-foreground">
+                <LockIcon className="size-4 text-[var(--money)]" />
+                100% Secure 256-Bit Encrypted Payment
               </p>
               <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                Each order is processed through a secure, 256-bit encrypted payment processing
-                gateway to ensure your privacy.
+                Your payment is processed through a high-security encrypted gateway to ensure complete privacy and instant pass confirmation.
               </p>
             </div>
           </div>
@@ -517,12 +534,12 @@ function CheckoutPage() {
           {/* Trust factor, deadline + what they get */}
           <div className="surface space-y-3 p-5 text-center">
             <p className="text-[15px] font-bold text-foreground">Enroll For The Workshop Before</p>
-            <p className="rounded-lg bg-[var(--money)]/20 px-3 py-2 font-display text-[18px] font-extrabold text-gold-grad">
-              October 8, 2026 (Thursday) · 7:00 PM
+            <p className="rounded-lg bg-[var(--money)]/20 px-3 py-2 font-display text-[17px] font-extrabold text-gold-grad">
+              October 16, 2026 (Friday) · 7:00 PM
             </p>
             <div className="rounded-xl border border-border p-4">
               <p className="font-display text-[16px] font-extrabold leading-snug text-foreground">
-                Build A Profitable AI Influencer Page , {" "}
+                Build A Profitable AI Influencer Page ,{" "}
                 <span className="text-gold-grad">Without Showing Your Face</span>
               </p>
               <p className="mt-1 text-[12px] font-semibold text-muted-foreground">
@@ -603,3 +620,4 @@ function CheckoutPage() {
     </main>
   );
 }
+
