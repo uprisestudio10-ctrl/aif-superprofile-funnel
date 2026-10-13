@@ -239,7 +239,7 @@ for (const item of items) {
   const cleanPhone = phone ? ('91' + phone) : '';
   const phHash = cleanPhone ? sha256(cleanPhone) : '';
   const eventTime = Math.floor(Date.now() / 1000);
-  const eventId = 'ws-sheet-' + phone + '-' + eventTime;
+  const eventId = 'ws-sheet-' + (phone || 'test') + '-' + eventTime;
   let fbcVal = undefined;
   const rawFbc = d['FB Click ID'] || d.fbclid || '';
   if (rawFbc) {
@@ -295,9 +295,9 @@ return output;`
       {
         parameters: {
           fromEmail: "Prateek Mayani <workshop@prateekmayani.com>",
-          toEmail: "={{ $json.recipientEmail }}",
-          subject: "={{ $json.emailSubject }}",
-          html: "={{ $json.emailHtml }}",
+          toEmail: "={{ $('Filter Unprocessed Leads').item.json.recipientEmail }}",
+          subject: "={{ $('Filter Unprocessed Leads').item.json.emailSubject }}",
+          html: "={{ $('Filter Unprocessed Leads').item.json.emailHtml }}",
           options: {
             replyTo: "workshop@prateekmayani.com"
           }
@@ -329,7 +329,7 @@ return output;`
           },
           sendBody: true,
           specifyBody: "json",
-          jsonBody: "={{ JSON.stringify($json.capi_payload) }}",
+          jsonBody: "={{ JSON.stringify($('Filter Unprocessed Leads').item.json.capi_payload) }}",
           options: {}
         },
         continueOnFail: true,
@@ -353,8 +353,16 @@ return output;`
             mode: "list",
             cachedResultName: "Sheet1"
           },
-          columnToMatchOn: "Email",
-          dataMode: "autoMapInputData",
+          columns: {
+            mappingMode: "defineBelow",
+            matchingColumns: [
+              "Email"
+            ],
+            value: {
+              Email: "={{ $('Filter Unprocessed Leads').item.json.recipientEmail }}",
+              email_html: "CONFIRMATION_EMAIL_SENT"
+            }
+          },
           options: {},
           authentication: "serviceAccount"
         },
