@@ -6,7 +6,7 @@ import { z } from "zod";
 export const WORKSHOP_PRICE_PAISE = 2900;
 
 // Meta Conversions API Configuration
-const META_PIXEL_ID = process.env["META_PIXEL_ID"] || "2359274784891947";
+const META_PIXEL_ID = process.env["META_PIXEL_ID"] || "1462195472776524";
 const META_CAPI_TOKEN =
   process.env["META_CAPI_TOKEN"] ||
   "EAAoYN6dNtekBSu9ToerUbQaM8evi7PVyQzqRdq27m1o0h5hcIT0v9UoXQ9pfbY06ZCgAkyqlmxnY5OhO7CUQzjaoW9wN5ncFNeoIBkZByeGhS93w3RqhubkYFp0goHACz5uynrlSXN7I7nY7MnMkbrubFBghx66zLNRXJyRjO6ELC81sTdcQ3B6OlDHwZC0lwZDZD";
