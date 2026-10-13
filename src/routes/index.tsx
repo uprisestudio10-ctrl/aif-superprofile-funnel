@@ -511,7 +511,7 @@ function Landing() {
           The Secret To Creating <span className="text-ai-blue">Bold AI Influencer Photos</span> Revealed
         </p>
 
-        <h1 className="mt-3 text-center text-[26px] leading-[1.2] font-extrabold sm:text-[34px]">
+        <h1 className="mt-3 text-center text-[28px] leading-[1.18] font-extrabold sm:text-[37px]">
           Create Your Own <span className="text-neon">AI Influencer</span> &amp; Earn{" "}
           <span className="text-gold-grad">₹50,000–₹1,00,000/Month</span> By Uploading Her{" "}
           <span className="text-ai-blue">Bold Images</span>
@@ -555,6 +555,20 @@ function Landing() {
             fetchPriority="high"
           />
         </div>
+
+        {/* Compact Scroll Hook Banner (Minimal vertical space, high urgency & scroll trigger) */}
+        <a
+          href="#results"
+          className="mt-3 block w-full rounded-xl border border-primary/40 bg-secondary/80 px-3 py-2 text-center shadow-md transition-all hover:border-primary hover:bg-secondary active:scale-[0.99]"
+        >
+          <p className="text-[12px] sm:text-[13px] font-bold text-foreground leading-tight">
+            Scroll Down To See The <span className="text-neon font-extrabold">AI Influencer Pages</span> Making <span className="text-gold font-extrabold">₹50K–₹1L+ Every Month</span>
+          </p>
+          <p className="mt-0.5 text-[11px] sm:text-[11.5px] font-semibold text-ai-blue leading-tight flex items-center justify-center gap-1">
+            <span>, And See The Bold Images You’ll Be Able To Generate</span>
+            <span className="inline-block animate-bounce text-ai-blue font-extrabold">↓</span>
+          </p>
+        </a>
       </Section>
 
       {/* JOIN CARD */}
@@ -619,7 +633,7 @@ function Landing() {
       </Section>
 
         {/* RESULTS */}
-        <Section className="glow-bg overflow-hidden">
+        <Section id="results" className="glow-bg overflow-hidden scroll-mt-4">
           <Eyebrow>✅ Real Instagram Pages</Eyebrow>
           <h2 className="text-center text-[24px] font-extrabold">
             <span className="text-gold-grad">100+ Indian Instagram Pages</span> Monetized
