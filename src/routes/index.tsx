@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Footer } from "@/components/Footer";
-import { HeroCarousel } from "@/components/HeroCarousel";
+import heroBanner from "@/assets/hero-banner.webp";
 import page10 from "@/assets/instagram-proof/page-10.png";
 import page11 from "@/assets/instagram-proof/page-11.png";
 import page12 from "@/assets/instagram-proof/page-12.png";
@@ -508,15 +508,18 @@ function Landing() {
       {/* HERO */}
       <Section className="hero-glow overflow-hidden pt-4 pb-2">
         <p className="hero-kicker text-[11px] py-1 px-3">
-          The Secret To Creating <span className="text-ai-blue">Realistic AI Influencer Photos</span>{" "}
-          Revealed
+          The Secret To Creating <span className="text-ai-blue">Bold AI Influencer Photos</span> Revealed
         </p>
 
-        <h1 className="mt-3 text-center text-[27px] leading-[1.18] font-extrabold sm:text-[34px]">
+        <h1 className="mt-3 text-center text-[26px] leading-[1.2] font-extrabold sm:text-[34px]">
           Create Your Own <span className="text-neon">AI Influencer</span> &amp; Earn{" "}
-          <span className="text-gold-grad">₹50,000 to ₹1,00,000/Month</span> By Uploading Her Realistic
-          Images
+          <span className="text-gold-grad">₹50,000–₹1,00,000/Month</span> By Uploading Her{" "}
+          <span className="text-ai-blue">Bold Images</span>
         </h1>
+
+        <p className="mt-3 text-center text-[13px] leading-relaxed text-muted-foreground sm:text-[14.5px] font-medium max-w-[410px] mx-auto">
+          There’s a secret AI tool that can create the kind of bold AI influencer images you’re unable to generate with tools like Higgsfield, Seedance, Google Nano Banana &amp; more.
+        </p>
 
         {/* 3 Key Highlights requested by user */}
         <div className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2 text-center">
@@ -540,7 +543,18 @@ function Landing() {
           </div>
         </div>
 
-        <HeroCarousel />
+        {/* HERO BANNER (Optimized WebP replacing slideshow) */}
+        <div className="mt-4.5 overflow-hidden rounded-2xl border border-primary/30 bg-card/60 shadow-xl shadow-primary/10">
+          <img
+            src={heroBanner}
+            alt="The Secret To Creating Bold AI Influencer Photos Revealed"
+            width={1024}
+            height={576}
+            className="w-full h-auto object-cover block"
+            loading="eager"
+            fetchPriority="high"
+          />
+        </div>
       </Section>
 
       {/* JOIN CARD */}
