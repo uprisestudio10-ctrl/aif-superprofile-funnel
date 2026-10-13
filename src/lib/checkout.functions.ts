@@ -231,7 +231,7 @@ async function sendMetaCapiPurchase(params: {
           event_name: "Purchase",
           event_time: Math.floor(Date.now() / 1000),
           event_id: params.eventId,
-          event_source_url: "https://aifworkshop.prateekmayani.com/thank-you-5034",
+          event_source_url: "https://live.prateekmayani.com/thank-you-5034",
           action_source: "website",
           user_data: userData,
           custom_data: {

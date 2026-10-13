@@ -8,7 +8,7 @@ export const Route = createFileRoute("/refund-policy")({
       {
         name: "description",
         content:
-          "Refund Policy for aifworkshop.prateekmayani.com by Prateek Mayani.",
+          "Refund Policy for live.prateekmayani.com by Prateek Mayani.",
       },
     ],
   }),
@@ -25,7 +25,7 @@ function RefundPolicyAliasPage() {
     >
       <section className="space-y-3">
         <p>
-          Thank you for choosing the <strong>AI Visual &amp; Reels Creation Masterclass</strong> at <strong>aifworkshop.prateekmayani.com</strong>, operated by <strong>Prateek Mayani</strong>.
+          Thank you for choosing the <strong>AI Visual &amp; Reels Creation Masterclass</strong> at <strong>live.prateekmayani.com</strong>, operated by <strong>Prateek Mayani</strong>.
         </p>
       </section>
 

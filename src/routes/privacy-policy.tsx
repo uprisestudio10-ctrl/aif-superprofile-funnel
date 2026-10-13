@@ -8,7 +8,7 @@ export const Route = createFileRoute("/privacy-policy")({
       {
         name: "description",
         content:
-          "Privacy Policy for aifworkshop.prateekmayani.com operated by Prateek Mayani.",
+          "Privacy Policy for live.prateekmayani.com operated by Prateek Mayani.",
       },
     ],
   }),
@@ -25,7 +25,7 @@ function PrivacyPolicyPage() {
     >
       <section className="space-y-3">
         <p>
-          <strong>Prateek Mayani</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;), operating <strong>aifworkshop.prateekmayani.com</strong>, is committed to protecting the privacy of its users. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or enroll in our educational workshop.
+          <strong>Prateek Mayani</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;), operating <strong>live.prateekmayani.com</strong>, is committed to protecting the privacy of its users. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or enroll in our educational workshop.
         </p>
       </section>
 

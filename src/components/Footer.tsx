@@ -80,7 +80,7 @@ export function Footer({ minimal = false }: FooterProps) {
           <p>Mowa, Daldal Seoni, Raipur (CG), India</p>
           <p>Email: prateekmayani@gmail.com | Phone: +91 8770500986</p>
           <p className="pt-2 text-[11px] text-muted-foreground/60">
-            © {new Date().getFullYear()} Prateek Mayani (aifworkshop.prateekmayani.com). All Rights Reserved.
+            © {new Date().getFullYear()} Prateek Mayani (live.prateekmayani.com). All Rights Reserved.
           </p>
         </div>
       </div>

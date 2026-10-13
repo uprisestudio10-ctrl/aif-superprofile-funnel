@@ -8,7 +8,7 @@ export const Route = createFileRoute("/terms-and-conditions")({
       {
         name: "description",
         content:
-          "Terms and Conditions governing the use of aifworkshop.prateekmayani.com by Prateek Mayani.",
+          "Terms and Conditions governing the use of live.prateekmayani.com by Prateek Mayani.",
       },
     ],
   }),
@@ -25,7 +25,7 @@ function TermsAndConditionsPage() {
     >
       <section className="space-y-3">
         <p>
-          Welcome to <strong>aifworkshop.prateekmayani.com</strong>. This website is owned and operated by <strong>Prateek Mayani</strong>, located at <strong>Mowa, Daldal Seoni, Raipur (CG), India</strong>. By accessing our website or registering for our workshop, you agree to comply with and be bound by the following Terms and Conditions.
+          Welcome to <strong>live.prateekmayani.com</strong>. This website is owned and operated by <strong>Prateek Mayani</strong>, located at <strong>Mowa, Daldal Seoni, Raipur (CG), India</strong>. By accessing our website or registering for our workshop, you agree to comply with and be bound by the following Terms and Conditions.
         </p>
       </section>
 

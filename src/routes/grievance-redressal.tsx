@@ -8,7 +8,7 @@ export const Route = createFileRoute("/grievance-redressal")({
       {
         name: "description",
         content:
-          "Grievance Redressal Mechanism for aifworkshop.prateekmayani.com by Prateek Mayani under Consumer Protection (E-Commerce) Rules, 2020.",
+          "Grievance Redressal Mechanism for live.prateekmayani.com by Prateek Mayani under Consumer Protection (E-Commerce) Rules, 2020.",
       },
     ],
   }),
@@ -25,7 +25,7 @@ function GrievanceRedressalPage() {
     >
       <section className="space-y-3">
         <p>
-          In accordance with the <strong>Information Technology Act, 2000</strong> and the <strong>Consumer Protection (E-Commerce) Rules, 2020</strong>, the details of the designated Grievance Officer for <strong>aifworkshop.prateekmayani.com</strong> are provided below.
+          In accordance with the <strong>Information Technology Act, 2000</strong> and the <strong>Consumer Protection (E-Commerce) Rules, 2020</strong>, the details of the designated Grievance Officer for <strong>live.prateekmayani.com</strong> are provided below.
         </p>
       </section>
 

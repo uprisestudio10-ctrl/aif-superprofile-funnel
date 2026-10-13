@@ -8,7 +8,7 @@ export const Route = createFileRoute("/shipping-policy")({
       {
         name: "description",
         content:
-          "Shipping & Delivery Policy for digital workshop and educational products on aifworkshop.prateekmayani.com by Prateek Mayani.",
+          "Shipping & Delivery Policy for digital workshop and educational products on live.prateekmayani.com by Prateek Mayani.",
       },
     ],
   }),
@@ -25,7 +25,7 @@ function ShippingPolicyPage() {
     >
       <section className="space-y-3">
         <p>
-          All products, training programs, and workshops offered on <strong>aifworkshop.prateekmayani.com</strong> by <strong>Prateek Mayani</strong> are <strong>100% digital</strong>.
+          All products, training programs, and workshops offered on <strong>live.prateekmayani.com</strong> by <strong>Prateek Mayani</strong> are <strong>100% digital</strong>.
         </p>
       </section>
 

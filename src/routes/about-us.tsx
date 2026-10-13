@@ -8,7 +8,7 @@ export const Route = createFileRoute("/about-us")({
       {
         name: "description",
         content:
-          "About Prateek Mayani and the AI Visual & Reels Creation Masterclass at aifworkshop.prateekmayani.com.",
+          "About Prateek Mayani and the AI Visual & Reels Creation Masterclass at live.prateekmayani.com.",
       },
     ],
   }),
@@ -26,7 +26,7 @@ function AboutUsPage() {
       <section className="space-y-3">
         <h2 className="font-display text-[16px] font-bold text-foreground">Welcome to Our Platform</h2>
         <p>
-          <strong>aifworkshop.prateekmayani.com</strong> is an online educational initiative led by <strong>Prateek Mayani</strong>, based in <strong>Mowa, Daldal Seoni, Raipur (CG), India</strong>.
+          <strong>live.prateekmayani.com</strong> is an online educational initiative led by <strong>Prateek Mayani</strong>, based in <strong>Mowa, Daldal Seoni, Raipur (CG), India</strong>.
         </p>
         <p>
           We provide practical, hands-on training for creators, freelancers, and entrepreneurs looking to master generative artificial intelligence, visual content creation, and modern digital storytelling workflows.
@@ -47,7 +47,7 @@ function AboutUsPage() {
           <p><strong className="text-foreground">Email:</strong> prateekmayani@gmail.com</p>
           <p><strong className="text-foreground">Phone:</strong> +91 8770500986</p>
           <p><strong className="text-foreground">Address:</strong> Mowa, Daldal Seoni, Raipur (CG), India</p>
-          <p><strong className="text-foreground">Website:</strong> aifworkshop.prateekmayani.com</p>
+          <p><strong className="text-foreground">Website:</strong> live.prateekmayani.com</p>
         </div>
       </section>
     </LegalLayout>
