@@ -84,7 +84,7 @@ const hasPrompts = item.prompts_purchased === 'YES' ||
 
 const name = (item.name || 'there').trim();
 const amount = item.amount_formatted || (item.amount ? '₹' + item.amount : '₹29');
-const whatsappUrl = 'https://chat.whatsapp.com/FDLe6CBZxa66sEcHvhy1pD?mode=gi_t';
+const whatsappUrl = 'https://chat.whatsapp.com/IHwK76ChghnDyirB7VkTRp?mode=gi_t';
 
 const emailHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;">
 <p>Hi \${name},</p>

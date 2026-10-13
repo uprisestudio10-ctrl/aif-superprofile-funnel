@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { verifyPayment } from "@/lib/checkout.functions";
 
-export const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/FDLe6CBZxa66sEcHvhy1pD?mode=gi_t";
+export const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/IHwK76ChghnDyirB7VkTRp?mode=gi_t";
 
 export const Route = createFileRoute("/thank-you-5034")({
   head: () => ({
