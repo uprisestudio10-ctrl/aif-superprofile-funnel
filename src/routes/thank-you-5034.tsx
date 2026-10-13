@@ -11,7 +11,7 @@ export const Route = createFileRoute("/thank-you-5034")({
       {
         name: "description",
         content:
-          "Your seat is booked for the live AI Visual & Reels Masterclass on 8th October (Thursday), 7:00 PM. Join the WhatsApp group to receive your Zoom link.",
+          "Your seat is booked for the live AI Visual & Reels Masterclass on 16th October (Friday), 7:00 PM. Join the WhatsApp group to receive your Zoom link.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -171,7 +171,7 @@ function ThankYouPage() {
         </p>
         <div className="mt-3 grid grid-cols-2 gap-3 text-left">
           {[
-            ["Date", "8th October 2026 (Thursday)"],
+            ["Date", "16th October 2026 (Friday)"],
             ["Time", "7:00 PM IST"],
             ["Platform", "Zoom Live"],
             ["Language", "Hindi + English"],
@@ -194,7 +194,7 @@ function ThankYouPage() {
             "Join the private WhatsApp community using the green button above.",
             "Receive the masterclass preparatory guide and guidelines.",
             "Access the live Zoom room link 15 minutes before the session starts.",
-            "Participate live on 8th October (Thursday) at 7:00 PM IST sharp.",
+            "Participate live on 16th October (Friday) at 7:00 PM IST sharp.",
           ].map((line, i) => (
             <li key={line} className="flex items-start gap-2.5 text-[13px] text-muted-foreground">
               <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[11px] font-extrabold text-primary">
