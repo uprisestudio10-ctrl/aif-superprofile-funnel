@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Automation credentials
+automation/.sp_token.json
+automation/.sp_verifier.json
