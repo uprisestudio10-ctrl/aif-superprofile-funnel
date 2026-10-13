@@ -31,34 +31,53 @@ const OFFERS: Array<{
   checkbox: string;
   headline: string;
   body: string;
+  bullets: string[];
   addonPrice: number;
   priceLabel: string;
   badge?: string;
+  highlightBadge?: string;
 }> = [
   {
     id: "recording",
-    checkbox: "Yes! I want the Workshop Recording + Notes @ ₹149/-",
-    headline: "83% Of Attendees Choose This To Get 2x Value!",
-    body: "Stop worrying about missing steps inside the workshop, get access to the full workshop recording to watch it again anytime you want, plus the complete step-by-step notes PDF.",
+    checkbox: "Add Lifetime Recording & Step-By-Step Notes",
+    headline: "Not sure you'll be free on the workshop date to attend live?",
+    body: "Get permanent lifetime access to rewatch the full masterclass anytime, pause each step at your own speed, and follow the exact blueprint to build a 6-figure AI influencer page.",
+    bullets: [
+      "Full HD recording available immediately after live session",
+      "Comprehensive notes & quick cheatsheet PDF included",
+      "Rewatch as many times as you need from mobile or laptop",
+    ],
     addonPrice: 149,
-    priceLabel: "Add for ₹149",
+    priceLabel: "+₹149",
   },
   {
     id: "prompts",
-    checkbox: "Yes! I want 300+ Ready-To-Use Prompts To Generate Realistic Images @ ₹199/-",
-    headline: "71% Attendees Choose This To Get 3x Results With Half The Effort",
-    body: "Don't waste weeks testing prompts yourself, just copy-paste from our proven library of 300+ prompts to create scroll-stopping realistic AI influencer images in different poses, outfits, backgrounds & styles that instantly grab attention.",
+    checkbox: "Add 300+ Ready-To-Use Bold AI Prompts Vault",
+    headline: "Want to generate your AI influencer in bold outfits & viral looks?",
+    body: "Stop wasting weeks testing prompts or getting blocked by AI safety filters. Copy-paste our 300+ tested prompts to generate scroll-stopping, bold, ultra-realistic photos in seconds.",
+    bullets: [
+      "300+ tested prompts for bold outfits, sarees, beachwear & viral poses",
+      "Secret prompting formula that bypasses AI censorship filters",
+      "Zero guesswork — simply copy, paste and generate unlimited photos",
+    ],
     addonPrice: 199,
-    priceLabel: "Add for ₹199",
+    priceLabel: "+₹199",
   },
   {
     id: "combo",
-    checkbox: "🔥 VIP Bundle: Get BOTH Recordings + 300+ Prompts @ Discounted Price",
-    headline: "78% Attendees Choose This To Get Everything & Save ₹129!",
-    body: "Get full lifetime workshop recordings with step-by-step notes PLUS the complete 300+ viral prompt vault together at an exclusive bundle discount. Best value!",
+    checkbox: "VIP All-Access Bundle: Recordings + 300+ Prompts Vault",
+    headline: "The Complete 6-Figure Creator Package: Don't Leave Any Tool Behind!",
+    body: "Get lifetime recordings so you can learn at your own pace, PLUS the complete vault of 300+ bold prompts so you can start publishing viral content immediately. Save ₹129 with this bundle discount!",
+    bullets: [
+      "Full Lifetime Workshop Recordings & Notes (Worth ₹149)",
+      "Complete 300+ Secret Bold Image Prompts Vault (Worth ₹199)",
+      "Instant ₹129 Savings: Regular ₹348 ➔ Only ₹219 Today",
+      "The #1 recommended package chosen by 84% of serious attendees",
+    ],
     addonPrice: 219,
-    priceLabel: "Add for ₹219 (Save ₹129 · Regular ₹348)",
-    badge: "BEST VALUE",
+    priceLabel: "+₹219 (Save ₹129)",
+    badge: "84% CHOOSE THIS",
+    highlightBadge: "BEST VALUE • SAVE ₹129",
   },
 ];
 
@@ -304,30 +323,43 @@ function CheckoutPage() {
       </div>
 
       {/* Step indicator */}
-      <div className="surface mt-4 overflow-hidden p-0">
-        <div className="bg-primary px-4 py-2.5 text-center text-[13px] font-bold text-white">
-          Register for the exclusive workshop now!
+      <div className="surface mt-4 overflow-hidden p-0 border border-white/10 shadow-lg">
+        <div className="bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 border-b border-primary/20 py-2 px-4 text-center">
+          <p className="text-[11.5px] font-extrabold uppercase tracking-widest text-primary flex items-center justify-center gap-1.5">
+            <span>🔒</span>
+            <span>Secure 2-Step Registration</span>
+          </p>
         </div>
         <div className="grid grid-cols-2">
           <button
             type="button"
             onClick={() => setStep(1)}
-            className={`flex items-center gap-2.5 border-b-2 px-4 py-3 text-left ${
-              step === 1 ? "border-primary bg-primary/10" : "border-transparent"
+            className={`flex items-center gap-2.5 border-b-2 px-4 py-3 text-left transition-colors ${
+              step === 1 ? "border-primary bg-primary/10" : "border-transparent hover:bg-white/5"
             }`}
           >
-            <span className="font-display text-[22px] font-extrabold text-foreground">1</span>
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full font-display text-[13px] font-black bg-primary/20 text-primary border border-primary/30">
+              1
+            </span>
             <span>
               <span className="block text-[13px] font-bold text-foreground">Contact</span>
               <span className="block text-[11px] text-muted-foreground">Your contact info</span>
             </span>
           </button>
           <div
-            className={`flex items-center gap-2.5 border-b-2 px-4 py-3 text-left ${
-              step === 2 ? "border-primary bg-primary/10" : "border-transparent opacity-70"
+            className={`flex items-center gap-2.5 border-b-2 px-4 py-3 text-left transition-colors ${
+              step === 2 ? "border-primary bg-primary/10" : "border-transparent opacity-60"
             }`}
           >
-            <span className="font-display text-[22px] font-extrabold text-foreground">2</span>
+            <span
+              className={`flex size-7 shrink-0 items-center justify-center rounded-full font-display text-[13px] font-black ${
+                step === 2
+                  ? "bg-primary text-white shadow-md shadow-primary/30"
+                  : "bg-white/10 text-muted-foreground"
+              }`}
+            >
+              2
+            </span>
             <span>
               <span className="block text-[13px] font-bold text-foreground">Payment</span>
               <span className="block text-[11px] text-muted-foreground">Of your ticket</span>
@@ -396,72 +428,119 @@ function CheckoutPage() {
           </div>
 
           {/* The three checkbox offers */}
-          <div className="space-y-4">
+          <div className="space-y-3.5">
             {OFFERS.map((offer) => {
               const on = selected[offer.id];
               const isCombo = offer.id === "combo";
               return (
                 <div
                   key={offer.id}
-                  className={`overflow-hidden rounded-xl border-2 transition-all ${
+                  onClick={() => toggle(offer.id)}
+                  className={`group relative cursor-pointer overflow-hidden rounded-2xl border transition-all duration-200 ${
                     on
-                      ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
+                      ? isCombo
+                        ? "border-amber-400 bg-amber-500/10 shadow-lg shadow-amber-500/15"
+                        : "border-primary bg-primary/10 shadow-lg shadow-primary/15"
                       : isCombo
-                      ? "border-amber-500/70 border-dashed bg-amber-500/[0.03]"
-                      : "border-destructive/60 border-dashed"
+                      ? "border-amber-500/40 bg-gradient-to-b from-amber-500/[0.08] to-card/90 hover:border-amber-400/70"
+                      : "border-white/10 bg-card/80 hover:border-white/20 hover:bg-card"
                   }`}
                 >
-                  <button
-                    type="button"
-                    onClick={() => toggle(offer.id)}
-                    className="flex w-full items-center gap-2.5 bg-secondary/60 px-3.5 py-3 text-left"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      className={`size-5 shrink-0 ${isCombo ? "text-amber-400" : "text-destructive"}`}
-                      fill="currentColor"
-                      aria-hidden
-                    >
-                      <path d="M4 11h12.2l-4.6-4.6L13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2Z" />
-                    </svg>
-                    <span
-                      className={`flex size-5 shrink-0 items-center justify-center rounded border-2 transition-colors ${
-                        on ? "border-primary bg-primary" : "border-muted-foreground/50"
-                      }`}
-                    >
-                      {on && (
-                        <svg viewBox="0 0 24 24" className="size-3.5 text-white" fill="none">
-                          <path
-                            d="M5 13l4 4L19 7"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      )}
-                    </span>
-                    <span className="flex-1 text-[13.5px] font-bold text-foreground leading-snug">
-                      {offer.checkbox}
-                    </span>
-                    {offer.badge && (
-                      <span className="rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-extrabold tracking-wide text-amber-300 uppercase">
-                        {offer.badge}
-                      </span>
-                    )}
-                  </button>
-                  <div className={`border-t-2 border-dashed p-4 ${isCombo ? "border-amber-500/40" : "border-destructive/60"}`}>
-                    <p className={`font-display text-[16px] font-extrabold leading-snug ${isCombo ? "text-amber-400" : "text-destructive"}`}>
-                      {offer.headline}
-                    </p>
-                    <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
-                      {offer.body}
-                    </p>
-                    <p className="mt-2.5 text-[12.5px] font-semibold text-muted-foreground">
-                      <span className="text-gold-grad font-extrabold">
-                        {offer.priceLabel}
-                      </span>
-                    </p>
+                  {/* VIP Highlight Header */}
+                  {offer.highlightBadge && (
+                    <div className="bg-gradient-to-r from-amber-500/30 via-amber-400/25 to-amber-500/30 border-b border-amber-400/30 px-3.5 py-1 text-center">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-amber-300 flex items-center justify-center gap-1.5">
+                        <span>👑</span>
+                        <span>{offer.highlightBadge}</span>
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Card Main Content */}
+                  <div className="p-3.5 sm:p-4">
+                    {/* Header Row: Checkbox, Title & Price Tag */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                        {/* Custom Checkbox */}
+                        <div
+                          className={`mt-0.5 flex size-5.5 shrink-0 items-center justify-center rounded-lg border-2 transition-all ${
+                            on
+                              ? isCombo
+                                ? "border-amber-400 bg-amber-400 text-black shadow-md shadow-amber-400/30"
+                                : "border-primary bg-primary text-white shadow-md shadow-primary/30"
+                              : "border-muted-foreground/40 bg-secondary/80 group-hover:border-white/40"
+                          }`}
+                        >
+                          {on && (
+                            <svg
+                              viewBox="0 0 24 24"
+                              className="size-3.5 stroke-[3.5]"
+                              fill="none"
+                              stroke="currentColor"
+                            >
+                              <path
+                                d="M5 13l4 4L19 7"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <h3 className="font-display text-[13.5px] sm:text-[14.5px] font-extrabold text-foreground leading-snug">
+                            {offer.checkbox}
+                          </h3>
+                        </div>
+                      </div>
+
+                      {/* Price Pill */}
+                      <div className="shrink-0">
+                        <span
+                          className={`inline-block rounded-lg px-2.5 py-1 text-[11.5px] font-black tracking-tight ${
+                            on
+                              ? isCombo
+                                ? "bg-amber-400 text-black font-extrabold shadow-sm"
+                                : "bg-primary text-white font-extrabold shadow-sm"
+                              : isCombo
+                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold"
+                              : "bg-secondary/90 text-foreground border border-white/10 font-bold"
+                          }`}
+                        >
+                          {offer.priceLabel}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Pain Point Hook & Description */}
+                    <div className="mt-2.5">
+                      <p
+                        className={`text-[12px] sm:text-[12.5px] font-bold leading-snug ${
+                          isCombo ? "text-amber-300" : "text-primary"
+                        }`}
+                      >
+                        {offer.headline}
+                      </p>
+                      <p className="mt-1 text-[11px] sm:text-[11.5px] leading-relaxed text-muted-foreground">
+                        {offer.body}
+                      </p>
+                    </div>
+
+                    {/* Clean Feature Bullets */}
+                    <ul className="mt-2.5 space-y-1 border-t border-white/5 pt-2 text-[11px] sm:text-[11.5px]">
+                      {offer.bullets.map((b, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-foreground/90">
+                          <span
+                            className={`shrink-0 font-bold ${
+                              isCombo ? "text-amber-400" : "text-emerald-400"
+                            }`}
+                          >
+                            ✓
+                          </span>
+                          <span className="leading-tight">{b}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               );
