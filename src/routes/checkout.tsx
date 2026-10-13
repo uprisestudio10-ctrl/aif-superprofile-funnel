@@ -38,7 +38,7 @@ const OFFERS: Array<{
 }> = [
   {
     id: "recording",
-    checkbox: "Yes! Add Workshop Recording + Notes",
+    checkbox: "Yes, I want to add Workshop Recording + Notes",
     headline: "83% Of Attendees Add This To Watch At Their Own Pace",
     body: "Not sure you'll be free on the workshop date to attend live? Add workshop recording and notes to get lifetime access, rewatch anytime, and learn at your own pace.",
     addonPrice: 149,
@@ -46,7 +46,7 @@ const OFFERS: Array<{
   },
   {
     id: "prompts",
-    checkbox: "Yes! Add 300+ Ready-To-Use Bold AI Prompts Vault",
+    checkbox: "Yes, I want to add 300+ Bold AI Prompts Vault",
     headline: "71% Of Attendees Choose This To Generate Bold Images Instantly",
     body: "Copy-paste our 300+ tested prompts to generate scroll-stopping, bold, ultra-realistic photos in seconds.",
     addonPrice: 199,
@@ -54,13 +54,13 @@ const OFFERS: Array<{
   },
   {
     id: "combo",
-    checkbox: "🔥 VIP Bundle: Recordings + 300+ Prompts Vault",
+    checkbox: "Yes, I want the VIP Bundle (Recordings + Prompts)",
     headline: "89% Of Attendees Choose This To Get Everything & Save ₹129!",
     body: "Get full lifetime workshop recordings PLUS the complete 300+ bold prompts vault together at a massive bundle discount. Best value!",
     addonPrice: 219,
     priceLabel: "+₹219 (Save ₹129)",
     badge: "BEST VALUE",
-    highlightBadge: "👑 BEST VALUE • SAVE ₹129",
+    highlightBadge: "BEST VALUE • SAVE ₹129",
   },
 ];
 
@@ -446,12 +446,12 @@ function CheckoutPage() {
                       <div className="flex items-start gap-2.5 flex-1 min-w-0">
                         {/* Custom Checkbox */}
                         <div
-                          className={`mt-0.5 flex size-5.5 shrink-0 items-center justify-center rounded-lg border-2 transition-all ${
+                          className={`mt-0.5 flex size-5.5 shrink-0 items-center justify-center rounded-[5px] border-2 transition-all ${
                             on
                               ? isCombo
                                 ? "border-amber-400 bg-amber-400 text-black shadow-md shadow-amber-400/30"
                                 : "border-primary bg-primary text-white shadow-md shadow-primary/30"
-                              : "border-muted-foreground/40 bg-secondary/80 group-hover:border-white/40"
+                              : "border-white/25 bg-card/60 group-hover:border-white/50 group-hover:bg-card/90"
                           }`}
                         >
                           {on && (
@@ -471,7 +471,7 @@ function CheckoutPage() {
                         </div>
 
                         <div className="min-w-0">
-                          <h3 className="font-display text-[13.5px] sm:text-[14.5px] font-extrabold text-foreground leading-snug">
+                          <h3 className="font-display text-[13.5px] sm:text-[14.5px] font-bold text-foreground leading-snug">
                             {offer.checkbox}
                           </h3>
                         </div>
@@ -496,9 +496,9 @@ function CheckoutPage() {
                     </div>
 
                     {/* Psychological Headline & Minimal Body */}
-                    <div className="mt-2 pl-7.5">
+                    <div className="mt-2 pl-8">
                       <p
-                        className={`text-[12px] sm:text-[12.5px] font-extrabold leading-snug ${
+                        className={`text-[12px] sm:text-[12.5px] font-bold leading-snug ${
                           isCombo ? "text-amber-300" : "text-primary"
                         }`}
                       >
