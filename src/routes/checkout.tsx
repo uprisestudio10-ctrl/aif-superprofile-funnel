@@ -31,7 +31,6 @@ const OFFERS: Array<{
   checkbox: string;
   headline: string;
   body: string;
-  bullets: string[];
   addonPrice: number;
   priceLabel: string;
   badge?: string;
@@ -39,45 +38,29 @@ const OFFERS: Array<{
 }> = [
   {
     id: "recording",
-    checkbox: "Add Lifetime Recording & Step-By-Step Notes",
-    headline: "Not sure you'll be free on the workshop date to attend live?",
-    body: "Get permanent lifetime access to rewatch the full masterclass anytime, pause each step at your own speed, and follow the exact blueprint to build a 6-figure AI influencer page.",
-    bullets: [
-      "Full HD recording available immediately after live session",
-      "Comprehensive notes & quick cheatsheet PDF included",
-      "Rewatch as many times as you need from mobile or laptop",
-    ],
+    checkbox: "Yes! Add Workshop Recording + Notes",
+    headline: "83% Of Attendees Add This To Watch At Their Own Pace",
+    body: "Not sure you'll be free on the workshop date to attend live? Add workshop recording and notes to get lifetime access, rewatch anytime, and learn at your own pace.",
     addonPrice: 149,
     priceLabel: "+₹149",
   },
   {
     id: "prompts",
-    checkbox: "Add 300+ Ready-To-Use Bold AI Prompts Vault",
-    headline: "Want to generate your AI influencer in bold outfits & viral looks?",
-    body: "Stop wasting weeks testing prompts or getting blocked by AI safety filters. Copy-paste our 300+ tested prompts to generate scroll-stopping, bold, ultra-realistic photos in seconds.",
-    bullets: [
-      "300+ tested prompts for bold outfits, sarees, beachwear & viral poses",
-      "Secret prompting formula that bypasses AI censorship filters",
-      "Zero guesswork — simply copy, paste and generate unlimited photos",
-    ],
+    checkbox: "Yes! Add 300+ Ready-To-Use Bold AI Prompts Vault",
+    headline: "71% Of Attendees Choose This To Generate Bold Images Instantly",
+    body: "Copy-paste our 300+ tested prompts to generate scroll-stopping, bold, ultra-realistic photos in seconds.",
     addonPrice: 199,
     priceLabel: "+₹199",
   },
   {
     id: "combo",
-    checkbox: "VIP All-Access Bundle: Recordings + 300+ Prompts Vault",
-    headline: "The Complete 6-Figure Creator Package: Don't Leave Any Tool Behind!",
-    body: "Get lifetime recordings so you can learn at your own pace, PLUS the complete vault of 300+ bold prompts so you can start publishing viral content immediately. Save ₹129 with this bundle discount!",
-    bullets: [
-      "Full Lifetime Workshop Recordings & Notes (Worth ₹149)",
-      "Complete 300+ Secret Bold Image Prompts Vault (Worth ₹199)",
-      "Instant ₹129 Savings: Regular ₹348 ➔ Only ₹219 Today",
-      "The #1 recommended package chosen by 84% of serious attendees",
-    ],
+    checkbox: "🔥 VIP Bundle: Recordings + 300+ Prompts Vault",
+    headline: "89% Of Attendees Choose This To Get Everything & Save ₹129!",
+    body: "Get full lifetime workshop recordings PLUS the complete 300+ bold prompts vault together at a massive bundle discount. Best value!",
     addonPrice: 219,
     priceLabel: "+₹219 (Save ₹129)",
-    badge: "84% CHOOSE THIS",
-    highlightBadge: "BEST VALUE • SAVE ₹129",
+    badge: "BEST VALUE",
+    highlightBadge: "👑 BEST VALUE • SAVE ₹129",
   },
 ];
 
@@ -512,35 +495,19 @@ function CheckoutPage() {
                       </div>
                     </div>
 
-                    {/* Pain Point Hook & Description */}
-                    <div className="mt-2.5">
+                    {/* Psychological Headline & Minimal Body */}
+                    <div className="mt-2 pl-7.5">
                       <p
-                        className={`text-[12px] sm:text-[12.5px] font-bold leading-snug ${
+                        className={`text-[12px] sm:text-[12.5px] font-extrabold leading-snug ${
                           isCombo ? "text-amber-300" : "text-primary"
                         }`}
                       >
                         {offer.headline}
                       </p>
-                      <p className="mt-1 text-[11px] sm:text-[11.5px] leading-relaxed text-muted-foreground">
+                      <p className="mt-1 text-[11.5px] sm:text-[12px] leading-relaxed text-muted-foreground">
                         {offer.body}
                       </p>
                     </div>
-
-                    {/* Clean Feature Bullets */}
-                    <ul className="mt-2.5 space-y-1 border-t border-white/5 pt-2 text-[11px] sm:text-[11.5px]">
-                      {offer.bullets.map((b, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-foreground/90">
-                          <span
-                            className={`shrink-0 font-bold ${
-                              isCombo ? "text-amber-400" : "text-emerald-400"
-                            }`}
-                          >
-                            ✓
-                          </span>
-                          <span className="leading-tight">{b}</span>
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 </div>
               );
