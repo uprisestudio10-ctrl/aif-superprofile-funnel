@@ -19,4 +19,4 @@ This project is edited directly in Antigravity instead of the Lovable web editor
 
 Do this after every change the user asks for, so the user only needs to type a prompt describing what they want changed — they should never need to run git commands themselves. Only skip the auto-commit if the change is broken, incomplete, or the user explicitly says not to commit yet.
 
-Note: pushing to GitHub syncs the code into the Lovable editor automatically, but it does NOT make the site live. The user (or Lovable) must still click "Publish" inside the Lovable dashboard to push a synced change live to visitors.
+Note: Pushing to `origin main` automatically deploys the site to `live.prateekmayani.com` via Cloudflare.
