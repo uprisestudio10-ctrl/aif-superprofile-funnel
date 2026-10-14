@@ -316,31 +316,6 @@ return output;`
       },
       {
         parameters: {
-          method: "POST",
-          url: `https://graph.facebook.com/v21.0/${META_PIXEL_ID}/events`,
-          sendQuery: true,
-          queryParameters: {
-            parameters: [
-              {
-                name: "access_token",
-                value: META_CAPI_TOKEN
-              }
-            ]
-          },
-          sendBody: true,
-          specifyBody: "json",
-          jsonBody: "={{ JSON.stringify($('Filter Unprocessed Leads').item.json.capi_payload) }}",
-          options: {}
-        },
-        continueOnFail: true,
-        id: "send-meta-capi-purchase",
-        name: "Send Meta CAPI Purchase",
-        type: "n8n-nodes-base.httpRequest",
-        typeVersion: 4.2,
-        position: [980, 200]
-      },
-      {
-        parameters: {
           operation: "update",
           documentId: {
             __rl: true,
@@ -371,7 +346,7 @@ return output;`
         name: "Mark Email Sent in Sheet",
         type: "n8n-nodes-base.googleSheets",
         typeVersion: 4.5,
-        position: [1200, 200],
+        position: [980, 200],
         credentials: {
           googleApi: {
             id: "SsEE517tRUiLR8pJ",
@@ -391,9 +366,6 @@ return output;`
         main: [[{ node: "Send Confirmation Email", type: "main", index: 0 }]]
       },
       "Send Confirmation Email": {
-        main: [[{ node: "Send Meta CAPI Purchase", type: "main", index: 0 }]]
-      },
-      "Send Meta CAPI Purchase": {
         main: [[{ node: "Mark Email Sent in Sheet", type: "main", index: 0 }]]
       }
     }
