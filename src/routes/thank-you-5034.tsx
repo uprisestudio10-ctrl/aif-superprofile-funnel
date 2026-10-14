@@ -45,6 +45,12 @@ function ThankYouPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // Strict deduplication guard: Ensure pixel events fire ONLY ONCE per buyer session
+    // Prevents duplicate tracking when users return from WhatsApp, refresh, or tab switch
+    if (sessionStorage.getItem("ty_pixel_already_fired")) {
+      return;
+    }
+
     const params = new URLSearchParams(window.location.search);
     const payment_id =
       params.get("payment_id") ||
@@ -56,10 +62,21 @@ function ThankYouPage() {
       "29";
     const amountValue = parseFloat(rawAmount) || 29.0;
 
+    let eventId = sessionStorage.getItem("ty_event_id");
+    if (!eventId) {
+      eventId = payment_id || ("ty-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8));
+      sessionStorage.setItem("ty_event_id", eventId);
+    }
+
     const firePixelEvents = () => {
       if ((window as unknown as { fbq?: (...args: unknown[]) => void }).fbq) {
+        if (sessionStorage.getItem("ty_pixel_already_fired")) {
+          return true;
+        }
+        sessionStorage.setItem("ty_pixel_already_fired", "true");
+
         const fbq = (window as unknown as { fbq: (...args: unknown[]) => void }).fbq;
-        const eventOptions = payment_id ? { eventID: payment_id } : undefined;
+        const eventOptions = { eventID: eventId };
 
         fbq(
           "track",
