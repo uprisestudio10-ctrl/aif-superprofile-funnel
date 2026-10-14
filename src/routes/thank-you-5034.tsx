@@ -45,71 +45,16 @@ function ThankYouPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Strict deduplication guard: Ensure pixel events fire ONLY ONCE per buyer session
-    // Prevents duplicate tracking when users return from WhatsApp, refresh, or tab switch
-    if (sessionStorage.getItem("ty_pixel_already_fired")) {
-      return;
-    }
-
+    // Purchase conversions are tracked server-side via Meta CAPI (n8n workflow)
+    // with SHA256 hashed phone, email, and exact amounts directly from the verified order.
+    // Client-side Purchase/Lead is removed here to prevent 2X duplicate tracking.
     const params = new URLSearchParams(window.location.search);
     const payment_id =
       params.get("payment_id") ||
       sessionStorage.getItem("last_payment_id") ||
       "";
-    const rawAmount =
-      params.get("amount") ||
-      sessionStorage.getItem("last_payment_amount") ||
-      "29";
-    const amountValue = parseFloat(rawAmount) || 29.0;
-
-    let eventId = sessionStorage.getItem("ty_event_id");
-    if (!eventId) {
-      eventId = payment_id || ("ty-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8));
-      sessionStorage.setItem("ty_event_id", eventId);
-    }
-
-    const firePixelEvents = () => {
-      if ((window as unknown as { fbq?: (...args: unknown[]) => void }).fbq) {
-        if (sessionStorage.getItem("ty_pixel_already_fired")) {
-          return true;
-        }
-        sessionStorage.setItem("ty_pixel_already_fired", "true");
-
-        const fbq = (window as unknown as { fbq: (...args: unknown[]) => void }).fbq;
-        const eventOptions = { eventID: eventId };
-
-        fbq(
-          "track",
-          "Purchase",
-          {
-            value: amountValue,
-            currency: "INR",
-            content_name: "AI Influencer Workshop",
-          },
-          eventOptions
-        );
-
-        fbq(
-          "track",
-          "Lead",
-          {
-            value: amountValue,
-            currency: "INR",
-            content_name: "AI Influencer Workshop",
-          },
-          eventOptions
-        );
-        return true;
-      }
-      return false;
-    };
-
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    if (!firePixelEvents()) {
-      timer = setTimeout(firePixelEvents, 600);
-    }
-
     const payment_request_id = params.get("payment_request_id");
+
     if (payment_id && payment_request_id) {
       verifyPayment({
         data: {
@@ -118,10 +63,6 @@ function ThankYouPage() {
         },
       }).catch((e) => console.error("Verification error:", e));
     }
-
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
   }, []);
 
   return (
