@@ -6,7 +6,7 @@ const N8N_URL = 'https://prateek.n8n.preetamsoni.com';
 const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3OWZjNTFlMi1mMTdlLTQ1MDktYTAzMS01NzFjNTAwMWM2MTciLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiNTkzMDgzNTEtNDY5Ny00YWIxLWJmZGItNzI5MDk5MTNlNWFkIiwiaWF0IjoxNzkxNjk1NzUyfQ.z1IZaAAdjaw1bxCtFN5N_xbnyQHCVAPuDGnzuqzXRjo';
 
 const OLD_LINK = 'https://chat.whatsapp.com/FDLe6CBZxa66sEcHvhy1pD?mode=gi_t';
-const NEW_LINK = 'https://chat.whatsapp.com/IHwK76ChghnDyirB7VkTRp?mode=gi_t';
+const NEW_LINK = 'https://chat.whatsapp.com/G3asnvdznZY3a4Ystpo0wR?mode=gi_t';
 
 function apiRequest(endpoint, method = 'GET', data = null) {
   return new Promise((resolve, reject) => {

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/checkout")({
       {
         name: "description",
         content:
-          "Final step: secure your seat for the live AI Influencer Workshop on 16th October (Friday), 7:00 PM. Pay securely via Superprofile.",
+          "Final step: secure your seat for the live AI Influencer Workshop on 22nd October (Thursday), 7:00 PM. Pay securely via Superprofile.",
       },
     ],
   }),
@@ -208,7 +208,7 @@ function CheckoutPage() {
           <span className="text-gold-grad">Customize</span> Your Access Pass
         </h1>
         <p className="mt-2 text-[13px] text-muted-foreground">
-          October 16, 2026 (Friday) · 7:00 PM IST · Live on Zoom
+          October 22, 2026 (Thursday) · 7:00 PM IST · Live on Zoom
         </p>
       </div>
 
@@ -409,7 +409,7 @@ function CheckoutPage() {
         <div className="surface space-y-3 p-5 text-center">
           <p className="text-[15px] font-bold text-foreground">Enroll For The Workshop Before</p>
           <p className="rounded-lg bg-[var(--money)]/20 px-3 py-2 font-display text-[17px] font-extrabold text-gold-grad">
-            October 16, 2026 (Friday) · 7:00 PM
+            October 22, 2026 (Thursday) · 7:00 PM
           </p>
           <div className="rounded-xl border border-border p-4">
             <p className="font-display text-[16px] font-extrabold leading-snug text-foreground">

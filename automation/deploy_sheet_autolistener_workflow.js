@@ -8,7 +8,7 @@ const WORKFLOW_ID = 'aGyJGiMZugFwweUk';
 const SHEET_ID = '1flbSez2txzFmW1jj7uMy7THzpJyvJtpvV3ZrASU5poc';
 const META_PIXEL_ID = '1462195472776524';
 const META_CAPI_TOKEN = 'EAAPdKUgkm4kBSgzKwkk4rV6DJRRnd43XZC43C3te57GKcymIPyauf08aC9IWLB8MPY1sx856PcUfjoinZCuSJJSEdCquY8HXxQmwqou93euJhVfELhSIr0ZA1ZAA6ZCTmpKm35X2LG4cx6e8NkajwTAudBDqQSBIWPanQv02ULIpQAZBFZAfZCkItqpdojrlRQZDZD';
-const WHATSAPP_URL = 'https://chat.whatsapp.com/IHwK76ChghnDyirB7VkTRp?mode=gi_t';
+const WHATSAPP_URL = 'https://chat.whatsapp.com/G3asnvdznZY3a4Ystpo0wR?mode=gi_t';
 
 function api(endpoint, method = 'GET', data = null) {
   return new Promise((resolve, reject) => {
@@ -173,7 +173,7 @@ const output = [];
 
 const whatsappUrl = "${WHATSAPP_URL}";
 const workshopName = "AI Influencer Workshop";
-const workshopDate = "16th October 2026 (Friday)";
+const workshopDate = "22nd October 2026 (Thursday)";
 const workshopTime = "7:00 PM IST";
 
 for (const item of items) {
@@ -213,7 +213,7 @@ for (const item of items) {
 <ol style="margin: 0 0 16px 0; padding-left: 20px;">
   <li>Click the link above to join the WhatsApp group right now.</li>
   <li>Pin the group on WhatsApp so you don't miss the Zoom link.</li>
-  <li>Keep your laptop ready on Friday at 6:55 PM IST.</li>
+  <li>Keep your laptop ready on Thursday at 6:55 PM IST.</li>
 </ol>
 
 <div style="background-color: #fff9e6; border: 1px solid #ffe082; border-radius: 8px; padding: 14px; margin: 18px 0; font-size: 13px; color: #333333;">
@@ -227,7 +227,7 @@ for (const item of items) {
 
 <p>If you have any questions, feel free to reply directly to this email.</p>
 
-<p>Looking forward to seeing you live on Friday.</p>
+<p>Looking forward to seeing you live on Thursday.</p>
 
 <p>Best Regards,<br>
 <strong>Prateek Mayani</strong><br>
@@ -277,7 +277,7 @@ for (const item of items) {
       recipientEmail: email,
       recipientPhone: phone,
       amount: amtNum,
-      emailSubject: "Seat Confirmed: AI Influencer Workshop (16th Oct, 7:00 PM)",
+      emailSubject: "Seat Confirmed: AI Influencer Workshop (22nd Oct, 7:00 PM)",
       emailHtml: emailHtml,
       capi_payload: capiPayload
     }

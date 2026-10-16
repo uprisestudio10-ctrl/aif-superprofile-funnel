@@ -31,7 +31,7 @@ async function test1_LeadRegistration() {
     offers: ["recording"],
     date: new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' }),
     time: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true }),
-    workshop_date: "16th October 2026 (Friday) 7:00 PM IST",
+    workshop_date: "22nd October 2026 (Thursday) 7:00 PM IST",
     utm_source: "meta_ads_test",
     utm_campaign: "aif_broad_cbo",
     fbclid: "fb.1.1728899999.test_click_id"

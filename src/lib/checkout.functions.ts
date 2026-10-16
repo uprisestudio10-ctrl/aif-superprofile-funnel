@@ -374,7 +374,7 @@ export const verifyPayment = createServerFn({ method: "POST" })
           time: timeStr,
           amount: finalAmountRupees,
           amount_formatted: `₹${finalAmountRupees}`,
-          workshop_date: "16th October 2026 (Friday) 7:00 PM IST",
+          workshop_date: "22nd October 2026 (Thursday) 7:00 PM IST",
           utm_source: tracking.utm_source || "",
           utm_campaign: tracking.utm_campaign || "",
           utm_content: tracking.utm_content || "",

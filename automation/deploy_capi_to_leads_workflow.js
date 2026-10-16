@@ -27,7 +27,7 @@ if ((raw.event === 'payment.captured' || raw.event === 'order.paid') && raw.payl
     email: notes.email || p.email || '',
     amount: amtNum,
     amount_formatted: '₹' + amtNum,
-    workshop_date: '7th October 2026 (Wednesday) 7:00 PM IST',
+    workshop_date: '22nd October 2026 (Thursday) 7:00 PM IST',
     has_call_booked: Boolean(notes.offers && notes.offers.includes('call')),
     call_booked: (notes.offers && notes.offers.includes('call')) ? 'YES' : 'NO',
     call_status: (notes.offers && notes.offers.includes('call')) ? 'Pending' : 'N/A',
@@ -84,7 +84,7 @@ const hasPrompts = item.prompts_purchased === 'YES' ||
 
 const name = (item.name || 'there').trim();
 const amount = item.amount_formatted || (item.amount ? '₹' + item.amount : '₹29');
-const whatsappUrl = 'https://chat.whatsapp.com/IHwK76ChghnDyirB7VkTRp?mode=gi_t';
+const whatsappUrl = 'https://chat.whatsapp.com/G3asnvdznZY3a4Ystpo0wR?mode=gi_t';
 
 const emailHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;">
 <p>Hi \${name},</p>
@@ -98,7 +98,7 @@ const emailHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px;
 
 <p><strong>Workshop Details:</strong></p>
 <ol style="margin: 0 0 16px 0; padding-left: 20px;">
-  <li><strong>Date:</strong> 7th October 2026 (Wednesday)</li>
+  <li><strong>Date:</strong> 22nd October 2026 (Thursday)</li>
   <li><strong>Time:</strong> 7:00 PM IST (Sharp)</li>
   <li><strong>Location:</strong> Live on Zoom (Link shared in the WhatsApp group)</li>
   <li><strong>Amount Paid:</strong> \${amount}</li>
@@ -108,12 +108,12 @@ const emailHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px;
 <ol style="margin: 0 0 16px 0; padding-left: 20px;">
   <li>Click the link above to join the WhatsApp group right now.</li>
   <li>Pin the group on WhatsApp so you don't miss the Zoom link.</li>
-  <li>Keep your laptop ready on Wednesday at 6:55 PM IST.</li>
+  <li>Keep your laptop ready on Thursday at 6:55 PM IST.</li>
 </ol>
 
 <p>If you have any questions, feel free to reply directly to this email.</p>
 
-<p>Looking forward to seeing you live on Wednesday.</p>
+<p>Looking forward to seeing you live on Thursday.</p>
 
 <p>Best Regards,<br>
 <strong>Prateek Mayani</strong><br>
@@ -128,7 +128,7 @@ return [{
     Date: item.date || new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' }),
     Time: item.time || new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true }),
     Amount: amount,
-    'Workshop Date': item.workshop_date || '7th October 2026 (Wednesday) 7:00 PM IST',
+    'Workshop Date': item.workshop_date || '22nd October 2026 (Thursday) 7:00 PM IST',
     'Utm source': item.utm_source || '',
     'Utm campaign': item.utm_campaign || '',
     'Utm content': item.utm_content || '',
