@@ -1,48 +1,60 @@
 {
-  "updatedAt": "2026-10-05T15:01:28.045Z",
-  "createdAt": "2026-09-29T10:54:54.804Z",
-  "id": "Z034qypVNed6oJcg",
+  "id": "TVNUUwtNq9CGsSW6",
   "name": "AI Influencer Mastery - Course Enrollment & Instant Access Delivery",
   "description": null,
   "active": true,
+  "activeVersionId": "32a54cba-0faf-47aa-8afb-4f56ec4af566",
+  "createdAt": "2026-10-07T16:23:49.924Z",
+  "updatedAt": "2026-10-16T13:16:59.552Z",
   "isArchived": false,
+  "versionId": "32a54cba-0faf-47aa-8afb-4f56ec4af566",
+  "versionCounter": 6,
+  "sourceWorkflowId": null,
+  "triggerCount": 2,
   "nodes": [
     {
+      "id": "723330a2-9d5a-49df-b3f5-45aa724a47d1",
+      "name": "Course Webhook Trigger",
+      "webhookId": "course-enrollment",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        96
+      ],
       "parameters": {
         "httpMethod": "POST",
         "path": "course-enrollment",
         "options": {}
-      },
-      "id": "course-webhook",
-      "name": "Course Webhook Trigger",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        100,
-        300
-      ],
-      "webhookId": "course-enrollment"
+      }
     },
     {
-      "parameters": {
-        "jsCode": "const raw = $input.first().json.body || $input.first().json;\n\nlet item = raw;\n\n// Event safety check: Only process successful captured payments\nif (raw.event && raw.event !== 'payment.captured' && raw.event !== 'order.paid') {\n  return [];\n}\n\n// Handle direct Razorpay Webhook format if sent from Razorpay Dashboard\nif ((raw.event === 'payment.captured' || raw.event === 'order.paid') && raw.payload) {\n  const p = raw.payload.payment ? raw.payload.payment.entity : (raw.payload.order ? raw.payload.order.entity : {});\n  const notes = p.notes || {};\n  const cleanPhone = (notes.phone || notes.contact || p.contact || '').replace(/\\D/g, '').slice(-10);\n  const amtNum = p.amount ? Math.round(p.amount / 100) : 2999;\n  const cleanEmail = (notes.email || p.email || '').trim().toLowerCase();\n  const payerName = notes.name || notes.buyer_name || notes.Name || notes['Full Name'] || notes.payer_name || notes.customer_name || p.name || '';\n  const commentName = (notes.comment && typeof notes.comment === 'string' && notes.comment.length > 2 && !notes.comment.includes('@') && isNaN(Number(notes.comment))) ? notes.comment.trim() : '';\n  const finalName = payerName || commentName || 'Student';\n\n  item = {\n    name: finalName,\n    phone: cleanPhone,\n    incoming_email: cleanEmail,\n    amount: amtNum,\n    description: p.description || '',\n    razorpay_payment_id: p.id || '',\n    razorpay_order_id: p.order_id || '',\n  };\n}\n\n// Pure Amount Filter: Course Purchases only (>= ₹900)\n// Filter out workshop leads (< ₹900)\nconst parsedAmount = typeof item.amount === 'number' \n  ? item.amount \n  : parseInt(String(item.amount || '').replace(/\\D/g, ''), 10) || 0;\n\nif (parsedAmount < 900) {\n  return [];\n}\n\nconst isToken = parsedAmount < 2000;\nconst phone = (item.phone || item.number || '').replace(/\\D/g, '').slice(-10);\nconst name = (item.name || 'Student').trim();\nconst incomingEmail = (item.incoming_email || item.email || '').trim().toLowerCase();\nconst paymentId = item.razorpay_payment_id || '';\nconst orderId = item.razorpay_order_id || '';\nconst amountFormatted = isToken ? '₹999 (Token)' : (parsedAmount > 0 ? ('₹' + parsedAmount.toLocaleString('en-IN')) : '₹2,999');\n\n// Deduplication safeguard\ntry {\n  const staticData = $getWorkflowStaticData('global');\n  staticData.processedIds = staticData.processedIds || [];\n  if (paymentId && staticData.processedIds.includes(paymentId)) {\n    return [];\n  }\n  if (paymentId) {\n    staticData.processedIds.push(paymentId);\n    if (staticData.processedIds.length > 200) {\n      staticData.processedIds.shift();\n    }\n  }\n} catch (e) {\n  // safe\n}\n\nconst now = new Date();\nconst regDate = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' });\nconst regTime = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });\n\nreturn [{\n  json: {\n    name,\n    phone,\n    incoming_email: incomingEmail,\n    amount: parsedAmount,\n    amount_formatted: amountFormatted,\n    is_token: isToken,\n    payment_id: paymentId,\n    order_id: orderId,\n    date: regDate,\n    time: regTime\n  }\n}];"
-      },
-      "id": "course-parse",
+      "id": "afcc270b-db9f-4d0d-a524-32dea6dfe317",
       "name": "Filter & Parse Course Payment",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        320,
-        300
-      ]
+        -912,
+        96
+      ],
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.body || $input.first().json;\n\nlet item = raw;\n\n// Event safety check: Only process successful captured payments\nif (raw.event && raw.event !== 'payment.captured' && raw.event !== 'order.paid') {\n  return [];\n}\n\n// Handle direct Razorpay Webhook format if sent from Razorpay Dashboard\nif ((raw.event === 'payment.captured' || raw.event === 'order.paid') && raw.payload) {\n  const p = raw.payload.payment ? raw.payload.payment.entity : (raw.payload.order ? raw.payload.order.entity : {});\n  const notes = p.notes || {};\n  const cleanPhone = (notes.phone || notes.contact || p.contact || '').replace(/\\D/g, '').slice(-10);\n  const amtNum = p.amount ? Math.round(p.amount / 100) : 2999;\n  const cleanEmail = (notes.email || p.email || '').trim().toLowerCase();\n  const payerName = notes.name || notes.buyer_name || notes.Name || notes['Full Name'] || notes.payer_name || notes.customer_name || p.name || '';\n  const commentName = (notes.comment && typeof notes.comment === 'string' && notes.comment.length > 2 && !notes.comment.includes('@') && isNaN(Number(notes.comment))) ? notes.comment.trim() : '';\n  const finalName = payerName || commentName || 'Student';\n\n  item = {\n    name: finalName,\n    phone: cleanPhone,\n    incoming_email: cleanEmail,\n    amount: amtNum,\n    description: p.description || '',\n    razorpay_payment_id: p.id || '',\n    razorpay_order_id: p.order_id || '',\n  };\n}\n\n// Pure Amount Filter: Course Purchases only (>= ₹900)\n// Filter out workshop leads (< ₹900)\nconst parsedAmount = typeof item.amount === 'number' \n  ? item.amount \n  : parseInt(String(item.amount || '').replace(/\\D/g, ''), 10) || 0;\n\nif (parsedAmount < 900) {\n  return [];\n}\n\nconst isToken = parsedAmount < 2400;\nconst phone = (item.phone || item.number || '').replace(/\\D/g, '').slice(-10);\nconst name = (item.name || 'Student').trim();\nconst incomingEmail = (item.incoming_email || item.email || '').trim().toLowerCase();\nconst paymentId = item.razorpay_payment_id || '';\nconst orderId = item.razorpay_order_id || '';\nconst amountFormatted = isToken ? '₹999 (Token)' : (parsedAmount > 0 ? ('₹' + parsedAmount.toLocaleString('en-IN')) : '₹2,999');\n\n// Deduplication safeguard\ntry {\n  const staticData = $getWorkflowStaticData('global');\n  staticData.processedIds = staticData.processedIds || [];\n  if (paymentId && staticData.processedIds.includes(paymentId)) {\n    return [];\n  }\n  if (paymentId) {\n    staticData.processedIds.push(paymentId);\n    if (staticData.processedIds.length > 200) {\n      staticData.processedIds.shift();\n    }\n  }\n} catch (e) {\n  // safe\n}\n\nconst now = new Date();\nconst regDate = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' });\nconst regTime = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });\n\nreturn [{\n  json: {\n    name,\n    phone,\n    incoming_email: incomingEmail,\n    amount: parsedAmount,\n    amount_formatted: amountFormatted,\n    is_token: isToken,\n    payment_id: paymentId,\n    order_id: orderId,\n    date: regDate,\n    time: regTime\n  }\n}];"
+      }
     },
     {
+      "id": "bd39393a-e309-423f-9fd4-2ab70c304eb3",
+      "name": "Fetch Workshop Attendees from Sheet1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -688,
+        96
+      ],
       "parameters": {
         "authentication": "serviceAccount",
-        "operation": "read",
         "documentId": {
           "__rl": true,
-          "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+          "value": "1flbSez2txzFmW1jj7uMy7THzpJyvJtpvV3ZrASU5poc",
           "mode": "id"
         },
         "sheetName": {
@@ -52,55 +64,70 @@
         },
         "options": {}
       },
-      "id": "fetch-workshop-attendees",
-      "name": "Fetch Workshop Attendees from Sheet1",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [
-        540,
-        300
-      ],
       "credentials": {
         "googleApi": {
-          "id": "SsEE517tRUiLR8pJ",
+          "id": "u1KbRiPRv3k5LrOJ",
           "name": "Google Sheets account"
         }
       }
     },
     {
-      "parameters": {
-        "jsCode": "const payment = $('Filter & Parse Course Payment').first().json;\nconst attendees = $input.all().map(i => i.json);\n\nconst phoneToFind = payment.phone; // 10 digits\nlet matchedAttendee = null;\n\nif (phoneToFind && phoneToFind.length === 10) {\n  matchedAttendee = attendees.find(r => {\n    const rPhone = String(r.Number || r.Phone || '').replace(/\\D/g, '').slice(-10);\n    return rPhone === phoneToFind;\n  });\n}\n\nlet resolvedEmail = '';\nlet emailSource = '';\n\n// Step 1: Check workshop registration Sheet1 for original email\nif (matchedAttendee && matchedAttendee.Email) {\n  const em = String(matchedAttendee.Email).trim().toLowerCase();\n  if (em.includes('@') && !em.endsWith('@razorpay.com') && !em.includes('void')) {\n    resolvedEmail = em;\n    emailSource = 'WORKSHOP_SHEET';\n  }\n}\n\n// Step 2: Fallback to incoming email from payment if not void@razorpay.com\nif (!resolvedEmail && payment.incoming_email) {\n  const em = String(payment.incoming_email).trim().toLowerCase();\n  if (em.includes('@') && !em.endsWith('@razorpay.com') && !em.includes('void')) {\n    resolvedEmail = em;\n    emailSource = 'PAYMENT_PAYLOAD';\n  }\n}\n\nconst emailFound = Boolean(resolvedEmail);\nconst studentName = matchedAttendee?.Name || payment.name || (resolvedEmail ? resolvedEmail.split('@')[0].toUpperCase() : 'Student');\nconst phone = payment.phone;\nconst amountFormatted = payment.amount_formatted;\nconst isToken = payment.is_token;\nconst paymentId = payment.payment_id;\nconst regDate = payment.date;\nconst regTime = payment.time;\n\nlet portalUrl = '';\nlet accessKey = '';\nlet accessStatus = '';\nlet studentEmailSubject = '';\nlet studentEmailHtml = '';\n\nlet adminEmailSubject = '';\nlet adminEmailHtml = '';\n\nif (emailFound) {\n  // Authorize buyer for device lock\n  try {\n    const staticData = $getWorkflowStaticData('global');\n    staticData.authorizedBuyers = staticData.authorizedBuyers || [];\n    if (phone && !staticData.authorizedBuyers.includes(phone)) {\n      staticData.authorizedBuyers.push(phone);\n    }\n    if (resolvedEmail && !staticData.authorizedBuyers.includes(resolvedEmail)) {\n      staticData.authorizedBuyers.push(resolvedEmail);\n    }\n  } catch (e) {}\n\n  accessStatus = isToken\n    ? 'LOCKED - Token Paid (Balance ₹2,000 Pending)'\n    : 'Active (Full Access)';\n\n  const secretKey = 'rzp_live_ThPkZr13H5M66E_aif_mastery_secret_2026';\n  accessKey = 'LOCKED_PENDING_FULL_PAYMENT';\n  portalUrl = 'LOCKED (Complete remaining ₹2,000 to unlock)';\n\n  if (!isToken) {\n    try {\n      const crypto = require('crypto');\n      accessKey = crypto.createHmac('sha256', secretKey).update(resolvedEmail || phone).digest('hex').slice(0, 16);\n    } catch (e) {\n      let h = 0;\n      const s = (resolvedEmail || phone) + ':' + secretKey;\n      for (let i = 0; i < s.length; i++) {\n        h = ((h << 5) - h) + s.charCodeAt(i);\n        h |= 0;\n      }\n      accessKey = Math.abs(h).toString(16).padEnd(12, '0') + 'aif';\n    }\n    portalUrl = `https://aifworkshop.prateekmayani.com/portal?phone=${phone}&email=${encodeURIComponent(resolvedEmail)}&key=${accessKey}`;\n  }\n\n  studentEmailSubject = isToken\n    ? '🔒 Your Course Seat is Reserved (Token Received) - AI Influencer Mastery'\n    : '🎉 Your Course Access is Ready: Welcome to AI Influencer Mastery!';\n\n  const fullAccessHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${studentName},</p>\n\n<p>Congratulations and welcome to the <strong>AI Influencer Mastery Program</strong>! 🚀</p>\n\n<p>Your course enrollment has been successfully confirmed. You now have lifetime access to the complete video curriculum, instant workflows, prompt libraries, and monetization resources.</p>\n\n<p><strong>Your 1-Click Secured Access Link:</strong><br>\nClick below to instantly unlock your private student portal (authorized strictly for your 1 personal device):</p>\n\n<p style=\"text-align: center; margin: 24px 0;\">\n  <a href=\"${portalUrl}\" style=\"background: #0066cc; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block; font-size: 16px;\">\n    👉 Click Here to Unlock Course Portal &amp; Bonus Vault\n  </a>\n</p>\n\n<p><strong>What is Unlocked Inside Your Portal:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>10 Recorded Video Lessons:</strong> Complete step-by-step course curriculum streamed in high definition.</li>\n  <li><strong>🎁 Bonus 1: Kruti Sharma - 300 Hot + Bold Photorealistic AI Image Prompts (PDF):</strong> 300 categorized prompt recipes for photorealistic AI influencers.</li>\n  <li><strong>🎁 Bonus 2: AI Influencer Page References (PDF):</strong> Curated reference creator pages for research, positioning, and monetization.</li>\n  <li><strong>🎁 Bonus 3: 8 Full Character Consistency Prompts (PDF):</strong> Multi-angle master consistency formulas across 8 poses.</li>\n</ul>\n\n<p><strong>Enrollment &amp; Security Summary:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Registered Student:</strong> ${studentName}</li>\n  <li><strong>Mobile Number:</strong> +91 ${phone}</li>\n  <li><strong>Registered Email:</strong> ${resolvedEmail}</li>\n  <li><strong>Access Key:</strong> <code style=\"font-family: monospace; background: #eee; padding: 2px 6px; border-radius: 4px;\">${accessKey}</code></li>\n  <li><strong>Email Source:</strong> ${emailSource === 'WORKSHOP_SHEET' ? 'Verified from Workshop Registration' : 'Payment Information'}</li>\n</ul>\n\n<p><em>Security Notice: Your course access is cryptographically bound to your mobile number and locked to your 1 registered personal device. To protect against link piracy, access on a second device is blocked.</em></p>\n\n<p>If you encounter any questions while building your AI creator, simply reply directly to this email.</p>\n\n<p>Excited to see what you create!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Mastery</p>\n</div>`;\n\n  const tokenHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${studentName},</p>\n\n<p>Your seat reservation token of <strong>₹999</strong> for the <strong>AI Influencer Mastery Program</strong> has been successfully received! 🔒</p>\n\n<p>Your special webinar discount price of <strong>₹2,999</strong> (Save ₹7,000) is now officially locked in your name.</p>\n\n<p><strong>⚠️ Important Notice Regarding Course Access:</strong><br>\nPlease note that full access to the video modules, secret prompt vaults, and student portal will be unlocked immediately once your remaining balance of <strong>₹2,000</strong> is completed.</p>\n\n<p><strong>Your Token Payment Summary:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Registered Student:</strong> ${studentName}</li>\n  <li><strong>Mobile Number:</strong> +91 ${phone}</li>\n  <li><strong>Email:</strong> ${resolvedEmail}</li>\n  <li><strong>Token Amount Paid:</strong> ₹999</li>\n  <li><strong>Remaining Balance:</strong> ₹2,000</li>\n  <li><strong>Access Status:</strong> Locked (Pending Full Payment)</li>\n</ul>\n\n<p><strong>Next Step to Unlock Instant Course Access:</strong><br>\nTo complete your remaining payment and unlock your course portal immediately, simply reply directly to this email or message us on WhatsApp.</p>\n\n<p>We look forward to welcoming you inside the masterclass!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Mastery</p>\n</div>`;\n\n  studentEmailHtml = isToken ? tokenHtml : fullAccessHtml;\n\n} else {\n  // EMAIL IS MISSING: Student paid via QR/UPI and was not in workshop sheet\n  accessStatus = 'LOCKED - Email Collection Required';\n  portalUrl = 'LOCKED - Email Collection Required';\n  accessKey = 'PENDING';\n\n  adminEmailSubject = `🚨 ACTION REQUIRED: Course Buyer Email Pending - ${studentName} (${phone})`;\n  adminEmailHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n  <h2 style=\"color: #d9381e; margin-top: 0;\">⚠️ Action Required: Course Buyer Email Collection Pending</h2>\n  <p>A course payment was received, but the student's registered email address <strong>could not be found in the workshop lead sheet</strong> (Sheet1), and Razorpay did not capture an email address (e.g. UPI QR payment).</p>\n  \n  <div style=\"background: #fdf2f2; border: 1px solid #f8b4b4; border-radius: 8px; padding: 16px; margin: 16px 0;\">\n    <table style=\"width: 100%; border-collapse: collapse;\">\n      <tr><td style=\"padding: 6px 0; font-weight: bold; width: 140px;\">Student Name:</td><td>${studentName}</td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Mobile Number:</td><td><strong>+91 ${phone}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Amount Paid:</td><td><strong style=\"color: #0f8b44;\">${amountFormatted}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Razorpay Payment ID:</td><td><code>${paymentId}</code></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Date &amp; Time:</td><td>${regDate} at ${regTime}</td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Razorpay Email:</td><td><code>${payment.incoming_email || 'None (void@razorpay.com)'}</code></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Course Access:</td><td><strong style=\"color: #d9381e;\">LOCKED (Waiting for Email)</strong></td></tr>\n    </table>\n  </div>\n\n  <p><strong>Action for Prateek / Admin:</strong></p>\n  <p>Click below to open a direct WhatsApp chat with the student and request their email address:</p>\n\n  <p style=\"text-align: center; margin: 24px 0;\">\n    <a href=\"https://wa.me/91${phone}?text=Hi%20${encodeURIComponent(studentName)},%20thank%20you%20for%20enrolling%20in%20AI%20Influencer%20Mastery!%20Please%20reply%20with%20your%20registered%20email%20address%20so%20we%20can%20grant%20your%20portal%20access.\" \n       style=\"background: #25D366; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block;\">\n      👉 WhatsApp Student (+91 ${phone})\n    </a>\n  </p>\n\n  <p>Once you collect their email, simply update their email in the <strong>Course Buyers</strong> sheet tab, and their course access link will be active.</p>\n</div>`;\n}\n\nreturn [{\n  json: {\n    email_found: emailFound,\n    email_source: emailSource,\n    student_name: studentName,\n    student_phone: phone,\n    student_email: resolvedEmail || 'PENDING_COLLECTION',\n    student_email_subject: studentEmailSubject,\n    student_email_html: studentEmailHtml,\n    admin_email: 'prateekmayanii@gmail.com',\n    admin_email_subject: adminEmailSubject,\n    admin_email_html: adminEmailHtml,\n    Date: regDate,\n    Time: regTime,\n    Name: studentName,\n    Number: phone,\n    Email: resolvedEmail || 'PENDING_COLLECTION',\n    Amount: amountFormatted,\n    'Payment ID': paymentId,\n    'Access Status': accessStatus,\n    'Login URL': portalUrl\n  }\n}];"
-      },
-      "id": "match-resolve-node",
+      "id": "a4e79f5d-fdf5-4aa6-944a-5efd36e1b5b9",
       "name": "Match Phone & Resolve Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        760,
-        300
-      ]
+        -464,
+        96
+      ],
+      "parameters": {
+        "jsCode": "const payment = $('Filter & Parse Course Payment').first().json;\nconst attendees = $input.all().map(i => i.json);\n\nconst phoneToFind = payment.phone; // 10 digits\nlet matchedAttendee = null;\n\nif (phoneToFind && phoneToFind.length === 10) {\n  matchedAttendee = attendees.find(r => {\n    const rPhone = String(r.Number || r.Phone || '').replace(/\\D/g, '').slice(-10);\n    return rPhone === phoneToFind;\n  });\n}\n\nlet resolvedEmail = '';\nlet emailSource = '';\n\n// Step 1: Check workshop registration Sheet1 for original email\nif (matchedAttendee && matchedAttendee.Email) {\n  const em = String(matchedAttendee.Email).trim().toLowerCase();\n  if (em.includes('@') && !em.endsWith('@razorpay.com') && !em.includes('void')) {\n    resolvedEmail = em;\n    emailSource = 'WORKSHOP_SHEET';\n  }\n}\n\n// Step 2: Fallback to incoming email from payment if not void@razorpay.com\nif (!resolvedEmail && payment.incoming_email) {\n  const em = String(payment.incoming_email).trim().toLowerCase();\n  if (em.includes('@') && !em.endsWith('@razorpay.com') && !em.includes('void')) {\n    resolvedEmail = em;\n    emailSource = 'PAYMENT_PAYLOAD';\n  }\n}\n\nconst emailFound = Boolean(resolvedEmail);\nconst studentName = matchedAttendee?.Name || payment.name || (resolvedEmail ? resolvedEmail.split('@')[0].toUpperCase() : 'Student');\nconst phone = payment.phone;\nconst amountFormatted = payment.amount_formatted;\nconst isToken = payment.is_token;\nconst paymentId = payment.payment_id;\nconst regDate = payment.date;\nconst regTime = payment.time;\n\nlet portalUrl = '';\nlet accessKey = '';\nlet accessStatus = '';\nlet studentEmailSubject = '';\nlet studentEmailHtml = '';\n\nlet adminEmailSubject = '';\nlet adminEmailHtml = '';\n\nif (emailFound) {\n  // Authorize buyer for device lock\n  try {\n    const staticData = $getWorkflowStaticData('global');\n    staticData.authorizedBuyers = staticData.authorizedBuyers || [];\n    if (phone && !staticData.authorizedBuyers.includes(phone)) {\n      staticData.authorizedBuyers.push(phone);\n    }\n    if (resolvedEmail && !staticData.authorizedBuyers.includes(resolvedEmail)) {\n      staticData.authorizedBuyers.push(resolvedEmail);\n    }\n  } catch (e) {}\n\n  accessStatus = isToken\n    ? 'LOCKED - Token Paid (Balance ₹1,500 Pending)'\n    : 'Active (Full Access)';\n\n  const secretKey = 'rzp_live_ThPkZr13H5M66E_aif_mastery_secret_2026';\n  accessKey = 'LOCKED_PENDING_FULL_PAYMENT';\n  portalUrl = 'LOCKED (Complete remaining ₹1,500 to unlock)';\n\n  if (!isToken) {\n    try {\n      const crypto = require('crypto');\n      accessKey = crypto.createHmac('sha256', secretKey).update(resolvedEmail || phone).digest('hex').slice(0, 16);\n    } catch (e) {\n      let h = 0;\n      const s = (resolvedEmail || phone) + ':' + secretKey;\n      for (let i = 0; i < s.length; i++) {\n        h = ((h << 5) - h) + s.charCodeAt(i);\n        h |= 0;\n      }\n      accessKey = Math.abs(h).toString(16).padEnd(12, '0') + 'aif';\n    }\n    portalUrl = `https://live.prateekmayani.com/portal?phone=${phone}&email=${encodeURIComponent(resolvedEmail)}&key=${accessKey}`;\n  }\n\n  studentEmailSubject = isToken\n    ? '🔒 Your Course Seat is Reserved (Token Received) - AI Influencer Mastery'\n    : '🎉 Your Course Access is Ready: Welcome to AI Influencer Mastery!';\n\n  const fullAccessHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${studentName},</p>\n\n<p>Congratulations and welcome to the <strong>AI Influencer Mastery Program</strong>! 🚀</p>\n\n<p>Your course enrollment has been successfully confirmed. You now have lifetime access to the complete video curriculum, instant workflows, prompt libraries, and monetization resources.</p>\n\n<p><strong>Your 1-Click Secured Access Link:</strong><br>\nClick below to instantly unlock your private student portal (authorized strictly for your 1 personal device):</p>\n\n<p style=\"margin: 16px 0;\">\n  👉 <a href=\"${portalUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold; font-size: 15px;\">${portalUrl}</a>\n</p>\n\n<p><strong>What is Unlocked Inside Your Portal:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>10 Recorded Video Lessons:</strong> Complete step-by-step course curriculum streamed in high definition.</li>\n  <li><strong>🎁 Bonus 1: Kruti Sharma - 300 Hot + Bold Photorealistic AI Image Prompts (PDF):</strong> 300 categorized prompt recipes for photorealistic AI influencers.</li>\n  <li><strong>🎁 Bonus 2: AI Influencer Page References (PDF):</strong> Curated reference creator pages for research, positioning, and monetization.</li>\n  <li><strong>🎁 Bonus 3: 8 Full Character Consistency Prompts (PDF):</strong> Multi-angle master consistency formulas across 8 poses.</li>\n</ul>\n\n<p><strong>Enrollment &amp; Security Summary:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Registered Student:</strong> ${studentName}</li>\n  <li><strong>Mobile Number:</strong> +91 ${phone}</li>\n  <li><strong>Registered Email:</strong> ${resolvedEmail}</li>\n  <li><strong>Access Key:</strong> <code style=\"font-family: monospace; background: #eee; padding: 2px 6px; border-radius: 4px;\">${accessKey}</code></li>\n  <li><strong>Email Source:</strong> ${emailSource === 'WORKSHOP_SHEET' ? 'Verified from Workshop Registration' : 'Payment Information'}</li>\n</ul>\n\n<p><em>Security Notice: Your course access is cryptographically bound to your mobile number and locked to your 1 registered personal device. To protect against link piracy, access on a second device is blocked.</em></p>\n\n<p>If you encounter any questions while building your AI creator, simply reply directly to this email.</p>\n\n<p>Excited to see what you create!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Mastery</p>\n</div>`;\n\n  const tokenHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${studentName},</p>\n\n<p>Your seat reservation token of <strong>₹999</strong> for the <strong>AI Influencer Mastery Program</strong> has been successfully received! 🔒</p>\n\n<p>Your special webinar discount price of <strong>₹2,499</strong> (Save ₹7,000) is now officially locked in your name.</p>\n\n<p><strong>⚠️ Important Notice Regarding Course Access:</strong><br>\nPlease note that full access to the video modules, secret prompt vaults, and student portal will be unlocked immediately once your remaining balance of <strong>₹1,500</strong> is completed.</p>\n\n<p><strong>Your Token Payment Summary:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Registered Student:</strong> ${studentName}</li>\n  <li><strong>Mobile Number:</strong> +91 ${phone}</li>\n  <li><strong>Email:</strong> ${resolvedEmail}</li>\n  <li><strong>Token Amount Paid:</strong> ₹999</li>\n  <li><strong>Remaining Balance:</strong> ₹1,500</li>\n  <li><strong>Access Status:</strong> Locked (Pending Full Payment)</li>\n</ul>\n\n<p><strong>Next Step to Unlock Instant Course Access:</strong><br>\nTo complete your remaining payment and unlock your course portal immediately, simply reply directly to this email or message us on WhatsApp.</p>\n\n<p>We look forward to welcoming you inside the masterclass!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Mastery</p>\n</div>`;\n\n  studentEmailHtml = isToken ? tokenHtml : fullAccessHtml;\n\n} else {\n  // EMAIL IS MISSING: Student paid via QR/UPI and was not in workshop sheet\n  accessStatus = 'LOCKED - Email Collection Required';\n  portalUrl = 'LOCKED - Email Collection Required';\n  accessKey = 'PENDING';\n\n  adminEmailSubject = `🚨 Email Nahi Mila: Course Enrollment for +91 ${phone} (${studentName})`;\n  adminEmailHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n  <h2 style=\"color: #d9381e; margin-top: 0;\">⚠️ Action Required: Course Buyer Ka Email Nahi Mila!</h2>\n  <p>Ek naya course enrollment payment receive hua hai, lekin student ka email address <strong>workshop lead sheet (Sheet1) mein nahi mila</strong> aur payment mein bhi email capture nahi hua.</p>\n  \n  <div style=\"background: #fdf2f2; border: 1.5px solid #f8b4b4; border-radius: 8px; padding: 16px; margin: 16px 0;\">\n    <table style=\"width: 100%; border-collapse: collapse; font-size: 14px;\">\n      <tr><td style=\"padding: 6px 0; font-weight: bold; width: 150px; color: #555;\">Mobile Number:</td><td><strong style=\"font-size: 18px; color: #111;\">+91 ${phone}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Student Name:</td><td><strong>${studentName}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Amount Paid:</td><td><strong style=\"color: #0f8b44; font-size: 16px;\">${amountFormatted}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Razorpay Payment ID:</td><td><code>${paymentId}</code></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Date &amp; Time:</td><td>${regDate} at ${regTime}</td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Razorpay Email:</td><td><code>${payment.incoming_email || 'None / Not Captured'}</code></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Course Access:</td><td><strong style=\"color: #d9381e;\">LOCKED (Waiting for Email)</strong></td></tr>\n    </table>\n  </div>\n\n  <p><strong>Action for Admin:</strong></p>\n  <p>Kripya student se unka email address lein. Direct WhatsApp chat shuru karne ke liye niche click karein:</p>\n\n  <p style=\"text-align: center; margin: 24px 0;\">\n    <a href=\"https://wa.me/91${phone}?text=Hi%20${encodeURIComponent(studentName)},%20thank%20you%20for%20enrolling%20in%20AI%20Influencer%20Mastery!%20Please%20reply%20with%20your%20registered%20email%20address%20so%20we%20can%20grant%20your%20portal%20access.\" \n       style=\"background: #25D366; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block;\">\n      👉 WhatsApp Student (+91 ${phone})\n    </a>\n  </p>\n\n  <p>Student ka email milne ke baad Google Sheet ke <strong>Course Buyers</strong> tab mein email update kar dein, instant access active ho jayega.</p>\n</div>`;\n}\n\nreturn [{\n  json: {\n    email_found: emailFound,\n    email_source: emailSource,\n    student_name: studentName,\n    student_phone: phone,\n    student_email: resolvedEmail || 'PENDING_COLLECTION',\n    student_email_subject: studentEmailSubject,\n    student_email_html: studentEmailHtml,\n    admin_email: 'uprisestudio10@gmail.com',\n    admin_email_subject: adminEmailSubject,\n    admin_email_html: adminEmailHtml,\n    Date: regDate,\n    Time: regTime,\n    Name: studentName,\n    Number: phone,\n    Email: resolvedEmail || 'PENDING_COLLECTION',\n    Amount: amountFormatted,\n    'Payment ID': paymentId,\n    'Access Status': accessStatus,\n    'Login URL': portalUrl\n  }\n}];"
+      }
     },
     {
-      "parameters": {
-        "conditions": {
-          "boolean": [
-            {
-              "value1": "={{ $json.email_found }}",
-              "value2": true
-            }
-          ]
-        }
-      },
-      "id": "check-email-found",
+      "id": "c968945e-6b6f-473a-85c9-dabb33f73c16",
       "name": "Is Email Found?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        980,
-        300
-      ]
+        -240,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "condition-email-check",
+              "leftValue": "={{ $json.email_found }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
     },
     {
+      "id": "e39f958d-3d43-4f61-a742-0c743d1fe238",
+      "name": "Send Course Access Email to Student",
+      "webhookId": "a251aeb2-a5d7-45a0-a8e1-e12c57652710",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "continueOnFail": true,
+      "position": [
+        0,
+        0
+      ],
       "parameters": {
         "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
         "toEmail": "={{ $json.student_email }}",
@@ -108,68 +135,67 @@
         "html": "={{ $json.student_email_html }}",
         "options": {}
       },
-      "id": "send-student-access",
-      "name": "Send Course Access Email to Student",
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
-      "position": [
-        1220,
-        200
-      ],
       "credentials": {
         "smtp": {
-          "id": "RmJjbVmoKL0wS3Bl",
+          "id": "lTsd4ouJn2s2HPNT",
           "name": "SMTP account"
         }
-      },
-      "continueOnFail": true,
-      "webhookId": "d2e7f7e9-8a50-4fde-a31a-14794d94ff6b"
+      }
     },
     {
+      "id": "61117f6e-7a79-4d6f-8408-1acdc4850007",
+      "name": "Send Admin Pending Email Alert",
+      "webhookId": "aae7300a-082a-40d1-aa79-e7bcdd2cd6ee",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "continueOnFail": true,
+      "position": [
+        0,
+        224
+      ],
       "parameters": {
         "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
-        "toEmail": "prateekmayanii@gmail.com",
+        "toEmail": "uprisestudio10@gmail.com, prateekmayanii@gmail.com",
         "subject": "={{ $json.admin_email_subject }}",
         "html": "={{ $json.admin_email_html }}",
         "options": {}
       },
-      "id": "send-admin-alert",
-      "name": "Send Admin Pending Email Alert",
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
-      "position": [
-        1220,
-        420
-      ],
       "credentials": {
         "smtp": {
-          "id": "RmJjbVmoKL0wS3Bl",
+          "id": "lTsd4ouJn2s2HPNT",
           "name": "SMTP account"
         }
-      },
-      "continueOnFail": true,
-      "webhookId": "06e37000-8acc-42ca-9482-498190807e96"
+      }
     },
     {
-      "parameters": {
-        "jsCode": "const item = $input.first().json;\nreturn [{\n  json: {\n    Date: item.Date,\n    Time: item.Time,\n    Name: item.Name,\n    Number: item.Number,\n    Email: item.Email,\n    Amount: item.Amount,\n    'Payment ID': item['Payment ID'],\n    'Access Status': item['Access Status'],\n    'Login URL': item['Login URL']\n  }\n}];"
-      },
-      "id": "clean-sheet-columns",
+      "id": "349f2b66-5b3c-4389-bde1-2e85fd63b478",
       "name": "Prepare Clean Sheet Columns",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1460,
-        300
-      ]
+        240,
+        96
+      ],
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nreturn [{\n  json: {\n    Date: item.Date,\n    Time: item.Time,\n    Name: item.Name,\n    Number: item.Number,\n    Email: item.Email,\n    Amount: item.Amount,\n    'Payment ID': item['Payment ID'],\n    'Access Status': item['Access Status'],\n    'Login URL': item['Login URL']\n  }\n}];"
+      }
     },
     {
+      "id": "151a5863-eb97-41cd-9b46-4a155f1ccd67",
+      "name": "Append to Course Buyers Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "continueOnFail": true,
+      "position": [
+        448,
+        96
+      ],
       "parameters": {
         "authentication": "serviceAccount",
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+          "value": "1flbSez2txzFmW1jj7uMy7THzpJyvJtpvV3ZrASU5poc",
           "mode": "id"
         },
         "sheetName": {
@@ -183,53 +209,52 @@
         },
         "options": {}
       },
-      "id": "append-course-buyers",
-      "name": "Append to Course Buyers Sheet",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [
-        1680,
-        300
-      ],
       "credentials": {
         "googleApi": {
-          "id": "SsEE517tRUiLR8pJ",
+          "id": "u1KbRiPRv3k5LrOJ",
           "name": "Google Sheets account"
         }
-      },
-      "continueOnFail": true
+      }
     },
     {
+      "id": "66b2ccdc-e1b5-40c5-a99d-ae4fa700c52a",
+      "name": "Device Auth Webhook",
+      "webhookId": "course-device-auth",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        400
+      ],
       "parameters": {
         "httpMethod": "POST",
         "path": "course-device-auth",
         "responseMode": "responseNode",
         "options": {}
-      },
-      "id": "course-device-webhook",
-      "name": "Device Auth Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        100,
-        600
-      ],
-      "webhookId": "course-device-auth"
+      }
     },
     {
-      "parameters": {
-        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst rawId = (body.email || body.phone || body.identifier || '').trim().toLowerCase();\nconst cleanPhone = rawId.replace(/\\D/g, '').slice(-10);\nconst deviceId = (body.deviceId || '').trim();\n\nconst staticData = $getWorkflowStaticData('global');\nstaticData.authorizedBuyers = staticData.authorizedBuyers || [];\nstaticData.devicesByStudent = staticData.devicesByStudent || {};\n\n// Allow device lock reset\nif (body.action === 'reset_device') {\n  const target = (body.targetEmail || body.targetPhone || body.email || '').trim().toLowerCase();\n  const cleanTarget = target.replace(/\\D/g, '').slice(-10);\n  delete staticData.devicesByStudent[target];\n  if (cleanTarget.length === 10) delete staticData.devicesByStudent[cleanTarget];\n  return [{ json: { allowed: true, reset: true, message: `Device lock successfully cleared for ${target}` } }];\n}\n\nif (!rawId || !deviceId) {\n  return [{ json: { allowed: false, message: 'Missing login credentials or device identifier.' } }];\n}\n\n// Master admins exempt from limits\nif (rawId === 'prateekmayanii@gmail.com' || cleanPhone === '9999900000' || rawId.includes('prateek')) {\n  return [{ json: { allowed: true, message: 'Admin access authorized.' } }];\n}\n\n// Check authorization\nconst isAuthorized = staticData.authorizedBuyers.includes(rawId) || \n  (cleanPhone.length === 10 && staticData.authorizedBuyers.includes(cleanPhone));\n\nif (!isAuthorized) {\n  return [{ \n    json: { \n      allowed: false, \n      message: 'No active course enrollment found for this email or phone. Please verify your purchase or contact support.' \n    } \n  }];\n}\n\n// Device count check (Max 2 devices)\nconst studentKey = (cleanPhone.length === 10) ? cleanPhone : rawId;\nstaticData.devicesByStudent[studentKey] = staticData.devicesByStudent[studentKey] || [];\nconst registeredDevices = staticData.devicesByStudent[studentKey];\n\nif (registeredDevices.includes(deviceId)) {\n  return [{ json: { allowed: true, message: 'Known device authenticated.' } }];\n}\n\nif (registeredDevices.length < 2) {\n  registeredDevices.push(deviceId);\n  return [{ json: { allowed: true, message: `New device successfully registered (Device ${registeredDevices.length} of 2).` } }];\n}\n\nreturn [{ \n  json: { \n    allowed: false, \n    message: 'Device limit reached (Maximum 2 devices allowed). To use a new device, please contact support to reset your session.' \n  } \n}];"
-      },
-      "id": "course-device-check",
+      "id": "8c7b4208-aa99-45c7-bd15-4663e4578ccb",
       "name": "Check and Register Device",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        340,
-        600
-      ]
+        -880,
+        400
+      ],
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst rawId = (body.email || body.phone || body.identifier || '').trim().toLowerCase();\nconst cleanPhone = rawId.replace(/\\D/g, '').slice(-10);\nconst deviceId = (body.deviceId || '').trim();\n\nconst staticData = $getWorkflowStaticData('global');\nstaticData.authorizedBuyers = staticData.authorizedBuyers || [];\nstaticData.devicesByStudent = staticData.devicesByStudent || {};\n\n// Allow device lock reset\nif (body.action === 'reset_device') {\n  const target = (body.targetEmail || body.targetPhone || body.email || '').trim().toLowerCase();\n  const cleanTarget = target.replace(/\\D/g, '').slice(-10);\n  delete staticData.devicesByStudent[target];\n  if (cleanTarget.length === 10) delete staticData.devicesByStudent[cleanTarget];\n  return [{ json: { allowed: true, reset: true, message: `Device lock successfully cleared for ${target}` } }];\n}\n\nif (!rawId || !deviceId) {\n  return [{ json: { allowed: false, message: 'Missing login credentials or device identifier.' } }];\n}\n\n// Master admins exempt from limits\nif (rawId === 'prateekmayanii@gmail.com' || cleanPhone === '9999900000' || rawId.includes('prateek')) {\n  return [{ json: { allowed: true, message: 'Admin access authorized.' } }];\n}\n\n// Check authorization\nconst isAuthorized = staticData.authorizedBuyers.includes(rawId) || \n  (cleanPhone.length === 10 && staticData.authorizedBuyers.includes(cleanPhone));\n\nif (!isAuthorized) {\n  return [{ \n    json: { \n      allowed: false, \n      message: 'No active course enrollment found for this email or phone. Please verify your purchase or contact support.' \n    } \n  }];\n}\n\n// Device count check (Max 2 devices)\nconst studentKey = (cleanPhone.length === 10) ? cleanPhone : rawId;\nstaticData.devicesByStudent[studentKey] = staticData.devicesByStudent[studentKey] || [];\nconst registeredDevices = staticData.devicesByStudent[studentKey];\n\nif (registeredDevices.includes(deviceId)) {\n  return [{ json: { allowed: true, message: 'Known device authenticated.' } }];\n}\n\nif (registeredDevices.length < 2) {\n  registeredDevices.push(deviceId);\n  return [{ json: { allowed: true, message: `New device successfully registered (Device ${registeredDevices.length} of 2).` } }];\n}\n\nreturn [{ \n  json: { \n    allowed: false, \n    message: 'Device limit reached (Maximum 2 devices allowed). To use a new device, please contact support to reset your session.' \n  } \n}];"
+      }
     },
     {
+      "id": "3f4e2d4d-51f3-4091-ba55-821f40e925f0",
+      "name": "Respond to Device Auth",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -640,
+        400
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ JSON.stringify($json) }}",
@@ -247,15 +272,7 @@
             ]
           }
         }
-      },
-      "id": "course-device-respond",
-      "name": "Respond to Device Auth",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
-      "position": [
-        580,
-        600
-      ]
+      }
     }
   ],
   "connections": {
@@ -365,139 +382,94 @@
       ]
     }
   },
+  "nodeGroups": [],
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate"
   },
   "staticData": {
     "global": {
+      "authorizedBuyers": [],
+      "devicesByStudent": {},
       "processedIds": [
-        "pay_test_course_1790679674630",
-        "pay_ThpcTqileNHPag",
-        "pay_ThqEm7XbMWj7F1",
-        "pay_test_course_buyers_1790682793973",
-        "pay_test_course_tab_check_1790683423120",
-        "pay_ThqaNcwOn7XjC9",
-        "pay_testCleanVerification999",
-        "pay_testCleanCheck999",
-        "pay_testCleanSuccess999",
-        "pay_Thqwxi3UHm6tun",
-        "pay_testCourse2499Passed",
-        "pay_test3000Check",
-        "pay_test5000Check",
-        "pay_t2499_nodesc",
-        "manual_bank_2499",
-        "pay_test_preview_1790854637124",
-        "pay_test_clean_1790854855414",
-        "pay_test_token_999_check",
-        "pay_test_token_live_verify_001",
-        "pay_test_full_course_verify_002",
-        "pay_test_razorpay_me_2999_check",
-        "pay_TjT4SNmA0GivRb",
-        "pay_TjT4es5O1PXM1q",
-        "pay_TjT86OyrG1GdRK",
-        "pay_TjT8kDHQs16NRH",
-        "pay_TjTQpSAMCg8Tzr",
-        "pay_TjUCjnV3OPkN8Y"
-      ],
-      "devicesByEmail": {
-        "device.test.user@gmail.com": [
-          "dev_laptop_1",
-          "dev_mobile_2"
-        ],
-        "mshivam79@gmail.com": [
-          "dev_360x707_uacytd06"
-        ]
-      },
-      "authorizedBuyers": [
-        "8770500986",
-        "uprisestudio10@gmail.com",
-        "9999888877",
-        "tokentest@prateekmayani.com",
-        "9822233344",
-        "deepak.full@gmail.com",
-        "9876543210",
-        "priya.verma@gmail.com",
-        "9154607968",
-        "9426395096",
-        "9730609119",
-        "7019326118",
-        "7600714608",
-        "kingabhijoshi.123@gmail.com"
-      ],
-      "devicesByStudent": {}
+        "pay_full_1791896205216",
+        "pay_token_1791896206945",
+        "pay_unk_1791896208560",
+        "pay_unk_1791896403209",
+        "pay_test_course_1792156630523"
+      ]
     }
   },
+  "pinData": {},
   "meta": null,
-  "nodeGroups": [],
-  "pinData": null,
-  "versionId": "3b51c786-2e94-4747-a3fe-187d2aac64d2",
-  "activeVersionId": "3b51c786-2e94-4747-a3fe-187d2aac64d2",
-  "versionCounter": 25,
-  "triggerCount": 2,
-  "sourceWorkflowId": null,
+  "tags": [],
   "shared": [
     {
-      "updatedAt": "2026-09-29T10:54:54.809Z",
-      "createdAt": "2026-09-29T10:54:54.809Z",
       "role": "workflow:owner",
-      "workflowId": "Z034qypVNed6oJcg",
-      "projectId": "j1WUDbxvXeD5ceGA",
+      "workflowId": "TVNUUwtNq9CGsSW6",
+      "projectId": "ACkZEiKXYVX4xYK1",
       "project": {
-        "updatedAt": "2026-07-12T20:52:16.859Z",
-        "createdAt": "2026-07-12T19:50:55.652Z",
-        "id": "j1WUDbxvXeD5ceGA",
-        "name": "Preetam Soni <pritamsoni3317@gmail.com>",
+        "id": "ACkZEiKXYVX4xYK1",
+        "name": "Prateek Mayani <prateekmayanii@gmail.com>",
         "type": "personal",
         "icon": null,
         "description": null,
         "customTelemetryTags": [],
-        "creatorId": "cb834f62-f70a-4201-b686-b92c03452f25"
-      }
+        "creatorId": "79fc51e2-f17e-4509-a031-571c5001c617",
+        "createdAt": "2026-10-07T04:32:21.004Z",
+        "updatedAt": "2026-10-07T16:08:22.665Z"
+      },
+      "createdAt": "2026-10-07T16:23:49.924Z",
+      "updatedAt": "2026-10-07T16:23:49.924Z"
     }
   ],
-  "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-10-05T15:01:28.046Z",
-    "createdAt": "2026-10-05T15:01:28.046Z",
-    "versionId": "3b51c786-2e94-4747-a3fe-187d2aac64d2",
-    "workflowId": "Z034qypVNed6oJcg",
+    "versionId": "32a54cba-0faf-47aa-8afb-4f56ec4af566",
+    "workflowId": "TVNUUwtNq9CGsSW6",
     "nodes": [
       {
+        "id": "723330a2-9d5a-49df-b3f5-45aa724a47d1",
+        "name": "Course Webhook Trigger",
+        "webhookId": "course-enrollment",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -1120,
+          96
+        ],
         "parameters": {
           "httpMethod": "POST",
           "path": "course-enrollment",
           "options": {}
-        },
-        "id": "course-webhook",
-        "name": "Course Webhook Trigger",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 2,
-        "position": [
-          100,
-          300
-        ],
-        "webhookId": "course-enrollment"
+        }
       },
       {
-        "parameters": {
-          "jsCode": "const raw = $input.first().json.body || $input.first().json;\n\nlet item = raw;\n\n// Event safety check: Only process successful captured payments\nif (raw.event && raw.event !== 'payment.captured' && raw.event !== 'order.paid') {\n  return [];\n}\n\n// Handle direct Razorpay Webhook format if sent from Razorpay Dashboard\nif ((raw.event === 'payment.captured' || raw.event === 'order.paid') && raw.payload) {\n  const p = raw.payload.payment ? raw.payload.payment.entity : (raw.payload.order ? raw.payload.order.entity : {});\n  const notes = p.notes || {};\n  const cleanPhone = (notes.phone || notes.contact || p.contact || '').replace(/\\D/g, '').slice(-10);\n  const amtNum = p.amount ? Math.round(p.amount / 100) : 2999;\n  const cleanEmail = (notes.email || p.email || '').trim().toLowerCase();\n  const payerName = notes.name || notes.buyer_name || notes.Name || notes['Full Name'] || notes.payer_name || notes.customer_name || p.name || '';\n  const commentName = (notes.comment && typeof notes.comment === 'string' && notes.comment.length > 2 && !notes.comment.includes('@') && isNaN(Number(notes.comment))) ? notes.comment.trim() : '';\n  const finalName = payerName || commentName || 'Student';\n\n  item = {\n    name: finalName,\n    phone: cleanPhone,\n    incoming_email: cleanEmail,\n    amount: amtNum,\n    description: p.description || '',\n    razorpay_payment_id: p.id || '',\n    razorpay_order_id: p.order_id || '',\n  };\n}\n\n// Pure Amount Filter: Course Purchases only (>= ₹900)\n// Filter out workshop leads (< ₹900)\nconst parsedAmount = typeof item.amount === 'number' \n  ? item.amount \n  : parseInt(String(item.amount || '').replace(/\\D/g, ''), 10) || 0;\n\nif (parsedAmount < 900) {\n  return [];\n}\n\nconst isToken = parsedAmount < 2000;\nconst phone = (item.phone || item.number || '').replace(/\\D/g, '').slice(-10);\nconst name = (item.name || 'Student').trim();\nconst incomingEmail = (item.incoming_email || item.email || '').trim().toLowerCase();\nconst paymentId = item.razorpay_payment_id || '';\nconst orderId = item.razorpay_order_id || '';\nconst amountFormatted = isToken ? '₹999 (Token)' : (parsedAmount > 0 ? ('₹' + parsedAmount.toLocaleString('en-IN')) : '₹2,999');\n\n// Deduplication safeguard\ntry {\n  const staticData = $getWorkflowStaticData('global');\n  staticData.processedIds = staticData.processedIds || [];\n  if (paymentId && staticData.processedIds.includes(paymentId)) {\n    return [];\n  }\n  if (paymentId) {\n    staticData.processedIds.push(paymentId);\n    if (staticData.processedIds.length > 200) {\n      staticData.processedIds.shift();\n    }\n  }\n} catch (e) {\n  // safe\n}\n\nconst now = new Date();\nconst regDate = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' });\nconst regTime = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });\n\nreturn [{\n  json: {\n    name,\n    phone,\n    incoming_email: incomingEmail,\n    amount: parsedAmount,\n    amount_formatted: amountFormatted,\n    is_token: isToken,\n    payment_id: paymentId,\n    order_id: orderId,\n    date: regDate,\n    time: regTime\n  }\n}];"
-        },
-        "id": "course-parse",
+        "id": "afcc270b-db9f-4d0d-a524-32dea6dfe317",
         "name": "Filter & Parse Course Payment",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          320,
-          300
-        ]
+          -912,
+          96
+        ],
+        "parameters": {
+          "jsCode": "const raw = $input.first().json.body || $input.first().json;\n\nlet item = raw;\n\n// Event safety check: Only process successful captured payments\nif (raw.event && raw.event !== 'payment.captured' && raw.event !== 'order.paid') {\n  return [];\n}\n\n// Handle direct Razorpay Webhook format if sent from Razorpay Dashboard\nif ((raw.event === 'payment.captured' || raw.event === 'order.paid') && raw.payload) {\n  const p = raw.payload.payment ? raw.payload.payment.entity : (raw.payload.order ? raw.payload.order.entity : {});\n  const notes = p.notes || {};\n  const cleanPhone = (notes.phone || notes.contact || p.contact || '').replace(/\\D/g, '').slice(-10);\n  const amtNum = p.amount ? Math.round(p.amount / 100) : 2999;\n  const cleanEmail = (notes.email || p.email || '').trim().toLowerCase();\n  const payerName = notes.name || notes.buyer_name || notes.Name || notes['Full Name'] || notes.payer_name || notes.customer_name || p.name || '';\n  const commentName = (notes.comment && typeof notes.comment === 'string' && notes.comment.length > 2 && !notes.comment.includes('@') && isNaN(Number(notes.comment))) ? notes.comment.trim() : '';\n  const finalName = payerName || commentName || 'Student';\n\n  item = {\n    name: finalName,\n    phone: cleanPhone,\n    incoming_email: cleanEmail,\n    amount: amtNum,\n    description: p.description || '',\n    razorpay_payment_id: p.id || '',\n    razorpay_order_id: p.order_id || '',\n  };\n}\n\n// Pure Amount Filter: Course Purchases only (>= ₹900)\n// Filter out workshop leads (< ₹900)\nconst parsedAmount = typeof item.amount === 'number' \n  ? item.amount \n  : parseInt(String(item.amount || '').replace(/\\D/g, ''), 10) || 0;\n\nif (parsedAmount < 900) {\n  return [];\n}\n\nconst isToken = parsedAmount < 2400;\nconst phone = (item.phone || item.number || '').replace(/\\D/g, '').slice(-10);\nconst name = (item.name || 'Student').trim();\nconst incomingEmail = (item.incoming_email || item.email || '').trim().toLowerCase();\nconst paymentId = item.razorpay_payment_id || '';\nconst orderId = item.razorpay_order_id || '';\nconst amountFormatted = isToken ? '₹999 (Token)' : (parsedAmount > 0 ? ('₹' + parsedAmount.toLocaleString('en-IN')) : '₹2,999');\n\n// Deduplication safeguard\ntry {\n  const staticData = $getWorkflowStaticData('global');\n  staticData.processedIds = staticData.processedIds || [];\n  if (paymentId && staticData.processedIds.includes(paymentId)) {\n    return [];\n  }\n  if (paymentId) {\n    staticData.processedIds.push(paymentId);\n    if (staticData.processedIds.length > 200) {\n      staticData.processedIds.shift();\n    }\n  }\n} catch (e) {\n  // safe\n}\n\nconst now = new Date();\nconst regDate = now.toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' });\nconst regTime = now.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true });\n\nreturn [{\n  json: {\n    name,\n    phone,\n    incoming_email: incomingEmail,\n    amount: parsedAmount,\n    amount_formatted: amountFormatted,\n    is_token: isToken,\n    payment_id: paymentId,\n    order_id: orderId,\n    date: regDate,\n    time: regTime\n  }\n}];"
+        }
       },
       {
+        "id": "bd39393a-e309-423f-9fd4-2ab70c304eb3",
+        "name": "Fetch Workshop Attendees from Sheet1",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          -688,
+          96
+        ],
         "parameters": {
           "authentication": "serviceAccount",
-          "operation": "read",
           "documentId": {
             "__rl": true,
-            "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+            "value": "1flbSez2txzFmW1jj7uMy7THzpJyvJtpvV3ZrASU5poc",
             "mode": "id"
           },
           "sheetName": {
@@ -507,55 +479,70 @@
           },
           "options": {}
         },
-        "id": "fetch-workshop-attendees",
-        "name": "Fetch Workshop Attendees from Sheet1",
-        "type": "n8n-nodes-base.googleSheets",
-        "typeVersion": 4.5,
-        "position": [
-          540,
-          300
-        ],
         "credentials": {
           "googleApi": {
-            "id": "SsEE517tRUiLR8pJ",
+            "id": "u1KbRiPRv3k5LrOJ",
             "name": "Google Sheets account"
           }
         }
       },
       {
-        "parameters": {
-          "jsCode": "const payment = $('Filter & Parse Course Payment').first().json;\nconst attendees = $input.all().map(i => i.json);\n\nconst phoneToFind = payment.phone; // 10 digits\nlet matchedAttendee = null;\n\nif (phoneToFind && phoneToFind.length === 10) {\n  matchedAttendee = attendees.find(r => {\n    const rPhone = String(r.Number || r.Phone || '').replace(/\\D/g, '').slice(-10);\n    return rPhone === phoneToFind;\n  });\n}\n\nlet resolvedEmail = '';\nlet emailSource = '';\n\n// Step 1: Check workshop registration Sheet1 for original email\nif (matchedAttendee && matchedAttendee.Email) {\n  const em = String(matchedAttendee.Email).trim().toLowerCase();\n  if (em.includes('@') && !em.endsWith('@razorpay.com') && !em.includes('void')) {\n    resolvedEmail = em;\n    emailSource = 'WORKSHOP_SHEET';\n  }\n}\n\n// Step 2: Fallback to incoming email from payment if not void@razorpay.com\nif (!resolvedEmail && payment.incoming_email) {\n  const em = String(payment.incoming_email).trim().toLowerCase();\n  if (em.includes('@') && !em.endsWith('@razorpay.com') && !em.includes('void')) {\n    resolvedEmail = em;\n    emailSource = 'PAYMENT_PAYLOAD';\n  }\n}\n\nconst emailFound = Boolean(resolvedEmail);\nconst studentName = matchedAttendee?.Name || payment.name || (resolvedEmail ? resolvedEmail.split('@')[0].toUpperCase() : 'Student');\nconst phone = payment.phone;\nconst amountFormatted = payment.amount_formatted;\nconst isToken = payment.is_token;\nconst paymentId = payment.payment_id;\nconst regDate = payment.date;\nconst regTime = payment.time;\n\nlet portalUrl = '';\nlet accessKey = '';\nlet accessStatus = '';\nlet studentEmailSubject = '';\nlet studentEmailHtml = '';\n\nlet adminEmailSubject = '';\nlet adminEmailHtml = '';\n\nif (emailFound) {\n  // Authorize buyer for device lock\n  try {\n    const staticData = $getWorkflowStaticData('global');\n    staticData.authorizedBuyers = staticData.authorizedBuyers || [];\n    if (phone && !staticData.authorizedBuyers.includes(phone)) {\n      staticData.authorizedBuyers.push(phone);\n    }\n    if (resolvedEmail && !staticData.authorizedBuyers.includes(resolvedEmail)) {\n      staticData.authorizedBuyers.push(resolvedEmail);\n    }\n  } catch (e) {}\n\n  accessStatus = isToken\n    ? 'LOCKED - Token Paid (Balance ₹2,000 Pending)'\n    : 'Active (Full Access)';\n\n  const secretKey = 'rzp_live_ThPkZr13H5M66E_aif_mastery_secret_2026';\n  accessKey = 'LOCKED_PENDING_FULL_PAYMENT';\n  portalUrl = 'LOCKED (Complete remaining ₹2,000 to unlock)';\n\n  if (!isToken) {\n    try {\n      const crypto = require('crypto');\n      accessKey = crypto.createHmac('sha256', secretKey).update(resolvedEmail || phone).digest('hex').slice(0, 16);\n    } catch (e) {\n      let h = 0;\n      const s = (resolvedEmail || phone) + ':' + secretKey;\n      for (let i = 0; i < s.length; i++) {\n        h = ((h << 5) - h) + s.charCodeAt(i);\n        h |= 0;\n      }\n      accessKey = Math.abs(h).toString(16).padEnd(12, '0') + 'aif';\n    }\n    portalUrl = `https://aifworkshop.prateekmayani.com/portal?phone=${phone}&email=${encodeURIComponent(resolvedEmail)}&key=${accessKey}`;\n  }\n\n  studentEmailSubject = isToken\n    ? '🔒 Your Course Seat is Reserved (Token Received) - AI Influencer Mastery'\n    : '🎉 Your Course Access is Ready: Welcome to AI Influencer Mastery!';\n\n  const fullAccessHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${studentName},</p>\n\n<p>Congratulations and welcome to the <strong>AI Influencer Mastery Program</strong>! 🚀</p>\n\n<p>Your course enrollment has been successfully confirmed. You now have lifetime access to the complete video curriculum, instant workflows, prompt libraries, and monetization resources.</p>\n\n<p><strong>Your 1-Click Secured Access Link:</strong><br>\nClick below to instantly unlock your private student portal (authorized strictly for your 1 personal device):</p>\n\n<p style=\"text-align: center; margin: 24px 0;\">\n  <a href=\"${portalUrl}\" style=\"background: #0066cc; color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block; font-size: 16px;\">\n    👉 Click Here to Unlock Course Portal &amp; Bonus Vault\n  </a>\n</p>\n\n<p><strong>What is Unlocked Inside Your Portal:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>10 Recorded Video Lessons:</strong> Complete step-by-step course curriculum streamed in high definition.</li>\n  <li><strong>🎁 Bonus 1: Kruti Sharma - 300 Hot + Bold Photorealistic AI Image Prompts (PDF):</strong> 300 categorized prompt recipes for photorealistic AI influencers.</li>\n  <li><strong>🎁 Bonus 2: AI Influencer Page References (PDF):</strong> Curated reference creator pages for research, positioning, and monetization.</li>\n  <li><strong>🎁 Bonus 3: 8 Full Character Consistency Prompts (PDF):</strong> Multi-angle master consistency formulas across 8 poses.</li>\n</ul>\n\n<p><strong>Enrollment &amp; Security Summary:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Registered Student:</strong> ${studentName}</li>\n  <li><strong>Mobile Number:</strong> +91 ${phone}</li>\n  <li><strong>Registered Email:</strong> ${resolvedEmail}</li>\n  <li><strong>Access Key:</strong> <code style=\"font-family: monospace; background: #eee; padding: 2px 6px; border-radius: 4px;\">${accessKey}</code></li>\n  <li><strong>Email Source:</strong> ${emailSource === 'WORKSHOP_SHEET' ? 'Verified from Workshop Registration' : 'Payment Information'}</li>\n</ul>\n\n<p><em>Security Notice: Your course access is cryptographically bound to your mobile number and locked to your 1 registered personal device. To protect against link piracy, access on a second device is blocked.</em></p>\n\n<p>If you encounter any questions while building your AI creator, simply reply directly to this email.</p>\n\n<p>Excited to see what you create!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Mastery</p>\n</div>`;\n\n  const tokenHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${studentName},</p>\n\n<p>Your seat reservation token of <strong>₹999</strong> for the <strong>AI Influencer Mastery Program</strong> has been successfully received! 🔒</p>\n\n<p>Your special webinar discount price of <strong>₹2,999</strong> (Save ₹7,000) is now officially locked in your name.</p>\n\n<p><strong>⚠️ Important Notice Regarding Course Access:</strong><br>\nPlease note that full access to the video modules, secret prompt vaults, and student portal will be unlocked immediately once your remaining balance of <strong>₹2,000</strong> is completed.</p>\n\n<p><strong>Your Token Payment Summary:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Registered Student:</strong> ${studentName}</li>\n  <li><strong>Mobile Number:</strong> +91 ${phone}</li>\n  <li><strong>Email:</strong> ${resolvedEmail}</li>\n  <li><strong>Token Amount Paid:</strong> ₹999</li>\n  <li><strong>Remaining Balance:</strong> ₹2,000</li>\n  <li><strong>Access Status:</strong> Locked (Pending Full Payment)</li>\n</ul>\n\n<p><strong>Next Step to Unlock Instant Course Access:</strong><br>\nTo complete your remaining payment and unlock your course portal immediately, simply reply directly to this email or message us on WhatsApp.</p>\n\n<p>We look forward to welcoming you inside the masterclass!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Mastery</p>\n</div>`;\n\n  studentEmailHtml = isToken ? tokenHtml : fullAccessHtml;\n\n} else {\n  // EMAIL IS MISSING: Student paid via QR/UPI and was not in workshop sheet\n  accessStatus = 'LOCKED - Email Collection Required';\n  portalUrl = 'LOCKED - Email Collection Required';\n  accessKey = 'PENDING';\n\n  adminEmailSubject = `🚨 ACTION REQUIRED: Course Buyer Email Pending - ${studentName} (${phone})`;\n  adminEmailHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n  <h2 style=\"color: #d9381e; margin-top: 0;\">⚠️ Action Required: Course Buyer Email Collection Pending</h2>\n  <p>A course payment was received, but the student's registered email address <strong>could not be found in the workshop lead sheet</strong> (Sheet1), and Razorpay did not capture an email address (e.g. UPI QR payment).</p>\n  \n  <div style=\"background: #fdf2f2; border: 1px solid #f8b4b4; border-radius: 8px; padding: 16px; margin: 16px 0;\">\n    <table style=\"width: 100%; border-collapse: collapse;\">\n      <tr><td style=\"padding: 6px 0; font-weight: bold; width: 140px;\">Student Name:</td><td>${studentName}</td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Mobile Number:</td><td><strong>+91 ${phone}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Amount Paid:</td><td><strong style=\"color: #0f8b44;\">${amountFormatted}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Razorpay Payment ID:</td><td><code>${paymentId}</code></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Date &amp; Time:</td><td>${regDate} at ${regTime}</td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Razorpay Email:</td><td><code>${payment.incoming_email || 'None (void@razorpay.com)'}</code></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold;\">Course Access:</td><td><strong style=\"color: #d9381e;\">LOCKED (Waiting for Email)</strong></td></tr>\n    </table>\n  </div>\n\n  <p><strong>Action for Prateek / Admin:</strong></p>\n  <p>Click below to open a direct WhatsApp chat with the student and request their email address:</p>\n\n  <p style=\"text-align: center; margin: 24px 0;\">\n    <a href=\"https://wa.me/91${phone}?text=Hi%20${encodeURIComponent(studentName)},%20thank%20you%20for%20enrolling%20in%20AI%20Influencer%20Mastery!%20Please%20reply%20with%20your%20registered%20email%20address%20so%20we%20can%20grant%20your%20portal%20access.\" \n       style=\"background: #25D366; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block;\">\n      👉 WhatsApp Student (+91 ${phone})\n    </a>\n  </p>\n\n  <p>Once you collect their email, simply update their email in the <strong>Course Buyers</strong> sheet tab, and their course access link will be active.</p>\n</div>`;\n}\n\nreturn [{\n  json: {\n    email_found: emailFound,\n    email_source: emailSource,\n    student_name: studentName,\n    student_phone: phone,\n    student_email: resolvedEmail || 'PENDING_COLLECTION',\n    student_email_subject: studentEmailSubject,\n    student_email_html: studentEmailHtml,\n    admin_email: 'prateekmayanii@gmail.com',\n    admin_email_subject: adminEmailSubject,\n    admin_email_html: adminEmailHtml,\n    Date: regDate,\n    Time: regTime,\n    Name: studentName,\n    Number: phone,\n    Email: resolvedEmail || 'PENDING_COLLECTION',\n    Amount: amountFormatted,\n    'Payment ID': paymentId,\n    'Access Status': accessStatus,\n    'Login URL': portalUrl\n  }\n}];"
-        },
-        "id": "match-resolve-node",
+        "id": "a4e79f5d-fdf5-4aa6-944a-5efd36e1b5b9",
         "name": "Match Phone & Resolve Email",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          760,
-          300
-        ]
+          -464,
+          96
+        ],
+        "parameters": {
+          "jsCode": "const payment = $('Filter & Parse Course Payment').first().json;\nconst attendees = $input.all().map(i => i.json);\n\nconst phoneToFind = payment.phone; // 10 digits\nlet matchedAttendee = null;\n\nif (phoneToFind && phoneToFind.length === 10) {\n  matchedAttendee = attendees.find(r => {\n    const rPhone = String(r.Number || r.Phone || '').replace(/\\D/g, '').slice(-10);\n    return rPhone === phoneToFind;\n  });\n}\n\nlet resolvedEmail = '';\nlet emailSource = '';\n\n// Step 1: Check workshop registration Sheet1 for original email\nif (matchedAttendee && matchedAttendee.Email) {\n  const em = String(matchedAttendee.Email).trim().toLowerCase();\n  if (em.includes('@') && !em.endsWith('@razorpay.com') && !em.includes('void')) {\n    resolvedEmail = em;\n    emailSource = 'WORKSHOP_SHEET';\n  }\n}\n\n// Step 2: Fallback to incoming email from payment if not void@razorpay.com\nif (!resolvedEmail && payment.incoming_email) {\n  const em = String(payment.incoming_email).trim().toLowerCase();\n  if (em.includes('@') && !em.endsWith('@razorpay.com') && !em.includes('void')) {\n    resolvedEmail = em;\n    emailSource = 'PAYMENT_PAYLOAD';\n  }\n}\n\nconst emailFound = Boolean(resolvedEmail);\nconst studentName = matchedAttendee?.Name || payment.name || (resolvedEmail ? resolvedEmail.split('@')[0].toUpperCase() : 'Student');\nconst phone = payment.phone;\nconst amountFormatted = payment.amount_formatted;\nconst isToken = payment.is_token;\nconst paymentId = payment.payment_id;\nconst regDate = payment.date;\nconst regTime = payment.time;\n\nlet portalUrl = '';\nlet accessKey = '';\nlet accessStatus = '';\nlet studentEmailSubject = '';\nlet studentEmailHtml = '';\n\nlet adminEmailSubject = '';\nlet adminEmailHtml = '';\n\nif (emailFound) {\n  // Authorize buyer for device lock\n  try {\n    const staticData = $getWorkflowStaticData('global');\n    staticData.authorizedBuyers = staticData.authorizedBuyers || [];\n    if (phone && !staticData.authorizedBuyers.includes(phone)) {\n      staticData.authorizedBuyers.push(phone);\n    }\n    if (resolvedEmail && !staticData.authorizedBuyers.includes(resolvedEmail)) {\n      staticData.authorizedBuyers.push(resolvedEmail);\n    }\n  } catch (e) {}\n\n  accessStatus = isToken\n    ? 'LOCKED - Token Paid (Balance ₹1,500 Pending)'\n    : 'Active (Full Access)';\n\n  const secretKey = 'rzp_live_ThPkZr13H5M66E_aif_mastery_secret_2026';\n  accessKey = 'LOCKED_PENDING_FULL_PAYMENT';\n  portalUrl = 'LOCKED (Complete remaining ₹1,500 to unlock)';\n\n  if (!isToken) {\n    try {\n      const crypto = require('crypto');\n      accessKey = crypto.createHmac('sha256', secretKey).update(resolvedEmail || phone).digest('hex').slice(0, 16);\n    } catch (e) {\n      let h = 0;\n      const s = (resolvedEmail || phone) + ':' + secretKey;\n      for (let i = 0; i < s.length; i++) {\n        h = ((h << 5) - h) + s.charCodeAt(i);\n        h |= 0;\n      }\n      accessKey = Math.abs(h).toString(16).padEnd(12, '0') + 'aif';\n    }\n    portalUrl = `https://live.prateekmayani.com/portal?phone=${phone}&email=${encodeURIComponent(resolvedEmail)}&key=${accessKey}`;\n  }\n\n  studentEmailSubject = isToken\n    ? '🔒 Your Course Seat is Reserved (Token Received) - AI Influencer Mastery'\n    : '🎉 Your Course Access is Ready: Welcome to AI Influencer Mastery!';\n\n  const fullAccessHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${studentName},</p>\n\n<p>Congratulations and welcome to the <strong>AI Influencer Mastery Program</strong>! 🚀</p>\n\n<p>Your course enrollment has been successfully confirmed. You now have lifetime access to the complete video curriculum, instant workflows, prompt libraries, and monetization resources.</p>\n\n<p><strong>Your 1-Click Secured Access Link:</strong><br>\nClick below to instantly unlock your private student portal (authorized strictly for your 1 personal device):</p>\n\n<p style=\"margin: 16px 0;\">\n  👉 <a href=\"${portalUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold; font-size: 15px;\">${portalUrl}</a>\n</p>\n\n<p><strong>What is Unlocked Inside Your Portal:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>10 Recorded Video Lessons:</strong> Complete step-by-step course curriculum streamed in high definition.</li>\n  <li><strong>🎁 Bonus 1: Kruti Sharma - 300 Hot + Bold Photorealistic AI Image Prompts (PDF):</strong> 300 categorized prompt recipes for photorealistic AI influencers.</li>\n  <li><strong>🎁 Bonus 2: AI Influencer Page References (PDF):</strong> Curated reference creator pages for research, positioning, and monetization.</li>\n  <li><strong>🎁 Bonus 3: 8 Full Character Consistency Prompts (PDF):</strong> Multi-angle master consistency formulas across 8 poses.</li>\n</ul>\n\n<p><strong>Enrollment &amp; Security Summary:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Registered Student:</strong> ${studentName}</li>\n  <li><strong>Mobile Number:</strong> +91 ${phone}</li>\n  <li><strong>Registered Email:</strong> ${resolvedEmail}</li>\n  <li><strong>Access Key:</strong> <code style=\"font-family: monospace; background: #eee; padding: 2px 6px; border-radius: 4px;\">${accessKey}</code></li>\n  <li><strong>Email Source:</strong> ${emailSource === 'WORKSHOP_SHEET' ? 'Verified from Workshop Registration' : 'Payment Information'}</li>\n</ul>\n\n<p><em>Security Notice: Your course access is cryptographically bound to your mobile number and locked to your 1 registered personal device. To protect against link piracy, access on a second device is blocked.</em></p>\n\n<p>If you encounter any questions while building your AI creator, simply reply directly to this email.</p>\n\n<p>Excited to see what you create!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Mastery</p>\n</div>`;\n\n  const tokenHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${studentName},</p>\n\n<p>Your seat reservation token of <strong>₹999</strong> for the <strong>AI Influencer Mastery Program</strong> has been successfully received! 🔒</p>\n\n<p>Your special webinar discount price of <strong>₹2,499</strong> (Save ₹7,000) is now officially locked in your name.</p>\n\n<p><strong>⚠️ Important Notice Regarding Course Access:</strong><br>\nPlease note that full access to the video modules, secret prompt vaults, and student portal will be unlocked immediately once your remaining balance of <strong>₹1,500</strong> is completed.</p>\n\n<p><strong>Your Token Payment Summary:</strong></p>\n<ul style=\"margin: 0 0 16px 0; padding-left: 20px;\">\n  <li><strong>Registered Student:</strong> ${studentName}</li>\n  <li><strong>Mobile Number:</strong> +91 ${phone}</li>\n  <li><strong>Email:</strong> ${resolvedEmail}</li>\n  <li><strong>Token Amount Paid:</strong> ₹999</li>\n  <li><strong>Remaining Balance:</strong> ₹1,500</li>\n  <li><strong>Access Status:</strong> Locked (Pending Full Payment)</li>\n</ul>\n\n<p><strong>Next Step to Unlock Instant Course Access:</strong><br>\nTo complete your remaining payment and unlock your course portal immediately, simply reply directly to this email or message us on WhatsApp.</p>\n\n<p>We look forward to welcoming you inside the masterclass!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Mastery</p>\n</div>`;\n\n  studentEmailHtml = isToken ? tokenHtml : fullAccessHtml;\n\n} else {\n  // EMAIL IS MISSING: Student paid via QR/UPI and was not in workshop sheet\n  accessStatus = 'LOCKED - Email Collection Required';\n  portalUrl = 'LOCKED - Email Collection Required';\n  accessKey = 'PENDING';\n\n  adminEmailSubject = `🚨 Email Nahi Mila: Course Enrollment for +91 ${phone} (${studentName})`;\n  adminEmailHtml = `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n  <h2 style=\"color: #d9381e; margin-top: 0;\">⚠️ Action Required: Course Buyer Ka Email Nahi Mila!</h2>\n  <p>Ek naya course enrollment payment receive hua hai, lekin student ka email address <strong>workshop lead sheet (Sheet1) mein nahi mila</strong> aur payment mein bhi email capture nahi hua.</p>\n  \n  <div style=\"background: #fdf2f2; border: 1.5px solid #f8b4b4; border-radius: 8px; padding: 16px; margin: 16px 0;\">\n    <table style=\"width: 100%; border-collapse: collapse; font-size: 14px;\">\n      <tr><td style=\"padding: 6px 0; font-weight: bold; width: 150px; color: #555;\">Mobile Number:</td><td><strong style=\"font-size: 18px; color: #111;\">+91 ${phone}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Student Name:</td><td><strong>${studentName}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Amount Paid:</td><td><strong style=\"color: #0f8b44; font-size: 16px;\">${amountFormatted}</strong></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Razorpay Payment ID:</td><td><code>${paymentId}</code></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Date &amp; Time:</td><td>${regDate} at ${regTime}</td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Razorpay Email:</td><td><code>${payment.incoming_email || 'None / Not Captured'}</code></td></tr>\n      <tr><td style=\"padding: 6px 0; font-weight: bold; color: #555;\">Course Access:</td><td><strong style=\"color: #d9381e;\">LOCKED (Waiting for Email)</strong></td></tr>\n    </table>\n  </div>\n\n  <p><strong>Action for Admin:</strong></p>\n  <p>Kripya student se unka email address lein. Direct WhatsApp chat shuru karne ke liye niche click karein:</p>\n\n  <p style=\"text-align: center; margin: 24px 0;\">\n    <a href=\"https://wa.me/91${phone}?text=Hi%20${encodeURIComponent(studentName)},%20thank%20you%20for%20enrolling%20in%20AI%20Influencer%20Mastery!%20Please%20reply%20with%20your%20registered%20email%20address%20so%20we%20can%20grant%20your%20portal%20access.\" \n       style=\"background: #25D366; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block;\">\n      👉 WhatsApp Student (+91 ${phone})\n    </a>\n  </p>\n\n  <p>Student ka email milne ke baad Google Sheet ke <strong>Course Buyers</strong> tab mein email update kar dein, instant access active ho jayega.</p>\n</div>`;\n}\n\nreturn [{\n  json: {\n    email_found: emailFound,\n    email_source: emailSource,\n    student_name: studentName,\n    student_phone: phone,\n    student_email: resolvedEmail || 'PENDING_COLLECTION',\n    student_email_subject: studentEmailSubject,\n    student_email_html: studentEmailHtml,\n    admin_email: 'uprisestudio10@gmail.com',\n    admin_email_subject: adminEmailSubject,\n    admin_email_html: adminEmailHtml,\n    Date: regDate,\n    Time: regTime,\n    Name: studentName,\n    Number: phone,\n    Email: resolvedEmail || 'PENDING_COLLECTION',\n    Amount: amountFormatted,\n    'Payment ID': paymentId,\n    'Access Status': accessStatus,\n    'Login URL': portalUrl\n  }\n}];"
+        }
       },
       {
-        "parameters": {
-          "conditions": {
-            "boolean": [
-              {
-                "value1": "={{ $json.email_found }}",
-                "value2": true
-              }
-            ]
-          }
-        },
-        "id": "check-email-found",
+        "id": "c968945e-6b6f-473a-85c9-dabb33f73c16",
         "name": "Is Email Found?",
         "type": "n8n-nodes-base.if",
         "typeVersion": 2,
         "position": [
-          980,
-          300
-        ]
+          -240,
+          96
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 1
+            },
+            "conditions": [
+              {
+                "id": "condition-email-check",
+                "leftValue": "={{ $json.email_found }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
       },
       {
+        "id": "e39f958d-3d43-4f61-a742-0c743d1fe238",
+        "name": "Send Course Access Email to Student",
+        "webhookId": "a251aeb2-a5d7-45a0-a8e1-e12c57652710",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "continueOnFail": true,
+        "position": [
+          0,
+          0
+        ],
         "parameters": {
           "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
           "toEmail": "={{ $json.student_email }}",
@@ -563,68 +550,67 @@
           "html": "={{ $json.student_email_html }}",
           "options": {}
         },
-        "id": "send-student-access",
-        "name": "Send Course Access Email to Student",
-        "type": "n8n-nodes-base.emailSend",
-        "typeVersion": 2.1,
-        "position": [
-          1220,
-          200
-        ],
         "credentials": {
           "smtp": {
-            "id": "RmJjbVmoKL0wS3Bl",
+            "id": "lTsd4ouJn2s2HPNT",
             "name": "SMTP account"
           }
-        },
-        "continueOnFail": true,
-        "webhookId": "d2e7f7e9-8a50-4fde-a31a-14794d94ff6b"
+        }
       },
       {
+        "id": "61117f6e-7a79-4d6f-8408-1acdc4850007",
+        "name": "Send Admin Pending Email Alert",
+        "webhookId": "aae7300a-082a-40d1-aa79-e7bcdd2cd6ee",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "continueOnFail": true,
+        "position": [
+          0,
+          224
+        ],
         "parameters": {
           "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
-          "toEmail": "prateekmayanii@gmail.com",
+          "toEmail": "uprisestudio10@gmail.com, prateekmayanii@gmail.com",
           "subject": "={{ $json.admin_email_subject }}",
           "html": "={{ $json.admin_email_html }}",
           "options": {}
         },
-        "id": "send-admin-alert",
-        "name": "Send Admin Pending Email Alert",
-        "type": "n8n-nodes-base.emailSend",
-        "typeVersion": 2.1,
-        "position": [
-          1220,
-          420
-        ],
         "credentials": {
           "smtp": {
-            "id": "RmJjbVmoKL0wS3Bl",
+            "id": "lTsd4ouJn2s2HPNT",
             "name": "SMTP account"
           }
-        },
-        "continueOnFail": true,
-        "webhookId": "06e37000-8acc-42ca-9482-498190807e96"
+        }
       },
       {
-        "parameters": {
-          "jsCode": "const item = $input.first().json;\nreturn [{\n  json: {\n    Date: item.Date,\n    Time: item.Time,\n    Name: item.Name,\n    Number: item.Number,\n    Email: item.Email,\n    Amount: item.Amount,\n    'Payment ID': item['Payment ID'],\n    'Access Status': item['Access Status'],\n    'Login URL': item['Login URL']\n  }\n}];"
-        },
-        "id": "clean-sheet-columns",
+        "id": "349f2b66-5b3c-4389-bde1-2e85fd63b478",
         "name": "Prepare Clean Sheet Columns",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1460,
-          300
-        ]
+          240,
+          96
+        ],
+        "parameters": {
+          "jsCode": "const item = $input.first().json;\nreturn [{\n  json: {\n    Date: item.Date,\n    Time: item.Time,\n    Name: item.Name,\n    Number: item.Number,\n    Email: item.Email,\n    Amount: item.Amount,\n    'Payment ID': item['Payment ID'],\n    'Access Status': item['Access Status'],\n    'Login URL': item['Login URL']\n  }\n}];"
+        }
       },
       {
+        "id": "151a5863-eb97-41cd-9b46-4a155f1ccd67",
+        "name": "Append to Course Buyers Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "continueOnFail": true,
+        "position": [
+          448,
+          96
+        ],
         "parameters": {
           "authentication": "serviceAccount",
           "operation": "append",
           "documentId": {
             "__rl": true,
-            "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
+            "value": "1flbSez2txzFmW1jj7uMy7THzpJyvJtpvV3ZrASU5poc",
             "mode": "id"
           },
           "sheetName": {
@@ -638,53 +624,52 @@
           },
           "options": {}
         },
-        "id": "append-course-buyers",
-        "name": "Append to Course Buyers Sheet",
-        "type": "n8n-nodes-base.googleSheets",
-        "typeVersion": 4.5,
-        "position": [
-          1680,
-          300
-        ],
         "credentials": {
           "googleApi": {
-            "id": "SsEE517tRUiLR8pJ",
+            "id": "u1KbRiPRv3k5LrOJ",
             "name": "Google Sheets account"
           }
-        },
-        "continueOnFail": true
+        }
       },
       {
+        "id": "66b2ccdc-e1b5-40c5-a99d-ae4fa700c52a",
+        "name": "Device Auth Webhook",
+        "webhookId": "course-device-auth",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -1120,
+          400
+        ],
         "parameters": {
           "httpMethod": "POST",
           "path": "course-device-auth",
           "responseMode": "responseNode",
           "options": {}
-        },
-        "id": "course-device-webhook",
-        "name": "Device Auth Webhook",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 2,
-        "position": [
-          100,
-          600
-        ],
-        "webhookId": "course-device-auth"
+        }
       },
       {
-        "parameters": {
-          "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst rawId = (body.email || body.phone || body.identifier || '').trim().toLowerCase();\nconst cleanPhone = rawId.replace(/\\D/g, '').slice(-10);\nconst deviceId = (body.deviceId || '').trim();\n\nconst staticData = $getWorkflowStaticData('global');\nstaticData.authorizedBuyers = staticData.authorizedBuyers || [];\nstaticData.devicesByStudent = staticData.devicesByStudent || {};\n\n// Allow device lock reset\nif (body.action === 'reset_device') {\n  const target = (body.targetEmail || body.targetPhone || body.email || '').trim().toLowerCase();\n  const cleanTarget = target.replace(/\\D/g, '').slice(-10);\n  delete staticData.devicesByStudent[target];\n  if (cleanTarget.length === 10) delete staticData.devicesByStudent[cleanTarget];\n  return [{ json: { allowed: true, reset: true, message: `Device lock successfully cleared for ${target}` } }];\n}\n\nif (!rawId || !deviceId) {\n  return [{ json: { allowed: false, message: 'Missing login credentials or device identifier.' } }];\n}\n\n// Master admins exempt from limits\nif (rawId === 'prateekmayanii@gmail.com' || cleanPhone === '9999900000' || rawId.includes('prateek')) {\n  return [{ json: { allowed: true, message: 'Admin access authorized.' } }];\n}\n\n// Check authorization\nconst isAuthorized = staticData.authorizedBuyers.includes(rawId) || \n  (cleanPhone.length === 10 && staticData.authorizedBuyers.includes(cleanPhone));\n\nif (!isAuthorized) {\n  return [{ \n    json: { \n      allowed: false, \n      message: 'No active course enrollment found for this email or phone. Please verify your purchase or contact support.' \n    } \n  }];\n}\n\n// Device count check (Max 2 devices)\nconst studentKey = (cleanPhone.length === 10) ? cleanPhone : rawId;\nstaticData.devicesByStudent[studentKey] = staticData.devicesByStudent[studentKey] || [];\nconst registeredDevices = staticData.devicesByStudent[studentKey];\n\nif (registeredDevices.includes(deviceId)) {\n  return [{ json: { allowed: true, message: 'Known device authenticated.' } }];\n}\n\nif (registeredDevices.length < 2) {\n  registeredDevices.push(deviceId);\n  return [{ json: { allowed: true, message: `New device successfully registered (Device ${registeredDevices.length} of 2).` } }];\n}\n\nreturn [{ \n  json: { \n    allowed: false, \n    message: 'Device limit reached (Maximum 2 devices allowed). To use a new device, please contact support to reset your session.' \n  } \n}];"
-        },
-        "id": "course-device-check",
+        "id": "8c7b4208-aa99-45c7-bd15-4663e4578ccb",
         "name": "Check and Register Device",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          340,
-          600
-        ]
+          -880,
+          400
+        ],
+        "parameters": {
+          "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst rawId = (body.email || body.phone || body.identifier || '').trim().toLowerCase();\nconst cleanPhone = rawId.replace(/\\D/g, '').slice(-10);\nconst deviceId = (body.deviceId || '').trim();\n\nconst staticData = $getWorkflowStaticData('global');\nstaticData.authorizedBuyers = staticData.authorizedBuyers || [];\nstaticData.devicesByStudent = staticData.devicesByStudent || {};\n\n// Allow device lock reset\nif (body.action === 'reset_device') {\n  const target = (body.targetEmail || body.targetPhone || body.email || '').trim().toLowerCase();\n  const cleanTarget = target.replace(/\\D/g, '').slice(-10);\n  delete staticData.devicesByStudent[target];\n  if (cleanTarget.length === 10) delete staticData.devicesByStudent[cleanTarget];\n  return [{ json: { allowed: true, reset: true, message: `Device lock successfully cleared for ${target}` } }];\n}\n\nif (!rawId || !deviceId) {\n  return [{ json: { allowed: false, message: 'Missing login credentials or device identifier.' } }];\n}\n\n// Master admins exempt from limits\nif (rawId === 'prateekmayanii@gmail.com' || cleanPhone === '9999900000' || rawId.includes('prateek')) {\n  return [{ json: { allowed: true, message: 'Admin access authorized.' } }];\n}\n\n// Check authorization\nconst isAuthorized = staticData.authorizedBuyers.includes(rawId) || \n  (cleanPhone.length === 10 && staticData.authorizedBuyers.includes(cleanPhone));\n\nif (!isAuthorized) {\n  return [{ \n    json: { \n      allowed: false, \n      message: 'No active course enrollment found for this email or phone. Please verify your purchase or contact support.' \n    } \n  }];\n}\n\n// Device count check (Max 2 devices)\nconst studentKey = (cleanPhone.length === 10) ? cleanPhone : rawId;\nstaticData.devicesByStudent[studentKey] = staticData.devicesByStudent[studentKey] || [];\nconst registeredDevices = staticData.devicesByStudent[studentKey];\n\nif (registeredDevices.includes(deviceId)) {\n  return [{ json: { allowed: true, message: 'Known device authenticated.' } }];\n}\n\nif (registeredDevices.length < 2) {\n  registeredDevices.push(deviceId);\n  return [{ json: { allowed: true, message: `New device successfully registered (Device ${registeredDevices.length} of 2).` } }];\n}\n\nreturn [{ \n  json: { \n    allowed: false, \n    message: 'Device limit reached (Maximum 2 devices allowed). To use a new device, please contact support to reset your session.' \n  } \n}];"
+        }
       },
       {
+        "id": "3f4e2d4d-51f3-4091-ba55-821f40e925f0",
+        "name": "Respond to Device Auth",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          -640,
+          400
+        ],
         "parameters": {
           "respondWith": "json",
           "responseBody": "={{ JSON.stringify($json) }}",
@@ -702,15 +687,7 @@
               ]
             }
           }
-        },
-        "id": "course-device-respond",
-        "name": "Respond to Device Auth",
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1.1,
-        "position": [
-          580,
-          600
-        ]
+        }
       }
     ],
     "connections": {
@@ -821,42 +798,36 @@
       }
     },
     "nodeGroups": [],
-    "authors": "Preetam Soni",
+    "authors": "Prateek Mayani",
     "name": null,
     "description": null,
     "autosaved": false,
+    "createdAt": "2026-10-16T13:16:59.555Z",
+    "updatedAt": "2026-10-16T13:16:59.555Z",
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-10-05T15:01:28.137Z",
-        "id": 179,
-        "workflowId": "Z034qypVNed6oJcg",
-        "versionId": "3b51c786-2e94-4747-a3fe-187d2aac64d2",
+        "id": 78,
+        "workflowId": "TVNUUwtNq9CGsSW6",
+        "versionId": "32a54cba-0faf-47aa-8afb-4f56ec4af566",
         "event": "activated",
-        "userId": "cb834f62-f70a-4201-b686-b92c03452f25"
+        "userId": "79fc51e2-f17e-4509-a031-571c5001c617",
+        "createdAt": "2026-10-16T13:16:59.635Z"
       },
       {
-        "createdAt": "2026-10-05T15:01:29.034Z",
-        "id": 181,
-        "workflowId": "Z034qypVNed6oJcg",
-        "versionId": "3b51c786-2e94-4747-a3fe-187d2aac64d2",
+        "id": 79,
+        "workflowId": "TVNUUwtNq9CGsSW6",
+        "versionId": "32a54cba-0faf-47aa-8afb-4f56ec4af566",
+        "event": "deactivated",
+        "userId": "79fc51e2-f17e-4509-a031-571c5001c617",
+        "createdAt": "2026-10-16T13:16:59.812Z"
+      },
+      {
+        "id": 80,
+        "workflowId": "TVNUUwtNq9CGsSW6",
+        "versionId": "32a54cba-0faf-47aa-8afb-4f56ec4af566",
         "event": "activated",
-        "userId": "cb834f62-f70a-4201-b686-b92c03452f25"
-      },
-      {
-        "createdAt": "2026-10-05T15:01:28.111Z",
-        "id": 178,
-        "workflowId": "Z034qypVNed6oJcg",
-        "versionId": "3b51c786-2e94-4747-a3fe-187d2aac64d2",
-        "event": "deactivated",
-        "userId": "cb834f62-f70a-4201-b686-b92c03452f25"
-      },
-      {
-        "createdAt": "2026-10-05T15:01:29.015Z",
-        "id": 180,
-        "workflowId": "Z034qypVNed6oJcg",
-        "versionId": "3b51c786-2e94-4747-a3fe-187d2aac64d2",
-        "event": "deactivated",
-        "userId": "cb834f62-f70a-4201-b686-b92c03452f25"
+        "userId": "79fc51e2-f17e-4509-a031-571c5001c617",
+        "createdAt": "2026-10-16T13:17:00.219Z"
       }
     ]
   }

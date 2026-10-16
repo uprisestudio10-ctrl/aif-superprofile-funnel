@@ -183,7 +183,7 @@ if (emailFound) {
       }
       accessKey = Math.abs(h).toString(16).padEnd(12, '0') + 'aif';
     }
-    portalUrl = \`https://aifworkshop.prateekmayani.com/portal?phone=\${phone}&email=\${encodeURIComponent(resolvedEmail)}&key=\${accessKey}\`;
+    portalUrl = \`https://live.prateekmayani.com/portal?phone=\${phone}&email=\${encodeURIComponent(resolvedEmail)}&key=\${accessKey}\`;
   }
 
   studentEmailSubject = isToken
@@ -310,7 +310,7 @@ return [{
     student_email: resolvedEmail || 'PENDING_COLLECTION',
     student_email_subject: studentEmailSubject,
     student_email_html: studentEmailHtml,
-    admin_email: 'prateekmayanii@gmail.com',
+    admin_email: 'uprisestudio10@gmail.com',
     admin_email_subject: adminEmailSubject,
     admin_email_html: adminEmailHtml,
     Date: regDate,
@@ -463,7 +463,7 @@ const workflowPayload = {
     {
       parameters: {
         fromEmail: "Prateek Mayani <workshop@prateekmayani.com>",
-        toEmail: "prateekmayanii@gmail.com",
+        toEmail: "uprisestudio10@gmail.com, prateekmayanii@gmail.com",
         subject: "={{ $json.admin_email_subject }}",
         html: "={{ $json.admin_email_html }}",
         options: {}
