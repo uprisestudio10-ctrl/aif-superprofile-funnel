@@ -26,8 +26,8 @@ if ((raw.event === 'payment.captured' || raw.event === 'order.paid') && raw.payl
   const notes = p.notes || {};
   const cleanPhone = (notes.phone || notes.contact || p.contact || '').replace(/\\D/g, '').slice(-10);
   const amtNum = p.amount ? Math.round(p.amount / 100) : 2999;
-  const cleanEmail = (notes.email || p.email || '').trim().toLowerCase();
-  const payerName = notes.name || notes.buyer_name || notes.Name || notes['Full Name'] || notes.payer_name || notes.customer_name || p.name || '';
+  const cleanEmail = (raw.email || raw.incoming_email || notes.email || p.email || '').trim().toLowerCase();
+  const payerName = raw.name || notes.name || notes.buyer_name || notes.Name || notes['Full Name'] || notes.payer_name || notes.customer_name || p.name || '';
   const commentName = (notes.comment && typeof notes.comment === 'string' && notes.comment.length > 2 && !notes.comment.includes('@') && isNaN(Number(notes.comment))) ? notes.comment.trim() : '';
   const finalName = payerName || commentName || 'Student';
 
@@ -39,6 +39,7 @@ if ((raw.event === 'payment.captured' || raw.event === 'order.paid') && raw.payl
     description: p.description || '',
     razorpay_payment_id: p.id || '',
     razorpay_order_id: p.order_id || '',
+    force_deliver: Boolean(raw.force_deliver || raw.force)
   };
 }
 
@@ -64,10 +65,12 @@ const amountFormatted = isToken ? '₹999 (Token)' : (parsedAmount > 0 ? ('₹' 
 try {
   const staticData = $getWorkflowStaticData('global');
   staticData.processedIds = staticData.processedIds || [];
-  if (paymentId && staticData.processedIds.includes(paymentId)) {
+  if (raw.force_deliver || item.force_deliver) {
+    staticData.processedIds = staticData.processedIds.filter(id => id !== paymentId);
+  } else if (paymentId && staticData.processedIds.includes(paymentId)) {
     return [];
   }
-  if (paymentId) {
+  if (paymentId && !staticData.processedIds.includes(paymentId)) {
     staticData.processedIds.push(paymentId);
     if (staticData.processedIds.length > 200) {
       staticData.processedIds.shift();
@@ -129,6 +132,12 @@ if (!resolvedEmail && payment.incoming_email) {
     resolvedEmail = em;
     emailSource = 'PAYMENT_PAYLOAD';
   }
+}
+
+// If student was not matched by phone, try matching by resolved email in Sheet1
+if (!matchedAttendee && (resolvedEmail || payment.incoming_email)) {
+  const targetEmail = (resolvedEmail || payment.incoming_email).toLowerCase();
+  matchedAttendee = attendees.find(r => String(r.Email || '').trim().toLowerCase() === targetEmail);
 }
 
 const emailFound = Boolean(resolvedEmail);
