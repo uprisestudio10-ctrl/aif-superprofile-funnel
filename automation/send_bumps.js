@@ -23,9 +23,9 @@ function getArg(key, def = "") {
 }
 
 const isTest = args.includes("--test") || args.includes("-t");
-const workshopDate = getArg("date", "8th October 2026");
-const recordingUrl = getArg("recording", "https://youtu.be/3VVlAY5aoJY");
-const promptsUrl = getArg("prompts", "https://aifworkshop.prateekmayani.com/downloads/Kruti_Sharma_300_Prompts_Library.pdf");
+const workshopDate = getArg("date", "all");
+const recordingUrl = getArg("recording", "https://www.youtube.com/watch?v=7vdqzvzCzEs");
+const promptsUrl = getArg("prompts", "https://live.prateekmayani.com/downloads/Kruti_Sharma_300_Prompts_Library.pdf");
 
 console.log("\n=======================================================");
 console.log("🎯 AI Influencer Workshop - Bump Delivery Trigger");

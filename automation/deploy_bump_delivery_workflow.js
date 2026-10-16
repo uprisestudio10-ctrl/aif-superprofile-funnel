@@ -4,9 +4,9 @@ const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3OWZjNTFlMi1mMT
 const filterAndTemplateCode = `// 1. Retrieve webhook input triggers
 const triggerData = $('Webhook Trigger').first().json.body || $('Webhook Trigger').first().json.query || $('Webhook Trigger').first().json || {};
 
-const targetWorkshopDate = (triggerData.workshop_date || '8th October 2026').toLowerCase();
-const recordingUrl = triggerData.recording_url || 'https://youtu.be/3VVlAY5aoJY';
-const promptsUrl = triggerData.prompts_url || 'https://aifworkshop.prateekmayani.com/downloads/Kruti_Sharma_300_Prompts_Library.pdf';
+const targetWorkshopDate = (triggerData.workshop_date || 'all').toLowerCase();
+const recordingUrl = triggerData.recording_url || 'https://www.youtube.com/watch?v=7vdqzvzCzEs';
+const promptsUrl = triggerData.prompts_url || 'https://live.prateekmayani.com/downloads/Kruti_Sharma_300_Prompts_Library.pdf';
 const testMode = triggerData.test_mode === true || triggerData.test_mode === 'true';
 const testEmail = triggerData.test_email || 'prateekmayanii@gmail.com';
 
@@ -23,17 +23,10 @@ for (const item of items) {
   const email = (row.Email || row.email || '').trim().toLowerCase();
   const name = (row.Name || row.name || 'there').trim();
   const wsDate = (row['Workshop Date'] || '').toLowerCase();
-  
-  // Date filter: Only process attendees for the targeted 7th/8th October 2026 workshop batch
-  const isTargetBatch = wsDate.includes('8th oct') || 
-                        wsDate.includes('8 oct') || 
-                        wsDate.includes('8th october') || 
-                        wsDate.includes('7th oct') || 
-                        wsDate.includes('7 oct') ||
-                        wsDate.includes(targetWorkshopDate);
 
-  if (!isTargetBatch) {
-    continue; // Strictly skip old 3rd Oct attendees or other batches
+  // If specific workshop date requested (and not all), check date match if wsDate is populated
+  if (targetWorkshopDate !== 'all' && wsDate && !wsDate.includes(targetWorkshopDate)) {
+    continue;
   }
 
   if (!email || !email.includes('@') || seenEmails.has(email)) {
@@ -47,9 +40,13 @@ for (const item of items) {
     continue;
   }
   
-  // Strict bump verification (checks explicit column first, then amount)
-  const isRec = row['Recording Purchased'] === 'YES' || cleanAmt === 178 || cleanAmt === 377 || cleanAmt === 677 || cleanAmt === 876;
-  const isPro = row['Prompts Purchased'] === 'YES' || cleanAmt === 228 || cleanAmt === 377 || cleanAmt === 727 || cleanAmt === 876;
+  // Bump verification:
+  // 178: Ticket + Recording
+  // 228: Ticket + Prompts
+  // 248: Ticket + Combo (Recording + Prompts)
+  // 377: Ticket + Recording + Prompts
+  const isRec = row['Recording Purchased'] === 'YES' || [178, 248, 377, 677, 876].includes(cleanAmt);
+  const isPro = row['Prompts Purchased'] === 'YES' || [228, 248, 377, 727, 876].includes(cleanAmt);
 
   // If neither bump was purchased, skip completely!
   if (!isRec && !isPro) {
@@ -85,6 +82,8 @@ for (const item of items) {
 <p style="margin: 0 0 16px 0;">
   👉 <a href="\${promptsUrl}" style="color: #0066cc; text-decoration: underline; font-weight: bold;">\${promptsUrl}</a>
 </p>
+
+<p>We recommend opening the links on your laptop or desktop for the best learning experience.</p>
 
 <p>If you have any questions or need anything, feel free to reply directly to this email.</p>
 
@@ -144,6 +143,8 @@ AI Influencer Workshop</p>
   👉 <a href="\${promptsUrl}" style="color: #0066cc; text-decoration: underline; font-weight: bold;">\${promptsUrl}</a>
 </p>
 
+<p>Simply copy the prompt formulas and test them on your characters.</p>
+
 <p>If you have any questions, feel free to reply directly to this email.</p>
 
 <p>Best Regards,<br>
@@ -193,8 +194,8 @@ async function deploy() {
           operation: "read",
           documentId: {
             __rl: true,
-            value: "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
-            mode: "list"
+            value: "1flbSez2txzFmW1jj7uMy7THzpJyvJtpvV3ZrASU5poc",
+            mode: "id"
           },
           sheetName: {
             __rl: true,
@@ -258,7 +259,9 @@ async function deploy() {
       }
     },
     settings: {
-      executionOrder: "v1"
+      executionOrder: "v1",
+      saveDataSuccessExecution: "all",
+      saveExecutionProgress: true
     }
   };
 
