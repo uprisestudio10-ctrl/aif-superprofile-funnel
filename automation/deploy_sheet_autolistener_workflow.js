@@ -359,6 +359,22 @@ return output;`
             name: "Google Sheets account"
           }
         }
+      },
+      {
+        parameters: {
+          method: "POST",
+          url: `https://graph.facebook.com/v19.0/${META_PIXEL_ID}/events?access_token=${META_CAPI_TOKEN}`,
+          sendBody: true,
+          specifyBody: "json",
+          jsonBody: "={{ $json.capi_payload }}",
+          options: {}
+        },
+        id: "send-meta-capi-purchase",
+        name: "Send Meta CAPI Purchase",
+        type: "n8n-nodes-base.httpRequest",
+        typeVersion: 4.2,
+        position: [760, 400],
+        continueOnFail: true
       }
     ],
     connections: {
@@ -369,7 +385,12 @@ return output;`
         main: [[{ node: "Filter Unprocessed Leads", type: "main", index: 0 }]]
       },
       "Filter Unprocessed Leads": {
-        main: [[{ node: "Send Confirmation Email", type: "main", index: 0 }]]
+        main: [
+          [
+            { node: "Send Confirmation Email", type: "main", index: 0 },
+            { node: "Send Meta CAPI Purchase", type: "main", index: 0 }
+          ]
+        ]
       },
       "Send Confirmation Email": {
         main: [[{ node: "Mark Email Sent in Sheet", type: "main", index: 0 }]]
