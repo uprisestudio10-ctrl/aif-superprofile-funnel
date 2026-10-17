@@ -189,6 +189,12 @@ for (const item of items) {
     continue;
   }
 
+  // Guardrail: Skip historical leads from previous workshops (16th Oct or earlier)
+  const regDate = String(d["Date "] || d.Date || d["Workshop Date"] || "").toLowerCase();
+  if (regDate.includes("2026-10-16") || regDate.includes("16 oct") || regDate.includes("15 oct") || regDate.includes("14 oct") || regDate.includes("13 oct")) {
+    continue;
+  }
+
   const amtNum = typeof amount === "number" ? amount : (parseInt(String(amount).replace(/\\D/g, "")) || 29);
 
   const emailHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;">
