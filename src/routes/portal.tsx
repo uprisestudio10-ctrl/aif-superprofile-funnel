@@ -275,18 +275,18 @@ function CoursePortalPage() {
             <div>
               <div className="flex items-center justify-between">
                 <label className="block text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Personal Access Key <span className="text-[11px] font-normal lowercase text-muted-foreground/70">(from your welcome email)</span>
+                  Personal Access Key <span className="text-[11px] font-normal lowercase text-muted-foreground/70">(Optional for verified buyers)</span>
                 </label>
               </div>
               <input
                 type="text"
                 value={keyInput}
                 onChange={(e) => setKeyInput(e.target.value)}
-                placeholder="e.g. 8f2a7b8e3c1d4a5b"
+                placeholder="Auto-filled from your welcome link (or leave blank)"
                 className="mt-1.5 w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-[14px] font-mono text-white placeholder-muted-foreground/60 outline-none transition-colors focus:border-primary focus:bg-black/60"
               />
               <p className="mt-1 text-[11px] text-muted-foreground">
-                💡 Clicking the direct 1-click link from your enrollment email fills this automatically.
+                💡 Registered buyers can login directly with their email or 10-digit WhatsApp number without a key.
               </p>
             </div>
 

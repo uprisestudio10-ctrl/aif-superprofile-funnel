@@ -35,7 +35,18 @@ export function computeStudentAccessKey(identifier: string): string {
   return crypto.createHmac("sha256", SECRET_KEY).update(clean).digest("hex").slice(0, 16);
 }
 
-// Generate simple tamper-resistant session token
+// Fallback signature matching n8n code node when crypto module was restricted in n8n
+export function computeFallbackAccessKey(identifier: string): string {
+  let h = 0;
+  const s = identifier.trim().toLowerCase() + ":" + SECRET_KEY;
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) - h) + s.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h).toString(16).padEnd(12, "0") + "aif";
+}
+
+// Generate simple tamper-resistant session token (safe in Node & Cloudflare Workers)
 function generateStudentToken(identifier: string, role: string): string {
   const secret = process.env["RAZORPAY_KEY_SECRET"] || "aif-mastery-secret-salt-2026";
   const raw = `${identifier}:${role}:${new Date().toISOString().slice(0, 10)}:${secret}`;
@@ -44,8 +55,44 @@ function generateStudentToken(identifier: string, role: string): string {
     hash = (hash << 5) - hash + raw.charCodeAt(i);
     hash |= 0;
   }
-  return `std_${Math.abs(hash).toString(36)}_${Buffer.from(identifier).toString("base64url").slice(0, 16)}`;
+  let b64 = "";
+  try {
+    if (typeof Buffer !== "undefined") {
+      b64 = Buffer.from(identifier).toString("base64url").slice(0, 16);
+    } else {
+      b64 = btoa(identifier).replace(/\+/g, "-").replace(/\//g, "_").slice(0, 16);
+    }
+  } catch {
+    b64 = "std_safe";
+  }
+  return `std_${Math.abs(hash).toString(36)}_${b64}`;
 }
+
+// Master list of all verified enrolled course buyers (16th Oct & previous batches)
+export const VERIFIED_COURSE_BUYERS: Array<{
+  name: string;
+  email: string;
+  phone: string;
+}> = [
+  { name: "SSK Teja", phone: "7416895725", email: "sskteja.smiles@gmail.com" },
+  { name: "Kedar Metri", phone: "7410186269", email: "kedarmetri8@gmail.com" },
+  { name: "Fahim", phone: "9123370566", email: "mrfahim9966@gmail.com" },
+  { name: "Sanjay Gupta", phone: "9004812678", email: "sanju.mj612@gmail.com" },
+  { name: "Ruyel Sarkar", phone: "6296772139", email: "ruyelsarkar42@gmail.com" },
+  { name: "Maheswara Reddy", phone: "9849039761", email: "vivekamahi27@gmail.com" },
+  { name: "Ravinder / Ravi D", phone: "9008077066", email: "rav.dkmr@gmail.com" },
+  { name: "Harshit Lohar", phone: "8233084905", email: "hlohar95@gmail.com" },
+  { name: "Ankit Agarwal", phone: "9851248798", email: "ankitagarwal805@gmail.com" },
+  { name: "Sebananda", phone: "9158984616", email: "sebanan@yahoo.com" },
+  { name: "Yaju Singh", phone: "9410679678", email: "yajuvndra@gmail.com" },
+  { name: "Rajesh Menezes / Raju Roy", phone: "9867345539", email: "rajuroy1810@gmail.com" },
+  { name: "Vyshnav Tp", phone: "9447936432", email: "vyshnav589@gmail.com" },
+  { name: "Ravinder Kumar", phone: "9811768586", email: "ravinderkumar0091@gmail.com" },
+  { name: "Shivam Malhotra", phone: "8448824505", email: "mshivam79@gmail.com" },
+  { name: "G Chhangani", phone: "8696242991", email: "gchhangani69@gmail.com" },
+  { name: "Abhi Go", phone: "9686607788", email: "go.abhi25@gmail.com" },
+  { name: "VIP Student", phone: "9288202588", email: "" },
+];
 
 export const verifyCourseAccess = createServerFn({ method: "POST" })
   .inputValidator((data) => verifyAccessInput.parse(data))
@@ -79,7 +126,8 @@ export const verifyCourseAccess = createServerFn({ method: "POST" })
       accessKey.toUpperCase() === "AIF2026VIP" ||
       accessKey.toLowerCase() === "admin" ||
       accessKey.toUpperCase() === "MASTERY2026" ||
-      accessKey.toLowerCase() === computeStudentAccessKey(identifier).toLowerCase();
+      accessKey.toLowerCase() === computeStudentAccessKey(identifier).toLowerCase() ||
+      accessKey.toLowerCase() === computeFallbackAccessKey(identifier).toLowerCase();
 
     const isAdminUser =
       (cleanEmail && adminEmails.includes(cleanEmail)) ||
@@ -100,29 +148,36 @@ export const verifyCourseAccess = createServerFn({ method: "POST" })
       };
     }
 
-    // Whitelist for verified course buyers (instant lifetime access)
-    const manualEnrolledEmails = [
-      "mshivam79@gmail.com",
-      "gchhangani69@gmail.com",
-      "go.abhi25@gmail.com",
-    ];
-    const manualEnrolledPhones = ["8448824505", "8696242991", "9686607788", "9288202588"];
-    const isManualStudent =
-      (cleanEmail && manualEnrolledEmails.includes(cleanEmail)) ||
-      (cleanPhone && manualEnrolledPhones.includes(cleanPhone));
+    // 2. Verified Course Buyer Match (by Email or 10-digit Phone)
+    const matchedBuyer = VERIFIED_COURSE_BUYERS.find((b) => {
+      const matchEmail = Boolean(cleanEmail && b.email && b.email.toLowerCase() === cleanEmail);
+      const matchPhone = Boolean(cleanPhone && b.phone && b.phone.slice(-10) === cleanPhone);
+      return matchEmail || matchPhone;
+    });
 
-    const isSignedKeyValid = Boolean(
-      accessKey &&
-      accessKey.toLowerCase() === computeStudentAccessKey(identifier).toLowerCase()
+    // 3. Cryptographic Signature Validation
+    const cleanKey = accessKey.toLowerCase();
+    const isHmacKeyValid = Boolean(
+      cleanKey &&
+      (cleanKey === computeStudentAccessKey(cleanEmail).toLowerCase() ||
+       cleanKey === computeStudentAccessKey(cleanPhone).toLowerCase())
     );
-    const isMasterPass =
-      accessKey.toUpperCase() === "MASTERY2026" ||
-      accessKey.toUpperCase() === "AIINFLUENCER100";
+    const isFallbackKeyValid = Boolean(
+      cleanKey &&
+      (cleanKey === computeFallbackAccessKey(cleanEmail).toLowerCase() ||
+       cleanKey === computeFallbackAccessKey(cleanPhone).toLowerCase())
+    );
+    const isMasterPass = Boolean(
+      cleanKey &&
+      (cleanKey === "mastery2026" || cleanKey === "aiinfluencer100" || cleanKey === "aif2026vip")
+    );
 
-    let enrollmentVerified = false;
+    let isAuthorized = Boolean(
+      matchedBuyer || isHmacKeyValid || isFallbackKeyValid || isMasterPass
+    );
+
+    // 4. Non-blocking device registration & fallback n8n check
     let deviceNumber = 1;
-
-    // Device check for regular students (Manual VIP students like Shivam bypass device lock)
     if (deviceId) {
       try {
         const deviceAuthUrl =
@@ -136,49 +191,34 @@ export const verifyCourseAccess = createServerFn({ method: "POST" })
 
         if (devRes.ok) {
           const devData: any = await devRes.json();
-          if (devData && devData.allowed === false) {
-            if (!isManualStudent) {
-              throw new Error(
-                devData.message ||
-                  "Access Denied: Course purchase not found or device limit exceeded. Contact workshop@prateekmayani.com"
-              );
-            }
-          }
           if (devData && devData.allowed === true) {
-            enrollmentVerified = true;
+            isAuthorized = true;
             deviceNumber = devData?.deviceNumber || 1;
           }
         }
-      } catch (devErr: any) {
-        if (
-          !isManualStudent &&
-          (devErr?.message?.includes("Access Denied") ||
-            devErr?.message?.includes("Device Limit Exceeded"))
-        ) {
-          throw devErr;
-        }
-        console.warn("Device lock notice:", devErr?.message);
+      } catch (err: any) {
+        console.warn("Background device sync notice:", err?.message);
       }
     }
 
-    // If neither n8n enrollment, nor signed key, nor master pass, nor manual student -> STRICTLY BLOCK!
-    if (!enrollmentVerified && !isSignedKeyValid && !isMasterPass && !isManualStudent) {
+    // 5. Final Authorization Gate
+    if (!isAuthorized) {
       throw new Error(
-        `Access Denied: Course purchase not found for ${cleanPhone ? `mobile number +91 ${cleanPhone}` : cleanEmail}. This course is strictly locked to verified students who completed enrollment. If you recently paid, please ensure you use the same mobile number, or contact workshop@prateekmayani.com.`
+        `Access Denied: Course purchase not found for ${cleanPhone ? `mobile number +91 ${cleanPhone}` : cleanEmail}. This course is strictly locked to verified students who completed enrollment. If you recently paid, please ensure you use your registered email or mobile number, or contact workshop@prateekmayani.com.`
       );
     }
 
-    const displayName =
-      cleanEmail === "mshivam79@gmail.com" || cleanPhone === "8448824505"
-        ? "SHIVAM MALHOTRA"
-        : cleanEmail
-          ? cleanEmail.split("@")[0].toUpperCase()
-          : `STUDENT (+91 ${cleanPhone})`;
+    // Determine student display details
+    const finalName =
+      matchedBuyer?.name ||
+      (cleanEmail ? cleanEmail.split("@")[0].toUpperCase() : `STUDENT (+91 ${cleanPhone})`);
+    const finalEmail = matchedBuyer?.email || cleanEmail || `${cleanPhone}@student.prateekmayani.com`;
+    const finalPhone = matchedBuyer?.phone ? `+91 ${matchedBuyer.phone}` : (cleanPhone ? `+91 ${cleanPhone}` : "");
 
     return {
-      email: cleanEmail || "mshivam79@gmail.com",
-      phone: cleanPhone ? `+91 ${cleanPhone}` : "+91 8448824505",
-      name: displayName,
+      email: finalEmail,
+      phone: finalPhone,
+      name: finalName,
       authorized: true,
       enrolledAt: new Date().toISOString(),
       accessType: "full_course",
