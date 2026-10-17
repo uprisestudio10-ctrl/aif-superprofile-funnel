@@ -240,40 +240,6 @@ for (const item of items) {
 \${workshopName}</p>
 </div>\`;
 
-  // Compute CAPI fields
-  const emHash = email ? sha256(email) : '';
-  const cleanPhone = phone ? ('91' + phone) : '';
-  const phHash = cleanPhone ? sha256(cleanPhone) : '';
-  const eventTime = Math.floor(Date.now() / 1000);
-  const eventId = 'ws-sheet-' + (phone || 'test') + '-' + eventTime;
-  let fbcVal = undefined;
-  const rawFbc = d['FB Click ID'] || d.fbclid || '';
-  if (rawFbc) {
-    fbcVal = 'fb.1.' + Date.now() + '.' + rawFbc;
-  }
-
-  const capiPayload = {
-    data: [
-      {
-        event_name: 'Purchase',
-        event_time: eventTime,
-        event_id: eventId,
-        event_source_url: 'https://live.prateekmayani.com/thank-you-5034',
-        action_source: 'website',
-        user_data: {
-          em: emHash ? [emHash] : [],
-          ph: phHash ? [phHash] : [],
-          ...(fbcVal ? { fbc: fbcVal } : {})
-        },
-        custom_data: {
-          currency: 'INR',
-          value: amtNum,
-          content_name: 'AI Influencer Workshop'
-        }
-      }
-    ]
-  };
-
   output.push({
     json: {
       Email: email,
@@ -284,8 +250,7 @@ for (const item of items) {
       recipientPhone: phone,
       amount: amtNum,
       emailSubject: "Seat Confirmed: AI Influencer Workshop (22nd Oct, 7:00 PM)",
-      emailHtml: emailHtml,
-      capi_payload: capiPayload
+      emailHtml: emailHtml
     }
   });
 }
@@ -359,22 +324,6 @@ return output;`
             name: "Google Sheets account"
           }
         }
-      },
-      {
-        parameters: {
-          method: "POST",
-          url: `https://graph.facebook.com/v19.0/${META_PIXEL_ID}/events?access_token=${META_CAPI_TOKEN}`,
-          sendBody: true,
-          specifyBody: "json",
-          jsonBody: "={{ $json.capi_payload }}",
-          options: {}
-        },
-        id: "send-meta-capi-purchase",
-        name: "Send Meta CAPI Purchase",
-        type: "n8n-nodes-base.httpRequest",
-        typeVersion: 4.2,
-        position: [760, 400],
-        continueOnFail: true
       }
     ],
     connections: {
@@ -385,12 +334,7 @@ return output;`
         main: [[{ node: "Filter Unprocessed Leads", type: "main", index: 0 }]]
       },
       "Filter Unprocessed Leads": {
-        main: [
-          [
-            { node: "Send Confirmation Email", type: "main", index: 0 },
-            { node: "Send Meta CAPI Purchase", type: "main", index: 0 }
-          ]
-        ]
+        main: [[{ node: "Send Confirmation Email", type: "main", index: 0 }]]
       },
       "Send Confirmation Email": {
         main: [[{ node: "Mark Email Sent in Sheet", type: "main", index: 0 }]]
