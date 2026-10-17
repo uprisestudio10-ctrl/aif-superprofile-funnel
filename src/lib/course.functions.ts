@@ -159,6 +159,7 @@ export const VERIFIED_COURSE_BUYERS: Array<{
   { name: "G Chhangani", phone: "8696242991", email: "gchhangani69@gmail.com" },
   { name: "Abhi Go", phone: "9686607788", email: "go.abhi25@gmail.com" },
   { name: "VIP Student", phone: "9288202588", email: "" },
+  { name: "Ankit Arora", phone: "9650206742", email: "ankitaroravfx@gmail.com" },
 ];
 
 export const verifyCourseAccess = createServerFn({ method: "POST" })
