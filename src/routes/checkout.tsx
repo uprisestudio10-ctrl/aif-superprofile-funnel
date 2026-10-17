@@ -18,10 +18,10 @@ export const Route = createFileRoute("/checkout")({
 type OfferId = "recording" | "prompts" | "combo";
 
 const SUPERPROFILE_LINKS = {
-  basic: "https://superprofile.bio/e/SoK1AxJQ", // ₹29
-  recording: "https://superprofile.bio/e/qlonB0yj", // ₹178
-  prompts: "https://superprofile.bio/e/LirmFFgB", // ₹228
-  combo: "https://superprofile.bio/e/6LfPN8jn", // ₹248
+  basic: "https://superprofile.bio/e/ILjNLKwO", // ₹29
+  recording: "https://superprofile.bio/e/9x5zPMBF", // ₹178
+  prompts: "https://superprofile.bio/e/wjvoptAf", // ₹228
+  combo: "https://superprofile.bio/e/rmJxqGcP", // ₹248
 } as const;
 
 const WORKSHOP_BASE_PRICE = 29;
