@@ -4,13 +4,19 @@ import crypto from "node:crypto";
 
 const coerceParam = z
   .unknown()
-  .transform((val) => (val !== undefined && val !== null ? String(val).trim() : ""))
+  .transform((val) => {
+    if (val === undefined || val === null) return "";
+    return String(val).replace(/^["']|["']$/g, "").trim();
+  })
   .optional();
 
 const verifyAccessInput = z.object({
   email: z
     .unknown()
-    .transform((val) => (val !== undefined && val !== null ? String(val).trim() : "")),
+    .transform((val) => {
+      if (val === undefined || val === null) return "";
+      return String(val).replace(/^["']|["']$/g, "").trim();
+    }),
   accessKey: coerceParam,
   deviceId: coerceParam,
 });
@@ -28,6 +34,8 @@ export interface StudentSession {
 }
 
 const SECRET_KEY = "rzp_live_ThPkZr13H5M66E_aif_mastery_secret_2026";
+const RZP_KEY_ID = "rzp_live_TjpSDnPQldisku";
+const RZP_KEY_SEC = "JA7v0pGvJoqKLNggE7CPUlLD";
 
 // Deterministic cryptographic signature matching n8n code node
 export function computeStudentAccessKey(identifier: string): string {
@@ -68,7 +76,66 @@ function generateStudentToken(identifier: string, role: string): string {
   return `std_${Math.abs(hash).toString(36)}_${b64}`;
 }
 
-// Master list of all verified enrolled course buyers (16th Oct & previous batches)
+// Dynamic real-time lookup directly against Razorpay API
+// Automatically authorizes ANY new lead who completes payment in the future
+async function verifyWithRazorpay(
+  cleanPhone: string,
+  cleanEmail: string
+): Promise<{ authorized: boolean; name?: string; amount?: number; phone?: string; email?: string } | null> {
+  try {
+    const auth =
+      typeof Buffer !== "undefined"
+        ? Buffer.from(`${RZP_KEY_ID}:${RZP_KEY_SEC}`).toString("base64")
+        : btoa(`${RZP_KEY_ID}:${RZP_KEY_SEC}`);
+
+    const res = await fetch("https://api.razorpay.com/v1/payments?count=100", {
+      headers: { Authorization: `Basic ${auth}` },
+    });
+
+    if (!res.ok) return null;
+    const data: any = await res.json();
+    const payments = data.items || [];
+
+    const match = payments.find((p: any) => {
+      if (p.status !== "captured") return false;
+      const pAmt = p.amount ? Math.round(p.amount / 100) : 0;
+      if (pAmt < 900) return false; // Must be course purchase (₹2,499 or ₹999 token)
+
+      const pPhone = String(p.contact || "").replace(/\D/g, "").slice(-10);
+      const pEmail = String(p.email || "").toLowerCase().trim();
+
+      const matchP = Boolean(cleanPhone && pPhone && pPhone === cleanPhone);
+      const matchE = Boolean(
+        cleanEmail && pEmail && pEmail === cleanEmail && !pEmail.endsWith("@razorpay.com")
+      );
+      return matchP || matchE;
+    });
+
+    if (match) {
+      const payerName =
+        match.notes?.name ||
+        match.notes?.buyer_name ||
+        match.notes?.Name ||
+        match.notes?.comment ||
+        "";
+      const pPhone = String(match.contact || "").replace(/\D/g, "").slice(-10);
+      const pEmail = String(match.email || "").toLowerCase().trim();
+
+      return {
+        authorized: true,
+        name: payerName,
+        amount: Math.round(match.amount / 100),
+        phone: pPhone,
+        email: pEmail.endsWith("@razorpay.com") ? "" : pEmail,
+      };
+    }
+  } catch (err) {
+    console.warn("Razorpay live dynamic lookup notice:", err);
+  }
+  return null;
+}
+
+// Master fast-cache list of all verified enrolled course buyers
 export const VERIFIED_COURSE_BUYERS: Array<{
   name: string;
   email: string;
@@ -97,9 +164,10 @@ export const VERIFIED_COURSE_BUYERS: Array<{
 export const verifyCourseAccess = createServerFn({ method: "POST" })
   .inputValidator((data) => verifyAccessInput.parse(data))
   .handler(async ({ data }): Promise<StudentSession> => {
-    const rawInput = (data.email || "").trim();
-    const accessKey = (data.accessKey || "").trim();
-    const deviceId = (data.deviceId || "").trim();
+    // Sanitize input (strip quotes, spaces, URL artifacts)
+    const rawInput = (data.email || "").replace(/^["']|["']$/g, "").trim();
+    const accessKey = (data.accessKey || "").replace(/^["']|["']$/g, "").trim();
+    const deviceId = (data.deviceId || "").replace(/^["']|["']$/g, "").trim();
 
     if (!rawInput) {
       throw new Error("Please enter your registered email address or WhatsApp mobile number.");
@@ -148,7 +216,7 @@ export const verifyCourseAccess = createServerFn({ method: "POST" })
       };
     }
 
-    // 2. Verified Course Buyer Match (by Email or 10-digit Phone)
+    // 2. Verified Course Buyer Match (Fast Cache)
     const matchedBuyer = VERIFIED_COURSE_BUYERS.find((b) => {
       const matchEmail = Boolean(cleanEmail && b.email && b.email.toLowerCase() === cleanEmail);
       const matchPhone = Boolean(cleanPhone && b.phone && b.phone.slice(-10) === cleanPhone);
@@ -176,7 +244,17 @@ export const verifyCourseAccess = createServerFn({ method: "POST" })
       matchedBuyer || isHmacKeyValid || isFallbackKeyValid || isMasterPass
     );
 
-    // 4. Non-blocking device registration & fallback n8n check
+    // 4. Dynamic Live Razorpay Verification
+    // Seamlessly handles any FUTURE lead enrolling via Razorpay payment links
+    let liveRzpBuyer: { authorized: boolean; name?: string; amount?: number; phone?: string; email?: string } | null = null;
+    if (!isAuthorized) {
+      liveRzpBuyer = await verifyWithRazorpay(cleanPhone, cleanEmail);
+      if (liveRzpBuyer && liveRzpBuyer.authorized) {
+        isAuthorized = true;
+      }
+    }
+
+    // 5. Non-blocking device registration & fallback n8n check
     let deviceNumber = 1;
     if (deviceId) {
       try {
@@ -201,7 +279,7 @@ export const verifyCourseAccess = createServerFn({ method: "POST" })
       }
     }
 
-    // 5. Final Authorization Gate
+    // 6. Final Authorization Gate
     if (!isAuthorized) {
       throw new Error(
         `Access Denied: Course purchase not found for ${cleanPhone ? `mobile number +91 ${cleanPhone}` : cleanEmail}. This course is strictly locked to verified students who completed enrollment. If you recently paid, please ensure you use your registered email or mobile number, or contact workshop@prateekmayani.com.`
@@ -211,9 +289,23 @@ export const verifyCourseAccess = createServerFn({ method: "POST" })
     // Determine student display details
     const finalName =
       matchedBuyer?.name ||
+      liveRzpBuyer?.name ||
       (cleanEmail ? cleanEmail.split("@")[0].toUpperCase() : `STUDENT (+91 ${cleanPhone})`);
-    const finalEmail = matchedBuyer?.email || cleanEmail || `${cleanPhone}@student.prateekmayani.com`;
-    const finalPhone = matchedBuyer?.phone ? `+91 ${matchedBuyer.phone}` : (cleanPhone ? `+91 ${cleanPhone}` : "");
+
+    const finalEmail =
+      matchedBuyer?.email ||
+      liveRzpBuyer?.email ||
+      cleanEmail ||
+      `${cleanPhone}@student.prateekmayani.com`;
+
+    const finalPhone =
+      matchedBuyer?.phone
+        ? `+91 ${matchedBuyer.phone}`
+        : liveRzpBuyer?.phone
+          ? `+91 ${liveRzpBuyer.phone}`
+          : cleanPhone
+            ? `+91 ${cleanPhone}`
+            : "";
 
     return {
       email: finalEmail,

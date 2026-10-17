@@ -10,9 +10,19 @@ import {
 import { BunnyVideoPlayer } from "@/components/course/BunnyVideoPlayer";
 import { verifyCourseAccess, type StudentSession } from "@/lib/course.functions";
 
+const cleanSearchValue = (val: unknown): string | undefined => {
+  if (val === undefined || val === null) return undefined;
+  let str = String(val).trim();
+  try {
+    str = decodeURIComponent(str);
+  } catch {}
+  str = str.replace(/^["'“”‘’]+|["'“”‘’]+$/g, "").trim();
+  return str || undefined;
+};
+
 const coerceSafeString = z
   .unknown()
-  .transform((val) => (val !== undefined && val !== null ? String(val).trim() : undefined))
+  .transform((val) => cleanSearchValue(val))
   .optional();
 
 const portalSearchSchema = z.object({
@@ -29,11 +39,11 @@ export const Route = createFileRoute("/portal")({
       return portalSearchSchema.parse(search ?? {});
     } catch {
       return {
-        email: search?.email != null ? String(search.email).trim() : undefined,
-        phone: search?.phone != null ? String(search.phone).trim() : undefined,
-        identifier: search?.identifier != null ? String(search.identifier).trim() : undefined,
-        key: search?.key != null ? String(search.key).trim() : undefined,
-        v: search?.v != null ? String(search.v).trim() : undefined,
+        email: cleanSearchValue(search?.email),
+        phone: cleanSearchValue(search?.phone),
+        identifier: cleanSearchValue(search?.identifier),
+        key: cleanSearchValue(search?.key),
+        v: cleanSearchValue(search?.v),
       };
     }
   },
