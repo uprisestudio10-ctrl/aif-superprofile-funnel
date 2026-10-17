@@ -33,6 +33,23 @@ for (const item of items) {
     continue;
   }
 
+  // Deduplication guard: Skip buyers who already received bumps previously
+  const deliveredList = triggerData.exclude_emails || [
+    'vivekamahi27@gmail.com', 'ameya@spectruminfology.com', 'vyshnav589@gmail.com',
+    'rajuroy1810@gmail.com', 'sureshprajapati12342@gmail.com', 'rajeshmgokulam@gmail.com',
+    'ankitagarwal805@gmail.com', 'manish.mohan.014@gmail.com', 'iamsanjutomar@gmail.com',
+    'bbnjms2020@gmail.com', 'sanju.mj612@gmail.com', 'maxkumaran@gmail.com',
+    'kedarmetri8@gmail.com', 'stuntk@gmail.com', 'yajuvndra@gmail.com',
+    'akashselva03@gmail.com', 'mrfahim9966@gmail.com', 'bhanudasanita123@gmail.com',
+    'bharatsapkale29583@gmail.com', 'ganpatlalganpat41@gmail.com', 'rav.dkmr@gmail.com',
+    'piyushorsingh@gmail.com', 'ankitaroravfx@gmail.com', 'hlohar95@gmail.com'
+  ];
+  const excludeSet = new Set(deliveredList.map(e => String(e).trim().toLowerCase()));
+
+  if (triggerData.only_new !== false && excludeSet.has(email)) {
+    continue; // Strictly skip previously delivered buyers!
+  }
+
   const cleanAmt = parseInt(String(row.Amount).replace(/\\D/g, '')) || 0;
 
   // Guardrail: Skip course buyers (>= ₹900)
