@@ -37,6 +37,16 @@ const OFFERS: Array<{
   highlightBadge?: string;
 }> = [
   {
+    id: "combo",
+    checkbox: "Yes, I want the VIP Bundle (Recordings + Prompts)",
+    headline: "89% Of Attendees Choose This To Get Everything & Save ₹129!",
+    body: "Get full lifetime workshop recordings PLUS the complete 300+ bold prompts vault together at a massive bundle discount. Best value!",
+    addonPrice: 219,
+    priceLabel: "+₹219 (Save ₹129)",
+    badge: "BEST VALUE",
+    highlightBadge: "MOST POPULAR (89% CHOOSE THIS) • SAVE ₹129",
+  },
+  {
     id: "recording",
     checkbox: "Yes, I want to add Workshop Recording + Notes",
     headline: "83% Of Attendees Add This To Watch At Their Own Pace",
@@ -51,16 +61,6 @@ const OFFERS: Array<{
     body: "Copy-paste our 300+ tested prompts to generate scroll-stopping, bold, ultra-realistic photos in seconds.",
     addonPrice: 199,
     priceLabel: "+₹199",
-  },
-  {
-    id: "combo",
-    checkbox: "Yes, I want the VIP Bundle (Recordings + Prompts)",
-    headline: "89% Of Attendees Choose This To Get Everything & Save ₹129!",
-    body: "Get full lifetime workshop recordings PLUS the complete 300+ bold prompts vault together at a massive bundle discount. Best value!",
-    addonPrice: 219,
-    priceLabel: "+₹219 (Save ₹129)",
-    badge: "BEST VALUE",
-    highlightBadge: "BEST VALUE • SAVE ₹129",
   },
 ];
 
@@ -390,6 +390,8 @@ function CheckoutPage() {
             <span>
               {isRedirecting
                 ? "Redirecting to Secure Checkout…"
+                : selected.combo
+                ? `Proceed with VIP Pass (₹${total}) →`
                 : `Proceed to Pay ₹${total} →`}
             </span>
           </button>
