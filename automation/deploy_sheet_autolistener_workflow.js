@@ -171,6 +171,14 @@ async function deploy() {
 const items = $input.all() || [];
 const output = [];
 
+let staticData = {};
+try {
+  staticData = $getWorkflowStaticData("global");
+} catch (e) {}
+staticData.processedRowNumbers = staticData.processedRowNumbers || [];
+staticData.sentEmails = staticData.sentEmails || {};
+const now = Date.now();
+
 const whatsappUrl = "${WHATSAPP_URL}";
 const workshopName = "AI Influencer Workshop";
 const workshopDate = "22nd October 2026 (Thursday)";
@@ -189,7 +197,17 @@ for (const item of items) {
     continue;
   }
 
-  // Guardrail: Skip historical leads from previous workshops (16th Oct or earlier)
+  // Guardrail 1: Never process the same sheet row twice in memory
+  if (d.row_number && staticData.processedRowNumbers.includes(d.row_number)) {
+    continue;
+  }
+
+  // Guardrail 2: 24-hour email deduplication debounce
+  if (staticData.sentEmails[email] && (now - staticData.sentEmails[email]) < 24 * 60 * 60 * 1000) {
+    continue;
+  }
+
+  // Guardrail 3: Skip historical leads from previous workshops (16th Oct or earlier)
   const regDate = String(d["Date "] || d.Date || d["Workshop Date"] || "").toLowerCase();
   if (regDate.includes("2026-10-16") || regDate.includes("16 oct") || regDate.includes("15 oct") || regDate.includes("14 oct") || regDate.includes("13 oct")) {
     continue;
@@ -239,6 +257,12 @@ for (const item of items) {
 <strong>Prateek Mayani</strong><br>
 \${workshopName}</p>
 </div>\`;
+
+  if (d.row_number) {
+    staticData.processedRowNumbers.push(d.row_number);
+    if (staticData.processedRowNumbers.length > 500) staticData.processedRowNumbers.shift();
+  }
+  staticData.sentEmails[email] = now;
 
   output.push({
     json: {
@@ -302,10 +326,10 @@ return output;`
           columns: {
             mappingMode: "defineBelow",
             matchingColumns: [
-              "Email"
+              "row_number"
             ],
             value: {
-              Email: "={{ $('Filter Unprocessed Leads').item.json.recipientEmail }}",
+              row_number: "={{ $('Filter Unprocessed Leads').item.json.row_number }}",
               email_html: "CONFIRMATION_EMAIL_SENT"
             }
           },
@@ -320,7 +344,7 @@ return output;`
         position: [980, 200],
         credentials: {
           googleApi: {
-            id: "SsEE517tRUiLR8pJ",
+            id: "u1KbRiPRv3k5LrOJ",
             name: "Google Sheets account"
           }
         }
