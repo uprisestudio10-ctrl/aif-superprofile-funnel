@@ -34,6 +34,10 @@ import gallery14 from "@/assets/gallery/gallery-14.webp";
 import gallery15 from "@/assets/gallery/gallery-15.webp";
 import gallery16 from "@/assets/gallery/gallery-16.webp";
 import gallery17 from "@/assets/gallery/gallery-17.webp";
+import gallery18 from "@/assets/gallery/gallery-18.webp";
+import gallery19 from "@/assets/gallery/gallery-19.webp";
+import gallery20 from "@/assets/gallery/gallery-20.webp";
+import gallery21 from "@/assets/gallery/gallery-21.webp";
 import mentor from "@/assets/mentor.jpg";
 import razorpayMark from "@/assets/razorpay-mark.svg";
 
@@ -98,6 +102,10 @@ const GALLERY = [
   gallery15,
   gallery16,
   gallery17,
+  gallery18,
+  gallery19,
+  gallery20,
+  gallery21,
 ];
 
 const PAIN_ICONS: Record<string, React.ReactNode> = {
