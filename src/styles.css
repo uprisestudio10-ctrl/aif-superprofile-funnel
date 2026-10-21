@@ -727,13 +727,14 @@
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 0.3rem;
   margin-inline: calc(50% - 50vw);
   padding-inline: 0.3rem;
 }
 
 .gallery-grid-item {
+  grid-column: span 2;
   aspect-ratio: 9 / 16;
   overflow: hidden;
   padding: 0;
@@ -741,6 +742,12 @@
   border-radius: 0.55rem;
   background-color: var(--color-card);
   cursor: zoom-in;
+}
+
+/* If the final row has exactly 2 items, expand both to 3 columns (50% each) so no empty slot is left */
+.gallery-grid-item:nth-last-child(2):nth-child(3n + 1),
+.gallery-grid-item:last-child:nth-child(3n + 2) {
+  grid-column: span 3;
 }
 
 .gallery-grid-item:focus-visible {
