@@ -23,8 +23,8 @@ function getArg(key, def = "") {
 }
 
 const isTest = args.includes("--test") || args.includes("-t");
-const workshopDate = getArg("date", "all");
-const recordingUrl = getArg("recording", "https://www.youtube.com/watch?v=7vdqzvzCzEs");
+const workshopDate = getArg("date", "22nd October");
+const recordingUrl = getArg("recording", "https://youtu.be/EhkzmI2cJWs");
 const promptsUrl = getArg("prompts", "https://live.prateekmayani.com/downloads/Kruti_Sharma_300_Prompts_Library.pdf");
 
 console.log("\n=======================================================");
@@ -47,6 +47,8 @@ async function run() {
       prompts_url: promptsUrl,
       test_mode: isTest,
       test_email: "prateekmayanii@gmail.com",
+      exclude_emails: [],
+      only_new: false,
     }),
   });
 

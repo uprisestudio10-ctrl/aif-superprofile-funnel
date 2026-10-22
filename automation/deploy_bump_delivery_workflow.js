@@ -4,8 +4,8 @@ const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3OWZjNTFlMi1mMT
 const filterAndTemplateCode = `// 1. Retrieve webhook input triggers
 const triggerData = $('Webhook Trigger').first().json.body || $('Webhook Trigger').first().json.query || $('Webhook Trigger').first().json || {};
 
-const targetWorkshopDate = (triggerData.workshop_date || 'all').toLowerCase();
-const recordingUrl = triggerData.recording_url || 'https://www.youtube.com/watch?v=7vdqzvzCzEs';
+const targetWorkshopDate = (triggerData.workshop_date || '22nd october').toLowerCase();
+const recordingUrl = triggerData.recording_url || 'https://youtu.be/EhkzmI2cJWs';
 const promptsUrl = triggerData.prompts_url || 'https://live.prateekmayani.com/downloads/Kruti_Sharma_300_Prompts_Library.pdf';
 const testMode = triggerData.test_mode === true || triggerData.test_mode === 'true';
 const testEmail = triggerData.test_email || 'prateekmayanii@gmail.com';
@@ -24,33 +24,26 @@ for (const item of items) {
   const name = (row.Name || row.name || 'there').trim();
   const wsDate = (row['Workshop Date'] || '').toLowerCase();
 
-  // If specific workshop date requested (and not all), check date match if wsDate is populated
-  if (targetWorkshopDate !== 'all' && wsDate && !wsDate.includes(targetWorkshopDate)) {
-    continue;
+  // If specific workshop date requested (and not all), strictly require workshop date to match
+  if (targetWorkshopDate !== 'all') {
+    if (!wsDate || !wsDate.includes(targetWorkshopDate)) {
+      continue;
+    }
   }
 
   if (!email || !email.includes('@') || seenEmails.has(email)) {
     continue;
   }
 
-  // Deduplication guard: Skip buyers who already received bumps previously
-  const deliveredList = triggerData.exclude_emails || [
-    'vivekamahi27@gmail.com', 'ameya@spectruminfology.com', 'vyshnav589@gmail.com',
-    'rajuroy1810@gmail.com', 'sureshprajapati12342@gmail.com', 'rajeshmgokulam@gmail.com',
-    'ankitagarwal805@gmail.com', 'manish.mohan.014@gmail.com', 'iamsanjutomar@gmail.com',
-    'bbnjms2020@gmail.com', 'sanju.mj612@gmail.com', 'maxkumaran@gmail.com',
-    'kedarmetri8@gmail.com', 'stuntk@gmail.com', 'yajuvndra@gmail.com',
-    'akashselva03@gmail.com', 'mrfahim9966@gmail.com', 'bhanudasanita123@gmail.com',
-    'bharatsapkale29583@gmail.com', 'ganpatlalganpat41@gmail.com', 'rav.dkmr@gmail.com',
-    'piyushorsingh@gmail.com', 'ankitaroravfx@gmail.com', 'hlohar95@gmail.com'
-  ];
+  // Deduplication guard
+  const deliveredList = triggerData.exclude_emails || [];
   const excludeSet = new Set(deliveredList.map(e => String(e).trim().toLowerCase()));
 
   if (triggerData.only_new !== false && excludeSet.has(email)) {
-    continue; // Strictly skip previously delivered buyers!
+    continue;
   }
 
-  const cleanAmt = parseInt(String(row.Amount).replace(/\\D/g, '')) || 0;
+  const cleanAmt = parseInt(String(row.raw_amount || row.Amount || '').replace(/\\D/g, '')) || 0;
 
   // Guardrail: Skip course buyers (>= ₹900)
   if (cleanAmt >= 900) {
@@ -228,7 +221,7 @@ async function deploy() {
         position: [460, 300],
         credentials: {
           googleApi: {
-            id: "SsEE517tRUiLR8pJ",
+            id: "u1KbRiPRv3k5LrOJ",
             name: "Google Sheets account"
           }
         }
@@ -258,7 +251,7 @@ async function deploy() {
         position: [980, 300],
         credentials: {
           smtp: {
-            id: "RmJjbVmoKL0wS3Bl",
+            id: "lTsd4ouJn2s2HPNT",
             name: "SMTP account"
           }
         }

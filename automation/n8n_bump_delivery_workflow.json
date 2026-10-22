@@ -1,13 +1,26 @@
 {
-  "updatedAt": "2026-10-05T13:39:53.525Z",
-  "createdAt": "2026-09-29T13:15:31.670Z",
-  "id": "Tn0divHXM7RQtFHj",
+  "id": "P2BZ8Z3KGYOqLitz",
   "name": "AI Influencer Workshop - Post-Workshop Bump Delivery (Recording & Prompts)",
   "description": null,
   "active": true,
+  "activeVersionId": "b0bc3bf5-7bb7-4b21-8901-bf7ec741b530",
+  "createdAt": "2026-10-07T16:25:37.482Z",
+  "updatedAt": "2026-10-22T16:03:15.359Z",
   "isArchived": false,
+  "versionId": "b0bc3bf5-7bb7-4b21-8901-bf7ec741b530",
+  "versionCounter": 12,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
   "nodes": [
     {
+      "name": "Webhook Trigger",
+      "webhookId": "deliver-workshop-bumps",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
       "parameters": {
         "httpMethod": "POST",
         "path": "deliver-workshop-bumps",
@@ -15,23 +28,22 @@
         "responseData": "allEntries",
         "options": {}
       },
-      "name": "Webhook Trigger",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        200,
-        300
-      ],
-      "webhookId": "deliver-workshop-bumps",
-      "id": "81678175-6265-496a-9199-270367efc483"
+      "id": "412e0291-a91e-4d1f-807b-557025c13100"
     },
     {
+      "name": "Fetch Attendees from Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        460,
+        300
+      ],
       "parameters": {
         "operation": "read",
         "documentId": {
           "__rl": true,
-          "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
-          "mode": "list"
+          "value": "1flbSez2txzFmW1jj7uMy7THzpJyvJtpvV3ZrASU5poc",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
@@ -41,25 +53,15 @@
         "options": {},
         "authentication": "serviceAccount"
       },
-      "name": "Fetch Attendees from Google Sheet",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [
-        460,
-        300
-      ],
       "credentials": {
         "googleApi": {
-          "id": "SsEE517tRUiLR8pJ",
+          "id": "u1KbRiPRv3k5LrOJ",
           "name": "Google Sheets account"
         }
       },
-      "id": "e6d4a3d5-050a-4f48-9edb-f903262dc869"
+      "id": "81d4965d-aef6-4e66-a6ca-3703ce612531"
     },
     {
-      "parameters": {
-        "jsCode": "// 1. Retrieve webhook input triggers\nconst triggerData = $('Webhook Trigger').first().json.body || $('Webhook Trigger').first().json.query || $('Webhook Trigger').first().json || {};\n\nconst targetWorkshopDate = (triggerData.workshop_date || '8th October 2026').toLowerCase();\nconst recordingUrl = triggerData.recording_url || 'https://aifworkshop.prateekmayani.com/portal';\nconst promptsUrl = triggerData.prompts_url || 'https://aifworkshop.prateekmayani.com/portal';\nconst testMode = triggerData.test_mode === true || triggerData.test_mode === 'true';\nconst testEmail = triggerData.test_email || 'prateekmayanii@gmail.com';\n\nconst items = $input.all();\nconst output = [];\nconst seenEmails = new Set();\n\nlet bothCount = 0;\nlet recOnlyCount = 0;\nlet proOnlyCount = 0;\n\nfor (const item of items) {\n  const row = item.json;\n  const email = (row.Email || row.email || '').trim().toLowerCase();\n  const name = (row.Name || row.name || 'there').trim();\n  const wsDate = (row['Workshop Date'] || '').toLowerCase();\n  \n  // Date filter: Only process attendees for the targeted workshop date\n  if (!wsDate.includes('3 oct') && !wsDate.includes('3rd oct') && !wsDate.includes(targetWorkshopDate)) {\n    continue;\n  }\n\n  if (!email || !email.includes('@') || seenEmails.has(email)) {\n    continue;\n  }\n\n  const cleanAmt = parseInt(String(row.Amount).replace(/\\D/g, '')) || 0;\n  \n  // Strict bump verification (checks explicit column first, then amount)\n  const isRec = row['Recording Purchased'] === 'YES' || cleanAmt === 178 || cleanAmt === 377 || cleanAmt === 677 || cleanAmt === 876;\n  const isPro = row['Prompts Purchased'] === 'YES' || cleanAmt === 228 || cleanAmt === 377 || cleanAmt === 727 || cleanAmt === 876;\n\n  // If neither bump was purchased, skip completely!\n  if (!isRec && !isPro) {\n    continue;\n  }\n\n  seenEmails.add(email);\n\n  const recipientTarget = testMode ? testEmail : email;\n\n  // Case 1: Both Recording & Prompts Purchased\n  if (isRec && isPro) {\n    bothCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'BOTH',\n        emailSubject: '🎁 Your Workshop Replay + 300+ Prompts Vault [AI Influencer Masterclass]',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for joining the <strong>AI Influencer Workshop</strong>! As promised, here are the replay recordings and resources you unlocked.</p>\n\n<div style=\"background-color: #f7f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; margin: 18px 0;\">\n  <h3 style=\"margin-top: 0; color: #0d1117;\">🎥 1. Workshop Replay Recording</h3>\n  <p style=\"margin-bottom: 12px; color: #57606a;\">Watch the complete step-by-step masterclass, character creation workflows, and voice cloning sessions.</p>\n  <a href=\"${recordingUrl}\" style=\"display: inline-block; background-color: #0969da; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold;\">Watch Workshop Recording →</a>\n</div>\n\n<div style=\"background-color: #f7f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; margin: 18px 0;\">\n  <h3 style=\"margin-top: 0; color: #0d1117;\">⚡ 2. 300+ AI Influencer Master Prompts Vault</h3>\n  <p style=\"margin-bottom: 12px; color: #57606a;\">Your copy-paste prompts library covering Fashion, Travel, Fitness, and consistent poses.</p>\n  <a href=\"${promptsUrl}\" style=\"display: inline-block; background-color: #2ea44f; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold;\">Download Prompts Vault (PDF) →</a>\n</div>\n\n<p><strong>Next Steps:</strong> Settle down with your laptop, open the video replay, and start testing the prompt formulas on your own characters.</p>\n\n<p>If you have any questions or need help with any step, reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  } \n  // Case 2: Recording Only Purchased\n  else if (isRec && !isPro) {\n    recOnlyCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'RECORDING_ONLY',\n        emailSubject: '🎥 Your Workshop Replay: AI Influencer Masterclass',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for attending the <strong>AI Influencer Workshop</strong>! Your session replay recording is now ready.</p>\n\n<div style=\"background-color: #f7f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; margin: 18px 0;\">\n  <h3 style=\"margin-top: 0; color: #0d1117;\">🎥 Workshop Video Replay</h3>\n  <p style=\"margin-bottom: 12px; color: #57606a;\">Access the full recorded session including all prompt demonstrations, face consistency techniques, and voice sync tutorials.</p>\n  <a href=\"${recordingUrl}\" style=\"display: inline-block; background-color: #0969da; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold;\">Click Here to Watch Recording →</a>\n</div>\n\n<p>We recommend bookmarking the link and watching it on a desktop/laptop for the best learning experience.</p>\n\n<p>If you need any assistance, feel free to reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  }\n  // Case 3: Prompts Only Purchased\n  else if (!isRec && isPro) {\n    proOnlyCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'PROMPTS_ONLY',\n        emailSubject: '⚡ Your 300+ AI Influencer Prompt Vault is here',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for joining the <strong>AI Influencer Workshop</strong>! Here is your official copy of the <strong>300+ AI Influencer Master Prompts Vault</strong>.</p>\n\n<div style=\"background-color: #f7f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; margin: 18px 0;\">\n  <h3 style=\"margin-top: 0; color: #0d1117;\">⚡ 300+ Master Prompts Library</h3>\n  <p style=\"margin-bottom: 12px; color: #57606a;\">Ready-to-use prompts for character consistency, luxury lifestyle, fitness, travel, and viral social media poses.</p>\n  <a href=\"${promptsUrl}\" style=\"display: inline-block; background-color: #2ea44f; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold;\">Download 300+ Prompts PDF →</a>\n</div>\n\n<p>Simply copy the prompt formulas and paste them into Midjourney, Flux, or Leonardo to create stunning character shots.</p>\n\n<p>Have fun generating!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  }\n\n  // In test mode, only send 1 of each type to prevent inbox spam\n  if (testMode && output.length >= 3) {\n    break;\n  }\n}\n\nreturn output;\n"
-      },
       "name": "Filter and Prepare Bump Emails",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -67,9 +69,19 @@
         720,
         300
       ],
-      "id": "9ce8b34b-33b2-4fe3-9471-102356e2d051"
+      "parameters": {
+        "jsCode": "// 1. Retrieve webhook input triggers\nconst triggerData = $('Webhook Trigger').first().json.body || $('Webhook Trigger').first().json.query || $('Webhook Trigger').first().json || {};\n\nconst targetWorkshopDate = (triggerData.workshop_date || '22nd october').toLowerCase();\nconst recordingUrl = triggerData.recording_url || 'https://youtu.be/EhkzmI2cJWs';\nconst promptsUrl = triggerData.prompts_url || 'https://live.prateekmayani.com/downloads/Kruti_Sharma_300_Prompts_Library.pdf';\nconst testMode = triggerData.test_mode === true || triggerData.test_mode === 'true';\nconst testEmail = triggerData.test_email || 'prateekmayanii@gmail.com';\n\nconst items = $input.all();\nconst output = [];\nconst seenEmails = new Set();\n\nlet bothCount = 0;\nlet recOnlyCount = 0;\nlet proOnlyCount = 0;\n\nfor (const item of items) {\n  const row = item.json;\n  const email = (row.Email || row.email || '').trim().toLowerCase();\n  const name = (row.Name || row.name || 'there').trim();\n  const wsDate = (row['Workshop Date'] || '').toLowerCase();\n\n  // If specific workshop date requested (and not all), strictly require workshop date to match\n  if (targetWorkshopDate !== 'all') {\n    if (!wsDate || !wsDate.includes(targetWorkshopDate)) {\n      continue;\n    }\n  }\n\n  if (!email || !email.includes('@') || seenEmails.has(email)) {\n    continue;\n  }\n\n  // Deduplication guard\n  const deliveredList = triggerData.exclude_emails || [];\n  const excludeSet = new Set(deliveredList.map(e => String(e).trim().toLowerCase()));\n\n  if (triggerData.only_new !== false && excludeSet.has(email)) {\n    continue;\n  }\n\n  const cleanAmt = parseInt(String(row.raw_amount || row.Amount || '').replace(/\\D/g, '')) || 0;\n\n  // Guardrail: Skip course buyers (>= ₹900)\n  if (cleanAmt >= 900) {\n    continue;\n  }\n  \n  // Bump verification:\n  // 178: Ticket + Recording\n  // 228: Ticket + Prompts\n  // 248: Ticket + Combo (Recording + Prompts)\n  // 377: Ticket + Recording + Prompts\n  const isRec = row['Recording Purchased'] === 'YES' || [178, 248, 377, 677, 876].includes(cleanAmt);\n  const isPro = row['Prompts Purchased'] === 'YES' || [228, 248, 377, 727, 876].includes(cleanAmt);\n\n  // If neither bump was purchased, skip completely!\n  if (!isRec && !isPro) {\n    continue;\n  }\n\n  seenEmails.add(email);\n\n  const recipientTarget = testMode ? testEmail : email;\n\n  // Case 1: Both Recording & Prompts Purchased\n  if (isRec && isPro) {\n    bothCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'BOTH',\n        emailSubject: '🎁 Your Workshop Replay + 300+ Prompts Vault [AI Influencer Workshop]',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for attending the <strong>AI Influencer Workshop</strong> today!</p>\n\n<p>Here are the replay recording and prompt resources you unlocked:</p>\n\n<p style=\"margin: 16px 0 6px 0;\"><strong>1. Workshop Replay Recording:</strong></p>\n<p style=\"margin: 0 0 16px 0;\">\n  👉 <a href=\"${recordingUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${recordingUrl}</a>\n</p>\n\n<p style=\"margin: 16px 0 6px 0;\"><strong>2. 300+ Master Prompts Vault (PDF):</strong></p>\n<p style=\"margin: 0 0 16px 0;\">\n  👉 <a href=\"${promptsUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${promptsUrl}</a>\n</p>\n\n<p>We recommend opening the links on your laptop or desktop for the best learning experience.</p>\n\n<p>If you have any questions or need anything, feel free to reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  } \n  // Case 2: Recording Only Purchased\n  else if (isRec && !isPro) {\n    recOnlyCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'RECORDING_ONLY',\n        emailSubject: '🎥 Your Workshop Replay: AI Influencer Workshop',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for attending the <strong>AI Influencer Workshop</strong> today! Your session replay recording is now ready.</p>\n\n<p style=\"margin: 16px 0 6px 0;\"><strong>Workshop Replay Recording:</strong></p>\n<p style=\"margin: 0 0 16px 0;\">\n  👉 <a href=\"${recordingUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${recordingUrl}</a>\n</p>\n\n<p>We recommend opening the link on your laptop/desktop for the best learning experience.</p>\n\n<p>If you have any questions, feel free to reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  }\n  // Case 3: Prompts Only Purchased\n  else if (!isRec && isPro) {\n    proOnlyCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'PROMPTS_ONLY',\n        emailSubject: '⚡ Your 300+ AI Influencer Prompts Vault (PDF)',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for purchasing the <strong>300+ Prompts Vault</strong> add-on with the AI Influencer Workshop!</p>\n\n<p style=\"margin: 16px 0 6px 0;\"><strong>300+ Master Prompts Vault (PDF):</strong></p>\n<p style=\"margin: 0 0 16px 0;\">\n  👉 <a href=\"${promptsUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${promptsUrl}</a>\n</p>\n\n<p>Simply copy the prompt formulas and test them on your characters.</p>\n\n<p>If you have any questions, feel free to reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  }\n\n  // In test mode, only send 1 of each type to prevent inbox spam\n  if (testMode && output.length >= 3) {\n    break;\n  }\n}\n\nreturn output;\n"
+      },
+      "id": "6d88e8de-046e-4c37-a0c7-c06e28cc4664"
     },
     {
+      "name": "Send Bump Email via SMTP",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        980,
+        300
+      ],
       "parameters": {
         "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
         "toEmail": "={{ $json.recipientEmail }}",
@@ -79,21 +91,14 @@
           "replyTo": "workshop@prateekmayani.com"
         }
       },
-      "name": "Send Bump Email via SMTP",
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
-      "position": [
-        980,
-        300
-      ],
       "credentials": {
         "smtp": {
-          "id": "RmJjbVmoKL0wS3Bl",
+          "id": "lTsd4ouJn2s2HPNT",
           "name": "SMTP account"
         }
       },
-      "id": "507e3cac-4f2d-4078-aff3-068e33a707bb",
-      "webhookId": "664fa4a2-f070-40d5-a65e-d22d57ca4deb"
+      "id": "79b33db4-91e1-4bdb-8929-91a71deef890",
+      "webhookId": "f1eb8d3e-5bcc-4377-a67f-ddf960934295"
     }
   ],
   "connections": {
@@ -131,26 +136,50 @@
       ]
     }
   },
+  "nodeGroups": [],
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "saveExecutionProgress": true,
+    "saveDataSuccessExecution": "all"
   },
   "staticData": null,
+  "pinData": {},
   "meta": null,
-  "nodeGroups": [],
-  "pinData": null,
-  "versionId": "4458608d-8b6b-40dd-880f-35bfd37a7c77",
-  "activeVersionId": "4458608d-8b6b-40dd-880f-35bfd37a7c77",
-  "versionCounter": 5,
-  "triggerCount": 1,
-  "sourceWorkflowId": null,
   "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "P2BZ8Z3KGYOqLitz",
+      "projectId": "ACkZEiKXYVX4xYK1",
+      "project": {
+        "id": "ACkZEiKXYVX4xYK1",
+        "name": "Prateek Mayani <prateekmayanii@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "79fc51e2-f17e-4509-a031-571c5001c617",
+        "createdAt": "2026-10-07T04:32:21.004Z",
+        "updatedAt": "2026-10-07T16:08:22.665Z"
+      },
+      "createdAt": "2026-10-07T16:25:37.482Z",
+      "updatedAt": "2026-10-07T16:25:37.482Z"
+    }
+  ],
   "activeVersion": {
-    "updatedAt": "2026-10-05T13:39:53.530Z",
-    "createdAt": "2026-10-05T13:39:53.530Z",
-    "versionId": "4458608d-8b6b-40dd-880f-35bfd37a7c77",
-    "workflowId": "Tn0divHXM7RQtFHj",
+    "versionId": "b0bc3bf5-7bb7-4b21-8901-bf7ec741b530",
+    "workflowId": "P2BZ8Z3KGYOqLitz",
     "nodes": [
       {
+        "name": "Webhook Trigger",
+        "webhookId": "deliver-workshop-bumps",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          200,
+          300
+        ],
         "parameters": {
           "httpMethod": "POST",
           "path": "deliver-workshop-bumps",
@@ -158,23 +187,22 @@
           "responseData": "allEntries",
           "options": {}
         },
-        "name": "Webhook Trigger",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 2,
-        "position": [
-          200,
-          300
-        ],
-        "webhookId": "deliver-workshop-bumps",
-        "id": "81678175-6265-496a-9199-270367efc483"
+        "id": "412e0291-a91e-4d1f-807b-557025c13100"
       },
       {
+        "name": "Fetch Attendees from Google Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.5,
+        "position": [
+          460,
+          300
+        ],
         "parameters": {
           "operation": "read",
           "documentId": {
             "__rl": true,
-            "value": "1gO4yvsdtW8a_p1CV40DAjnyt5-ZmVIm-TaX3BeqHHdA",
-            "mode": "list"
+            "value": "1flbSez2txzFmW1jj7uMy7THzpJyvJtpvV3ZrASU5poc",
+            "mode": "id"
           },
           "sheetName": {
             "__rl": true,
@@ -184,25 +212,15 @@
           "options": {},
           "authentication": "serviceAccount"
         },
-        "name": "Fetch Attendees from Google Sheet",
-        "type": "n8n-nodes-base.googleSheets",
-        "typeVersion": 4.5,
-        "position": [
-          460,
-          300
-        ],
         "credentials": {
           "googleApi": {
-            "id": "SsEE517tRUiLR8pJ",
+            "id": "u1KbRiPRv3k5LrOJ",
             "name": "Google Sheets account"
           }
         },
-        "id": "e6d4a3d5-050a-4f48-9edb-f903262dc869"
+        "id": "81d4965d-aef6-4e66-a6ca-3703ce612531"
       },
       {
-        "parameters": {
-          "jsCode": "// 1. Retrieve webhook input triggers\nconst triggerData = $('Webhook Trigger').first().json.body || $('Webhook Trigger').first().json.query || $('Webhook Trigger').first().json || {};\n\nconst targetWorkshopDate = (triggerData.workshop_date || '8th October 2026').toLowerCase();\nconst recordingUrl = triggerData.recording_url || 'https://aifworkshop.prateekmayani.com/portal';\nconst promptsUrl = triggerData.prompts_url || 'https://aifworkshop.prateekmayani.com/portal';\nconst testMode = triggerData.test_mode === true || triggerData.test_mode === 'true';\nconst testEmail = triggerData.test_email || 'prateekmayanii@gmail.com';\n\nconst items = $input.all();\nconst output = [];\nconst seenEmails = new Set();\n\nlet bothCount = 0;\nlet recOnlyCount = 0;\nlet proOnlyCount = 0;\n\nfor (const item of items) {\n  const row = item.json;\n  const email = (row.Email || row.email || '').trim().toLowerCase();\n  const name = (row.Name || row.name || 'there').trim();\n  const wsDate = (row['Workshop Date'] || '').toLowerCase();\n  \n  // Date filter: Only process attendees for the targeted workshop date\n  if (!wsDate.includes('3 oct') && !wsDate.includes('3rd oct') && !wsDate.includes(targetWorkshopDate)) {\n    continue;\n  }\n\n  if (!email || !email.includes('@') || seenEmails.has(email)) {\n    continue;\n  }\n\n  const cleanAmt = parseInt(String(row.Amount).replace(/\\D/g, '')) || 0;\n  \n  // Strict bump verification (checks explicit column first, then amount)\n  const isRec = row['Recording Purchased'] === 'YES' || cleanAmt === 178 || cleanAmt === 377 || cleanAmt === 677 || cleanAmt === 876;\n  const isPro = row['Prompts Purchased'] === 'YES' || cleanAmt === 228 || cleanAmt === 377 || cleanAmt === 727 || cleanAmt === 876;\n\n  // If neither bump was purchased, skip completely!\n  if (!isRec && !isPro) {\n    continue;\n  }\n\n  seenEmails.add(email);\n\n  const recipientTarget = testMode ? testEmail : email;\n\n  // Case 1: Both Recording & Prompts Purchased\n  if (isRec && isPro) {\n    bothCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'BOTH',\n        emailSubject: '🎁 Your Workshop Replay + 300+ Prompts Vault [AI Influencer Masterclass]',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for joining the <strong>AI Influencer Workshop</strong>! As promised, here are the replay recordings and resources you unlocked.</p>\n\n<div style=\"background-color: #f7f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; margin: 18px 0;\">\n  <h3 style=\"margin-top: 0; color: #0d1117;\">🎥 1. Workshop Replay Recording</h3>\n  <p style=\"margin-bottom: 12px; color: #57606a;\">Watch the complete step-by-step masterclass, character creation workflows, and voice cloning sessions.</p>\n  <a href=\"${recordingUrl}\" style=\"display: inline-block; background-color: #0969da; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold;\">Watch Workshop Recording →</a>\n</div>\n\n<div style=\"background-color: #f7f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; margin: 18px 0;\">\n  <h3 style=\"margin-top: 0; color: #0d1117;\">⚡ 2. 300+ AI Influencer Master Prompts Vault</h3>\n  <p style=\"margin-bottom: 12px; color: #57606a;\">Your copy-paste prompts library covering Fashion, Travel, Fitness, and consistent poses.</p>\n  <a href=\"${promptsUrl}\" style=\"display: inline-block; background-color: #2ea44f; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold;\">Download Prompts Vault (PDF) →</a>\n</div>\n\n<p><strong>Next Steps:</strong> Settle down with your laptop, open the video replay, and start testing the prompt formulas on your own characters.</p>\n\n<p>If you have any questions or need help with any step, reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  } \n  // Case 2: Recording Only Purchased\n  else if (isRec && !isPro) {\n    recOnlyCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'RECORDING_ONLY',\n        emailSubject: '🎥 Your Workshop Replay: AI Influencer Masterclass',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for attending the <strong>AI Influencer Workshop</strong>! Your session replay recording is now ready.</p>\n\n<div style=\"background-color: #f7f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; margin: 18px 0;\">\n  <h3 style=\"margin-top: 0; color: #0d1117;\">🎥 Workshop Video Replay</h3>\n  <p style=\"margin-bottom: 12px; color: #57606a;\">Access the full recorded session including all prompt demonstrations, face consistency techniques, and voice sync tutorials.</p>\n  <a href=\"${recordingUrl}\" style=\"display: inline-block; background-color: #0969da; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold;\">Click Here to Watch Recording →</a>\n</div>\n\n<p>We recommend bookmarking the link and watching it on a desktop/laptop for the best learning experience.</p>\n\n<p>If you need any assistance, feel free to reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  }\n  // Case 3: Prompts Only Purchased\n  else if (!isRec && isPro) {\n    proOnlyCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'PROMPTS_ONLY',\n        emailSubject: '⚡ Your 300+ AI Influencer Prompt Vault is here',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for joining the <strong>AI Influencer Workshop</strong>! Here is your official copy of the <strong>300+ AI Influencer Master Prompts Vault</strong>.</p>\n\n<div style=\"background-color: #f7f9fa; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; margin: 18px 0;\">\n  <h3 style=\"margin-top: 0; color: #0d1117;\">⚡ 300+ Master Prompts Library</h3>\n  <p style=\"margin-bottom: 12px; color: #57606a;\">Ready-to-use prompts for character consistency, luxury lifestyle, fitness, travel, and viral social media poses.</p>\n  <a href=\"${promptsUrl}\" style=\"display: inline-block; background-color: #2ea44f; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold;\">Download 300+ Prompts PDF →</a>\n</div>\n\n<p>Simply copy the prompt formulas and paste them into Midjourney, Flux, or Leonardo to create stunning character shots.</p>\n\n<p>Have fun generating!</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  }\n\n  // In test mode, only send 1 of each type to prevent inbox spam\n  if (testMode && output.length >= 3) {\n    break;\n  }\n}\n\nreturn output;\n"
-        },
         "name": "Filter and Prepare Bump Emails",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -210,9 +228,19 @@
           720,
           300
         ],
-        "id": "9ce8b34b-33b2-4fe3-9471-102356e2d051"
+        "parameters": {
+          "jsCode": "// 1. Retrieve webhook input triggers\nconst triggerData = $('Webhook Trigger').first().json.body || $('Webhook Trigger').first().json.query || $('Webhook Trigger').first().json || {};\n\nconst targetWorkshopDate = (triggerData.workshop_date || '22nd october').toLowerCase();\nconst recordingUrl = triggerData.recording_url || 'https://youtu.be/EhkzmI2cJWs';\nconst promptsUrl = triggerData.prompts_url || 'https://live.prateekmayani.com/downloads/Kruti_Sharma_300_Prompts_Library.pdf';\nconst testMode = triggerData.test_mode === true || triggerData.test_mode === 'true';\nconst testEmail = triggerData.test_email || 'prateekmayanii@gmail.com';\n\nconst items = $input.all();\nconst output = [];\nconst seenEmails = new Set();\n\nlet bothCount = 0;\nlet recOnlyCount = 0;\nlet proOnlyCount = 0;\n\nfor (const item of items) {\n  const row = item.json;\n  const email = (row.Email || row.email || '').trim().toLowerCase();\n  const name = (row.Name || row.name || 'there').trim();\n  const wsDate = (row['Workshop Date'] || '').toLowerCase();\n\n  // If specific workshop date requested (and not all), strictly require workshop date to match\n  if (targetWorkshopDate !== 'all') {\n    if (!wsDate || !wsDate.includes(targetWorkshopDate)) {\n      continue;\n    }\n  }\n\n  if (!email || !email.includes('@') || seenEmails.has(email)) {\n    continue;\n  }\n\n  // Deduplication guard\n  const deliveredList = triggerData.exclude_emails || [];\n  const excludeSet = new Set(deliveredList.map(e => String(e).trim().toLowerCase()));\n\n  if (triggerData.only_new !== false && excludeSet.has(email)) {\n    continue;\n  }\n\n  const cleanAmt = parseInt(String(row.raw_amount || row.Amount || '').replace(/\\D/g, '')) || 0;\n\n  // Guardrail: Skip course buyers (>= ₹900)\n  if (cleanAmt >= 900) {\n    continue;\n  }\n  \n  // Bump verification:\n  // 178: Ticket + Recording\n  // 228: Ticket + Prompts\n  // 248: Ticket + Combo (Recording + Prompts)\n  // 377: Ticket + Recording + Prompts\n  const isRec = row['Recording Purchased'] === 'YES' || [178, 248, 377, 677, 876].includes(cleanAmt);\n  const isPro = row['Prompts Purchased'] === 'YES' || [228, 248, 377, 727, 876].includes(cleanAmt);\n\n  // If neither bump was purchased, skip completely!\n  if (!isRec && !isPro) {\n    continue;\n  }\n\n  seenEmails.add(email);\n\n  const recipientTarget = testMode ? testEmail : email;\n\n  // Case 1: Both Recording & Prompts Purchased\n  if (isRec && isPro) {\n    bothCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'BOTH',\n        emailSubject: '🎁 Your Workshop Replay + 300+ Prompts Vault [AI Influencer Workshop]',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for attending the <strong>AI Influencer Workshop</strong> today!</p>\n\n<p>Here are the replay recording and prompt resources you unlocked:</p>\n\n<p style=\"margin: 16px 0 6px 0;\"><strong>1. Workshop Replay Recording:</strong></p>\n<p style=\"margin: 0 0 16px 0;\">\n  👉 <a href=\"${recordingUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${recordingUrl}</a>\n</p>\n\n<p style=\"margin: 16px 0 6px 0;\"><strong>2. 300+ Master Prompts Vault (PDF):</strong></p>\n<p style=\"margin: 0 0 16px 0;\">\n  👉 <a href=\"${promptsUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${promptsUrl}</a>\n</p>\n\n<p>We recommend opening the links on your laptop or desktop for the best learning experience.</p>\n\n<p>If you have any questions or need anything, feel free to reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  } \n  // Case 2: Recording Only Purchased\n  else if (isRec && !isPro) {\n    recOnlyCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'RECORDING_ONLY',\n        emailSubject: '🎥 Your Workshop Replay: AI Influencer Workshop',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for attending the <strong>AI Influencer Workshop</strong> today! Your session replay recording is now ready.</p>\n\n<p style=\"margin: 16px 0 6px 0;\"><strong>Workshop Replay Recording:</strong></p>\n<p style=\"margin: 0 0 16px 0;\">\n  👉 <a href=\"${recordingUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${recordingUrl}</a>\n</p>\n\n<p>We recommend opening the link on your laptop/desktop for the best learning experience.</p>\n\n<p>If you have any questions, feel free to reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  }\n  // Case 3: Prompts Only Purchased\n  else if (!isRec && isPro) {\n    proOnlyCount++;\n    output.push({\n      json: {\n        recipientEmail: recipientTarget,\n        recipientName: name,\n        bumpType: 'PROMPTS_ONLY',\n        emailSubject: '⚡ Your 300+ AI Influencer Prompts Vault (PDF)',\n        emailHtml: `<div style=\"font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;\">\n<p>Hi ${name},</p>\n\n<p>Thank you for purchasing the <strong>300+ Prompts Vault</strong> add-on with the AI Influencer Workshop!</p>\n\n<p style=\"margin: 16px 0 6px 0;\"><strong>300+ Master Prompts Vault (PDF):</strong></p>\n<p style=\"margin: 0 0 16px 0;\">\n  👉 <a href=\"${promptsUrl}\" style=\"color: #0066cc; text-decoration: underline; font-weight: bold;\">${promptsUrl}</a>\n</p>\n\n<p>Simply copy the prompt formulas and test them on your characters.</p>\n\n<p>If you have any questions, feel free to reply directly to this email.</p>\n\n<p>Best Regards,<br>\n<strong>Prateek Mayani</strong><br>\nAI Influencer Workshop</p>\n</div>`\n      }\n    });\n  }\n\n  // In test mode, only send 1 of each type to prevent inbox spam\n  if (testMode && output.length >= 3) {\n    break;\n  }\n}\n\nreturn output;\n"
+        },
+        "id": "6d88e8de-046e-4c37-a0c7-c06e28cc4664"
       },
       {
+        "name": "Send Bump Email via SMTP",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          980,
+          300
+        ],
         "parameters": {
           "fromEmail": "Prateek Mayani <workshop@prateekmayani.com>",
           "toEmail": "={{ $json.recipientEmail }}",
@@ -222,21 +250,14 @@
             "replyTo": "workshop@prateekmayani.com"
           }
         },
-        "name": "Send Bump Email via SMTP",
-        "type": "n8n-nodes-base.emailSend",
-        "typeVersion": 2.1,
-        "position": [
-          980,
-          300
-        ],
         "credentials": {
           "smtp": {
-            "id": "RmJjbVmoKL0wS3Bl",
+            "id": "lTsd4ouJn2s2HPNT",
             "name": "SMTP account"
           }
         },
-        "id": "507e3cac-4f2d-4078-aff3-068e33a707bb",
-        "webhookId": "664fa4a2-f070-40d5-a65e-d22d57ca4deb"
+        "id": "79b33db4-91e1-4bdb-8929-91a71deef890",
+        "webhookId": "f1eb8d3e-5bcc-4377-a67f-ddf960934295"
       }
     ],
     "connections": {
@@ -275,9 +296,37 @@
       }
     },
     "nodeGroups": [],
-    "authors": "Preetam Soni",
+    "authors": "Prateek Mayani",
     "name": null,
     "description": null,
-    "autosaved": false
+    "autosaved": false,
+    "createdAt": "2026-10-22T16:03:15.363Z",
+    "updatedAt": "2026-10-22T16:03:15.363Z",
+    "workflowPublishHistory": [
+      {
+        "id": 171,
+        "workflowId": "P2BZ8Z3KGYOqLitz",
+        "versionId": "b0bc3bf5-7bb7-4b21-8901-bf7ec741b530",
+        "event": "activated",
+        "userId": "79fc51e2-f17e-4509-a031-571c5001c617",
+        "createdAt": "2026-10-22T16:03:15.957Z"
+      },
+      {
+        "id": 172,
+        "workflowId": "P2BZ8Z3KGYOqLitz",
+        "versionId": "b0bc3bf5-7bb7-4b21-8901-bf7ec741b530",
+        "event": "deactivated",
+        "userId": "79fc51e2-f17e-4509-a031-571c5001c617",
+        "createdAt": "2026-10-22T16:03:16.341Z"
+      },
+      {
+        "id": 173,
+        "workflowId": "P2BZ8Z3KGYOqLitz",
+        "versionId": "b0bc3bf5-7bb7-4b21-8901-bf7ec741b530",
+        "event": "activated",
+        "userId": "79fc51e2-f17e-4509-a031-571c5001c617",
+        "createdAt": "2026-10-22T16:03:16.341Z"
+      }
+    ]
   }
 }
