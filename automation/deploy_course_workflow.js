@@ -116,6 +116,12 @@ if (phoneToFind && phoneToFind.length === 10) {
   });
 }
 
+// Fallback: If not matched by phone, check if incoming email matches Sheet1
+const incomingEmailClean = String(payment.incoming_email || '').trim().toLowerCase();
+if (!matchedAttendee && incomingEmailClean && incomingEmailClean.includes('@') && !incomingEmailClean.endsWith('@razorpay.com') && !incomingEmailClean.includes('void')) {
+  matchedAttendee = attendees.find(r => String(r.Email || '').trim().toLowerCase() === incomingEmailClean);
+}
+
 let resolvedEmail = '';
 let emailSource = '';
 
@@ -139,11 +145,12 @@ if (!resolvedEmail && payment.incoming_email) {
 
 // Verification Flags
 const phoneProvided = Boolean(phoneToFind && phoneToFind.length === 10);
-const phoneFoundInSheet = Boolean(matchedAttendee);
+const phoneFoundInSheet = Boolean(phoneToFind && phoneToFind.length === 10 && attendees.some(r => String(r.Number || r.Phone || '').replace(/\\D/g, '').slice(-10) === phoneToFind));
+const sheetMatched = Boolean(matchedAttendee);
 const emailFound = Boolean(resolvedEmail);
 
-// User rule: Phone number ya fir email nahi milne pe -> Alert Admin (uprisestudio10@gmail.com)
-const verifiedInSheet = phoneProvided && phoneFoundInSheet && emailFound;
+// User rule: Verified if matched in sheet (phone or email) AND email resolved
+const verifiedInSheet = sheetMatched && emailFound;
 
 const studentName = matchedAttendee?.Name || payment.name || (resolvedEmail ? resolvedEmail.split('@')[0].toUpperCase() : 'Student');
 const phone = payment.phone || '';
