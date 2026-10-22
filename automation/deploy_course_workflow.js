@@ -53,13 +53,16 @@ if (parsedAmount < 900) {
   return [];
 }
 
-const isToken = parsedAmount < 2000;
+const isToken = parsedAmount < 2499;
+const remainingBalance = Math.max(0, 2499 - parsedAmount);
 const phone = (item.phone || item.number || '').replace(/\\D/g, '').slice(-10);
 const name = (item.name || 'Student').trim();
 const incomingEmail = (item.incoming_email || item.email || '').trim().toLowerCase();
 const paymentId = item.razorpay_payment_id || '';
 const orderId = item.razorpay_order_id || '';
-const amountFormatted = isToken ? '₹999 (Token)' : (parsedAmount > 0 ? ('₹' + parsedAmount.toLocaleString('en-IN')) : '₹2,999');
+const amountFormatted = isToken 
+  ? \`₹\${parsedAmount.toLocaleString('en-IN')} (Token - Balance ₹\${remainingBalance.toLocaleString('en-IN')} Pending)\` 
+  : (parsedAmount > 0 ? ('₹' + parsedAmount.toLocaleString('en-IN')) : '₹2,499');
 
 // Deduplication safeguard
 try {
@@ -134,20 +137,29 @@ if (!resolvedEmail && payment.incoming_email) {
   }
 }
 
-// If student was not matched by phone, try matching by resolved email in Sheet1
-if (!matchedAttendee && (resolvedEmail || payment.incoming_email)) {
-  const targetEmail = (resolvedEmail || payment.incoming_email).toLowerCase();
-  matchedAttendee = attendees.find(r => String(r.Email || '').trim().toLowerCase() === targetEmail);
-}
-
+// Verification Flags
+const phoneProvided = Boolean(phoneToFind && phoneToFind.length === 10);
+const phoneFoundInSheet = Boolean(matchedAttendee);
 const emailFound = Boolean(resolvedEmail);
+
+// User rule: Phone number ya fir email nahi milne pe -> Alert Admin (uprisestudio10@gmail.com)
+const verifiedInSheet = phoneProvided && phoneFoundInSheet && emailFound;
+
 const studentName = matchedAttendee?.Name || payment.name || (resolvedEmail ? resolvedEmail.split('@')[0].toUpperCase() : 'Student');
-const phone = payment.phone;
-const amountFormatted = payment.amount_formatted;
-const isToken = payment.is_token;
+const phone = payment.phone || '';
+const parsedAmount = payment.amount;
+const isToken = payment.is_token; // true if < 2499
 const paymentId = payment.payment_id;
 const regDate = payment.date;
 const regTime = payment.time;
+const remainingBalance = Math.max(0, 2499 - parsedAmount);
+
+let amountFormatted = payment.amount_formatted;
+if (isToken) {
+  amountFormatted = \`₹\${parsedAmount.toLocaleString('en-IN')} (Token - Balance ₹\${remainingBalance.toLocaleString('en-IN')} Pending)\`;
+} else {
+  amountFormatted = \`₹\${parsedAmount.toLocaleString('en-IN')}\`;
+}
 
 let portalUrl = '';
 let accessKey = '';
@@ -158,28 +170,61 @@ let studentEmailHtml = '';
 let adminEmailSubject = '';
 let adminEmailHtml = '';
 
-if (emailFound) {
-  // Authorize buyer for device lock
-  try {
-    const staticData = $getWorkflowStaticData('global');
-    staticData.authorizedBuyers = staticData.authorizedBuyers || [];
-    if (phone && !staticData.authorizedBuyers.includes(phone)) {
-      staticData.authorizedBuyers.push(phone);
-    }
-    if (resolvedEmail && !staticData.authorizedBuyers.includes(resolvedEmail)) {
-      staticData.authorizedBuyers.push(resolvedEmail);
-    }
-  } catch (e) {}
+if (verifiedInSheet) {
+  // Verified in Sheet1!
+  if (isToken) {
+    // ₹999 Token: Seat reserved, ACCESS LOCKED
+    accessStatus = \`LOCKED - Token Paid (Balance ₹\${remainingBalance.toLocaleString('en-IN')} Pending)\`;
+    accessKey = 'LOCKED_PENDING_FULL_PAYMENT';
+    portalUrl = \`LOCKED (Complete remaining ₹\${remainingBalance.toLocaleString('en-IN')} to unlock)\`;
 
-  accessStatus = isToken
-    ? 'LOCKED - Token Paid (Balance ₹2,000 Pending)'
-    : 'Active (Full Access)';
+    studentEmailSubject = '🔒 Your Course Seat is Reserved (Token Received) - AI Influencer Mastery';
+    studentEmailHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;">
+<p>Hi \${studentName},</p>
 
-  const secretKey = 'rzp_live_ThPkZr13H5M66E_aif_mastery_secret_2026';
-  accessKey = 'LOCKED_PENDING_FULL_PAYMENT';
-  portalUrl = 'LOCKED (Complete remaining ₹2,000 to unlock)';
+<p>Your seat reservation token of <strong>₹\${parsedAmount.toLocaleString('en-IN')}</strong> for the <strong>AI Influencer Mastery Program</strong> has been successfully received! 🔒</p>
 
-  if (!isToken) {
+<p>Your special webinar discount price of <strong>₹2,499</strong> (Save ₹7,500) is now officially locked in your name.</p>
+
+<div style="background-color: #fff9e6; border: 1px solid #ffe082; border-radius: 8px; padding: 14px; margin: 18px 0; font-size: 13px; color: #333333;">
+  <p style="margin: 0 0 6px 0; font-weight: bold; color: #b78103; font-size: 14px;">⚠️ Important Notice Regarding Course Access:</p>
+  <p style="margin: 0; line-height: 1.5;">Please note that full access to the video modules, secret prompt vaults, and student portal will be unlocked immediately once your remaining balance of <strong>₹\${remainingBalance.toLocaleString('en-IN')}</strong> is completed.</p>
+</div>
+
+<p><strong>Your Token Payment Summary:</strong></p>
+<ul style="margin: 0 0 16px 0; padding-left: 20px;">
+  <li><strong>Registered Student:</strong> \${studentName}</li>
+  <li><strong>Mobile Number:</strong> +91 \${phone}</li>
+  <li><strong>Registered Email:</strong> \${resolvedEmail}</li>
+  <li><strong>Token Amount Paid:</strong> ₹\${parsedAmount.toLocaleString('en-IN')}</li>
+  <li><strong>Remaining Balance:</strong> ₹\${remainingBalance.toLocaleString('en-IN')}</li>
+  <li><strong>Access Status:</strong> <span style="color: #b78103; font-weight: bold;">Locked (Pending Full Payment)</span></li>
+</ul>
+
+<p><strong>Next Step to Unlock Instant Course Access:</strong><br>
+To complete your remaining payment of ₹\${remainingBalance.toLocaleString('en-IN')} and unlock your course portal immediately, simply reply directly to this email or message us on WhatsApp.</p>
+
+<p>We look forward to welcoming you inside the masterclass!</p>
+
+<p>Best Regards,<br>
+<strong>Prateek Mayani</strong><br>
+AI Influencer Mastery</p>
+</div>\`;
+  } else {
+    // Full Payment (>= ₹2,499): UNLOCK ACCESS
+    try {
+      const staticData = $getWorkflowStaticData('global');
+      staticData.authorizedBuyers = staticData.authorizedBuyers || [];
+      if (phone && !staticData.authorizedBuyers.includes(phone)) {
+        staticData.authorizedBuyers.push(phone);
+      }
+      if (resolvedEmail && !staticData.authorizedBuyers.includes(resolvedEmail)) {
+        staticData.authorizedBuyers.push(resolvedEmail);
+      }
+    } catch (e) {}
+
+    accessStatus = 'Active (Full Access)';
+    const secretKey = 'rzp_live_ThPkZr13H5M66E_aif_mastery_secret_2026';
     try {
       const crypto = require('crypto');
       accessKey = crypto.createHmac('sha256', secretKey).update(resolvedEmail || phone).digest('hex').slice(0, 16);
@@ -193,13 +238,9 @@ if (emailFound) {
       accessKey = Math.abs(h).toString(16).padEnd(12, '0') + 'aif';
     }
     portalUrl = \`https://live.prateekmayani.com/portal?phone=\${phone}&email=\${encodeURIComponent(resolvedEmail)}&key=\${accessKey}\`;
-  }
 
-  studentEmailSubject = isToken
-    ? '🔒 Your Course Seat is Reserved (Token Received) - AI Influencer Mastery'
-    : '🎉 Your Course Access is Ready: Welcome to AI Influencer Mastery!';
-
-  const fullAccessHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;">
+    studentEmailSubject = '🎉 Your Course Access is Ready: Welcome to AI Influencer Mastery!';
+    studentEmailHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;">
 <p>Hi \${studentName},</p>
 
 <p>Congratulations and welcome to the <strong>AI Influencer Mastery Program</strong>! 🚀</p>
@@ -230,7 +271,7 @@ Click below to instantly unlock your private student portal (authorized strictly
   <li><strong>Email Source:</strong> \${emailSource === 'WORKSHOP_SHEET' ? 'Verified from Workshop Registration' : 'Payment Information'}</li>
 </ul>
 
-<p><em>Security Notice: Your course access is cryptographically bound to your mobile number and locked to your 1 registered personal device. To protect against link piracy, access on a second device is blocked.</em></p>
+<p><em>Security Notice: Your course access is cryptographically bound to your mobile number and locked to your personal device. To protect against link piracy, access on unauthorized devices is blocked.</em></p>
 
 <p>If you encounter any questions while building your AI creator, simply reply directly to this email.</p>
 
@@ -240,86 +281,70 @@ Click below to instantly unlock your private student portal (authorized strictly
 <strong>Prateek Mayani</strong><br>
 AI Influencer Mastery</p>
 </div>\`;
-
-  const tokenHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;">
-<p>Hi \${studentName},</p>
-
-<p>Your seat reservation token of <strong>₹999</strong> for the <strong>AI Influencer Mastery Program</strong> has been successfully received! 🔒</p>
-
-<p>Your special webinar discount price of <strong>₹2,999</strong> (Save ₹7,000) is now officially locked in your name.</p>
-
-<p><strong>⚠️ Important Notice Regarding Course Access:</strong><br>
-Please note that full access to the video modules, secret prompt vaults, and student portal will be unlocked immediately once your remaining balance of <strong>₹2,000</strong> is completed.</p>
-
-<p><strong>Your Token Payment Summary:</strong></p>
-<ul style="margin: 0 0 16px 0; padding-left: 20px;">
-  <li><strong>Registered Student:</strong> \${studentName}</li>
-  <li><strong>Mobile Number:</strong> +91 \${phone}</li>
-  <li><strong>Email:</strong> \${resolvedEmail}</li>
-  <li><strong>Token Amount Paid:</strong> ₹999</li>
-  <li><strong>Remaining Balance:</strong> ₹2,000</li>
-  <li><strong>Access Status:</strong> Locked (Pending Full Payment)</li>
-</ul>
-
-<p><strong>Next Step to Unlock Instant Course Access:</strong><br>
-To complete your remaining payment and unlock your course portal immediately, simply reply directly to this email or message us on WhatsApp.</p>
-
-<p>We look forward to welcoming you inside the masterclass!</p>
-
-<p>Best Regards,<br>
-<strong>Prateek Mayani</strong><br>
-AI Influencer Mastery</p>
-</div>\`;
-
-  studentEmailHtml = isToken ? tokenHtml : fullAccessHtml;
-
+  }
 } else {
-  // EMAIL IS MISSING: Student paid via QR/UPI and was not in workshop sheet
-  accessStatus = 'LOCKED - Email Collection Required';
-  portalUrl = 'LOCKED - Email Collection Required';
+  // MISSING PHONE OR EMAIL IN SHEET: Alert Admin
+  let reasonText = '';
+  if (!phoneProvided) {
+    reasonText = 'Payment checkout mein mobile number provide nahi kiya gaya tha.';
+  } else if (!phoneFoundInSheet && !emailFound) {
+    reasonText = \`Mobile number (+91 \${phone}) workshop lead sheet (Sheet1) mein nahi mila aur payment mein bhi email capture nahi hua.\`;
+  } else if (!phoneFoundInSheet) {
+    reasonText = \`Mobile number (+91 \${phone}) workshop lead sheet (Sheet1) mein nahi mila.\`;
+  } else {
+    reasonText = 'Mobile number sheet mein mila, lekin email address blank / missing hai.';
+  }
+
+  accessStatus = 'LOCKED - Verification Required';
+  portalUrl = 'LOCKED (Admin action required)';
   accessKey = 'PENDING';
 
-  adminEmailSubject = \`🚨 ACTION REQUIRED: Course Buyer Email Pending - \${studentName} (\${phone})\`;
+  adminEmailSubject = \`🚨 ACTION REQUIRED: Course Buyer Detail Missing - \${studentName} (+91 \${phone || 'No Phone'})\`;
   adminEmailHtml = \`<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #111111; max-width: 600px;">
-  <h2 style="color: #d9381e; margin-top: 0;">⚠️ Action Required: Course Buyer Email Collection Pending</h2>
-  <p>A course payment was received, but the student's registered email address <strong>could not be found in the workshop lead sheet</strong> (Sheet1), and Razorpay did not capture an email address (e.g. UPI QR payment).</p>
+  <h2 style="color: #d9381e; margin-top: 0;">⚠️ Action Required: Course Buyer Detail Missing</h2>
+  <p>Ek naya course enrollment payment receive hua hai, lekin student ka detail workshop lead sheet mein verify nahi ho paya.</p>
   
-  <div style="background: #fdf2f2; border: 1px solid #f8b4b4; border-radius: 8px; padding: 16px; margin: 16px 0;">
-    <table style="width: 100%; border-collapse: collapse;">
-      <tr><td style="padding: 6px 0; font-weight: bold; width: 140px;">Student Name:</td><td>\${studentName}</td></tr>
-      <tr><td style="padding: 6px 0; font-weight: bold;">Mobile Number:</td><td><strong>+91 \${phone}</strong></td></tr>
-      <tr><td style="padding: 6px 0; font-weight: bold;">Amount Paid:</td><td><strong style="color: #0f8b44;">\${amountFormatted}</strong></td></tr>
-      <tr><td style="padding: 6px 0; font-weight: bold;">Razorpay Payment ID:</td><td><code>\${paymentId}</code></td></tr>
-      <tr><td style="padding: 6px 0; font-weight: bold;">Date &amp; Time:</td><td>\${regDate} at \${regTime}</td></tr>
-      <tr><td style="padding: 6px 0; font-weight: bold;">Razorpay Email:</td><td><code>\${payment.incoming_email || 'None (void@razorpay.com)'}</code></td></tr>
-      <tr><td style="padding: 6px 0; font-weight: bold;">Course Access:</td><td><strong style="color: #d9381e;">LOCKED (Waiting for Email)</strong></td></tr>
+  <div style="background: #fdf2f2; border: 1.5px solid #f8b4b4; border-radius: 8px; padding: 16px; margin: 16px 0;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+      <tr><td style="padding: 6px 0; font-weight: bold; width: 160px; color: #555;">Student Name:</td><td><strong style="font-size: 15px; color: #111;">\${studentName}</strong></td></tr>
+      <tr><td style="padding: 6px 0; font-weight: bold; color: #555;">Mobile Number:</td><td><strong style="font-size: 16px; color: #111;">+91 \${phone || 'Not Provided'}</strong></td></tr>
+      <tr><td style="padding: 6px 0; font-weight: bold; color: #555;">Amount Paid:</td><td><strong style="color: #0f8b44; font-size: 16px;">\${amountFormatted}</strong></td></tr>
+      <tr><td style="padding: 6px 0; font-weight: bold; color: #555;">Razorpay Payment ID:</td><td><code>\${paymentId}</code></td></tr>
+      <tr><td style="padding: 6px 0; font-weight: bold; color: #555;">Date &amp; Time:</td><td>\${regDate} at \${regTime}</td></tr>
+      <tr><td style="padding: 6px 0; font-weight: bold; color: #555;">Lookup Issue:</td><td><span style="color: #d9381e; font-weight: bold;">\${reasonText}</span></td></tr>
+      <tr><td style="padding: 6px 0; font-weight: bold; color: #555;">Course Access:</td><td><strong style="color: #d9381e;">LOCKED (Access not given)</strong></td></tr>
     </table>
   </div>
 
-  <p><strong>Action for Prateek / Admin:</strong></p>
-  <p>Click below to open a direct WhatsApp chat with the student and request their email address:</p>
+  <h3 style="color: #111; margin: 18px 0 8px 0;">👉 Admin Side Se Kya Required Hai:</h3>
+  <ol style="margin: 0 0 18px 0; padding-left: 20px; line-height: 1.8;">
+    <li><strong>Student se Email / Details confirm karein:</strong> Niche diye gaye WhatsApp button pe click karke direct student se baat karein aur unka registered email address maangein.</li>
+    <li><strong>Workshop Sheet verify karein:</strong> Check karein kya student ne kisi doosre number ya email se workshop register kiya tha.</li>
+    <li><strong>Access grant karein:</strong> Email milte hi Google Sheet ke <strong>Course Buyers</strong> tab mein unka email aur status update kar dein. (Agar ₹999 token hai to remaining ₹1,500 collect karne ke baad hi full access dein).</li>
+  </ol>
 
-  <p style="text-align: center; margin: 24px 0;">
-    <a href="https://wa.me/91\${phone}?text=Hi%20\${encodeURIComponent(studentName)},%20thank%20you%20for%20enrolling%20in%20AI%20Influencer%20Mastery!%20Please%20reply%20with%20your%20registered%20email%20address%20so%20we%20can%20grant%20your%20portal%20access." 
-       style="background: #25D366; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block;">
+  \${phone ? \`<p style="text-align: center; margin: 24px 0;">
+    <a href="https://wa.me/91\${phone}?text=Hi%20\${encodeURIComponent(studentName)},%20thank%20you%20for%20enrolling%20in%20AI%20Influencer%20Mastery!%20Please%20reply%20with%20your%20registered%20email%20address%20so%20we%20can%20grant%20your%20course%20portal%20access." 
+       style="background: #25D366; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 6px; display: inline-block; font-size: 15px;">
       👉 WhatsApp Student (+91 \${phone})
     </a>
-  </p>
+  </p>\` : ''}
 
-  <p>Once you collect their email, simply update their email in the <strong>Course Buyers</strong> sheet tab, and their course access link will be active.</p>
+  <p style="font-size: 12px; color: #666;">Once email is collected and entered in 'Course Buyers' tab, their portal access will be active.</p>
 </div>\`;
 }
 
 return [{
   json: {
+    verified_in_sheet: verifiedInSheet,
     email_found: emailFound,
-    email_source: emailSource,
+    phone_found_in_sheet: phoneFoundInSheet,
     student_name: studentName,
     student_phone: phone,
     student_email: resolvedEmail || 'PENDING_COLLECTION',
     student_email_subject: studentEmailSubject,
     student_email_html: studentEmailHtml,
-    admin_email: 'uprisestudio10@gmail.com',
+    admin_email: 'uprisestudio10@gmail.com, prateekmayanii@gmail.com',
     admin_email_subject: adminEmailSubject,
     admin_email_html: adminEmailHtml,
     Date: regDate,
@@ -427,8 +452,8 @@ const workflowPayload = {
           },
           conditions: [
             {
-              id: "condition-email-check",
-              leftValue: "={{ $json.email_found }}",
+              id: "condition-verified-check",
+              leftValue: "={{ $json.verified_in_sheet }}",
               rightValue: true,
               operator: {
                 type: "boolean",
@@ -441,7 +466,7 @@ const workflowPayload = {
         options: {}
       },
       id: "check-email-found",
-      name: "Is Email Found?",
+      name: "Is Verified in Sheet?",
       type: "n8n-nodes-base.if",
       typeVersion: 2,
       position: [980, 300]
@@ -684,16 +709,16 @@ return [{
       main: [[{ node: "Match Phone & Resolve Email", type: "main", index: 0 }]]
     },
     "Match Phone & Resolve Email": {
-      main: [[{ node: "Is Email Found?", type: "main", index: 0 }]]
+      main: [[{ node: "Is Verified in Sheet?", type: "main", index: 0 }]]
     },
-    "Is Email Found?": {
+    "Is Verified in Sheet?": {
       main: [
-        // True branch: Email is found
+        // True branch: Verified in Sheet1 (Phone + Email found)
         [
           { node: "Send Course Access Email to Student", type: "main", index: 0 },
           { node: "Prepare Clean Sheet Columns", type: "main", index: 0 }
         ],
-        // False branch: Email is missing
+        // False branch: Missing Phone or Email in Sheet1
         [
           { node: "Send Admin Pending Email Alert", type: "main", index: 0 },
           { node: "Prepare Clean Sheet Columns", type: "main", index: 0 }
@@ -721,7 +746,7 @@ async function deployWorkflow() {
     headers: { "X-N8N-API-KEY": apiKey }
   });
   const data = await getRes.json();
-  const existingWf = data.data.find(w => w.name === workflowPayload.name || w.id === "Z034qypVNed6oJcg");
+  const existingWf = data.data.find(w => w.name === workflowPayload.name || w.id === "TVNUUwtNq9CGsSW6");
 
   let workflowId;
 

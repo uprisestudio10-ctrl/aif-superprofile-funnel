@@ -99,7 +99,8 @@ async function verifyWithRazorpay(
     const match = payments.find((p: any) => {
       if (p.status !== "captured") return false;
       const pAmt = p.amount ? Math.round(p.amount / 100) : 0;
-      if (pAmt < 900) return false; // Must be course purchase (₹2,499 or ₹999 token)
+      // User rule: Below ₹2,499 is strictly token/partial; do NOT grant portal access!
+      if (pAmt < 2499) return false;
 
       const pPhone = String(p.contact || "").replace(/\D/g, "").slice(-10);
       const pEmail = String(p.email || "").toLowerCase().trim();
