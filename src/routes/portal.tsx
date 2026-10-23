@@ -158,6 +158,26 @@ function CoursePortalPage() {
     }
   }, [search.email, search.phone, search.identifier, search.key]);
 
+  // Validate existing cached session on mount (ensures refunded/revoked students are purged immediately)
+  useEffect(() => {
+    if (session) {
+      const idToValidate = session.email || session.phone || "";
+      if (idToValidate) {
+        verifyCourseAccess({
+          data: {
+            email: idToValidate,
+            accessKey: search.key || undefined,
+            deviceId: getOrCreateDeviceId(),
+          },
+        }).catch((err) => {
+          console.warn("Session validation failed, revoking portal access:", err?.message);
+          handleLogout();
+          setAuthError(err?.message || "Your course access has been revoked.");
+        });
+      }
+    }
+  }, []);
+
   const getOrCreateDeviceId = (): string => {
     if (typeof window === "undefined") return "dev_ssr";
     const key = "aif_device_fingerprint";

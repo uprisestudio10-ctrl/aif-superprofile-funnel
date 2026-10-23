@@ -151,7 +151,7 @@ const sheetMatched = Boolean(matchedAttendee);
 const emailFound = Boolean(resolvedEmail);
 
 // User rule: Verified if matched in sheet (phone or email) OR admin force_deliver AND email resolved
-const verifiedInSheet = (sheetMatched || payment.force_deliver) && emailFound;
+let verifiedInSheet = (sheetMatched || payment.force_deliver) && emailFound;
 
 const studentName = matchedAttendee?.Name || payment.name || (resolvedEmail ? resolvedEmail.split('@')[0].toUpperCase() : 'Student');
 const phone = payment.phone || '';
@@ -178,7 +178,18 @@ let studentEmailHtml = '';
 let adminEmailSubject = '';
 let adminEmailHtml = '';
 
-if (verifiedInSheet) {
+const revokedList = ['6262692120', '9202278929', 'golurawt455@gmail.com', '9870673209', 'teetunimash9870@gmail.com'];
+const isRevoked = revokedList.includes(phone) || (resolvedEmail && revokedList.includes(resolvedEmail.toLowerCase()));
+
+if (isRevoked) {
+  // EXPLICITLY REVOKED / REFUNDED
+  verifiedInSheet = false;
+  accessStatus = 'REVOKED - Refund Processed';
+  portalUrl = 'ACCESS_REVOKED (Refund Processed)';
+  accessKey = 'REVOKED';
+  adminEmailSubject = \`⚠️ NOTICE: Refunded Student Course Access Revoked - \${studentName} (+91 \${phone})\`;
+  adminEmailHtml = \`<p>Course access for student <strong>\${studentName}</strong> (+91 \${phone}) is strictly revoked due to processed refund.</p>\`;
+} else if (verifiedInSheet) {
   // Verified in Sheet1!
   if (isToken) {
     // ₹999 Token: Seat reserved, ACCESS LOCKED
@@ -615,6 +626,19 @@ if (body.action === 'authorize_buyer') {
   return [{ json: { allowed: true, authorized: true, message: \`Buyer successfully authorized: \${target}\` } }];
 }
 
+// Allow buyer revocation / refund
+if (body.action === 'revoke_buyer') {
+  const target = (body.targetEmail || body.targetPhone || body.email || '').trim().toLowerCase();
+  const cleanTarget = target.replace(/\\D/g, '').slice(-10);
+  staticData.revokedBuyers = staticData.revokedBuyers || [];
+  if (target && !staticData.revokedBuyers.includes(target)) staticData.revokedBuyers.push(target);
+  if (cleanTarget.length === 10 && !staticData.revokedBuyers.includes(cleanTarget)) staticData.revokedBuyers.push(cleanTarget);
+  staticData.authorizedBuyers = (staticData.authorizedBuyers || []).filter(b => b !== target && b !== cleanTarget);
+  delete staticData.devicesByStudent[target];
+  if (cleanTarget.length === 10) delete staticData.devicesByStudent[cleanTarget];
+  return [{ json: { allowed: false, revoked: true, message: \`Buyer access revoked: \${target}\` } }];
+}
+
 // Pre-whitelist verified buyers
 const defaultAuthorized = [
   'gchhangani69@gmail.com',
@@ -623,10 +647,40 @@ const defaultAuthorized = [
   '9686607788',
   '9288202588',
   'mshivam79@gmail.com',
-  '8448824505'
+  '8448824505',
+  '9573399944',
+  'naveegaadi@gmail.com',
+  '9343163399',
+  'amalik0924@gmail.com'
 ];
 for (const da of defaultAuthorized) {
   if (!staticData.authorizedBuyers.includes(da)) staticData.authorizedBuyers.push(da);
+}
+
+// Permanent revoked / refunded buyers list
+const hardcodedRevoked = [
+  '6262692120',
+  '9202278929',
+  'golurawt455@gmail.com',
+  '9870673209',
+  'teetunimash9870@gmail.com'
+];
+staticData.revokedBuyers = staticData.revokedBuyers || [];
+for (const hr of hardcodedRevoked) {
+  if (!staticData.revokedBuyers.includes(hr)) staticData.revokedBuyers.push(hr);
+}
+
+// Filter out any revoked buyers from authorized list
+staticData.authorizedBuyers = (staticData.authorizedBuyers || []).filter(b => !staticData.revokedBuyers.includes(b));
+
+if (staticData.revokedBuyers.includes(rawId) || (cleanPhone.length === 10 && staticData.revokedBuyers.includes(cleanPhone))) {
+  return [{ 
+    json: { 
+      allowed: false, 
+      revoked: true,
+      message: 'Access Denied: Course access for this account has been revoked due to a processed refund.' 
+    } 
+  }];
 }
 
 if (!rawId || !deviceId) {

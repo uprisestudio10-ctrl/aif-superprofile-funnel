@@ -96,8 +96,24 @@ async function verifyWithRazorpay(
     const data: any = await res.json();
     const payments = data.items || [];
 
+    // Skip Razorpay lookup entirely if student is in revoked list
+    const isRevoked = REFUNDED_OR_REVOKED_STUDENTS.some((r) => {
+      const matchPhone = Boolean(
+        cleanPhone && r.phone && r.phone.replace(/\D/g, "").slice(-10) === cleanPhone
+      );
+      const matchEmail = Boolean(
+        cleanEmail && r.email && r.email.toLowerCase() === cleanEmail
+      );
+      return matchPhone || matchEmail;
+    });
+    if (isRevoked) return null;
+
     const match = payments.find((p: any) => {
       if (p.status !== "captured") return false;
+      // Skip refunded payments
+      if (p.refund_status === "full" || (p.amount_refunded && p.amount_refunded >= p.amount)) {
+        return false;
+      }
       const pAmt = p.amount ? Math.round(p.amount / 100) : 0;
       // User rule: Below ₹2,499 is strictly token/partial; do NOT grant portal access!
       if (pAmt < 2499) return false;
@@ -162,8 +178,35 @@ export const VERIFIED_COURSE_BUYERS: Array<{
   { name: "VIP Student", phone: "9288202588", email: "" },
   { name: "Ankit Arora", phone: "9650206742", email: "ankitaroravfx@gmail.com" },
   { name: "Student (VIP Access)", phone: "", email: "editdesign1947@gmail.com" },
-  { name: "Golu Rawat", phone: "6262692120", email: "golurawt455@gmail.com" },
-  { name: "Golu Rawat", phone: "9202278929", email: "golurawt455@gmail.com" },
+  { name: "Naveen", phone: "9573399944", email: "naveegaadi@gmail.com" },
+  { name: "Ayan Malik", phone: "9343163399", email: "amalik0924@gmail.com" },
+];
+
+// List of students whose course access has been explicitly revoked (refunded or cancelled)
+export const REFUNDED_OR_REVOKED_STUDENTS: Array<{
+  name: string;
+  phone: string;
+  email: string;
+  reason: string;
+}> = [
+  {
+    name: "Golu Rawat",
+    phone: "6262692120",
+    email: "golurawt455@gmail.com",
+    reason: "Refund processed",
+  },
+  {
+    name: "Golu Rawat (Alt)",
+    phone: "9202278929",
+    email: "golurawt455@gmail.com",
+    reason: "Refund processed",
+  },
+  {
+    name: "Teetu Kumar",
+    phone: "9870673209",
+    email: "teetunimash9870@gmail.com",
+    reason: "Refund processed",
+  },
 ];
 
 export const verifyCourseAccess = createServerFn({ method: "POST" })
@@ -182,6 +225,27 @@ export const verifyCourseAccess = createServerFn({ method: "POST" })
     const cleanEmail = isEmail ? rawInput.toLowerCase() : "";
     const cleanPhone = !isEmail ? rawInput.replace(/\D/g, "").slice(-10) : "";
     const identifier = cleanEmail || cleanPhone;
+
+    // 0. Immediate Revocation Check for Refunded / Cancelled Students
+    const isRevoked = REFUNDED_OR_REVOKED_STUDENTS.some((r) => {
+      const matchPhone = Boolean(
+        cleanPhone &&
+        r.phone &&
+        r.phone.replace(/\D/g, "").slice(-10) === cleanPhone
+      );
+      const matchEmail = Boolean(
+        cleanEmail &&
+        r.email &&
+        r.email.toLowerCase() === cleanEmail
+      );
+      return matchPhone || matchEmail;
+    });
+
+    if (isRevoked) {
+      throw new Error(
+        `Access Revoked: Course enrollment for ${cleanPhone ? `mobile number +91 ${cleanPhone}` : cleanEmail} has been cancelled/revoked due to a processed refund. If you have any questions, please contact workshop@prateekmayani.com.`
+      );
+    }
 
     // 1. Master Admin / Instructor Pass
     const adminEmails = [
