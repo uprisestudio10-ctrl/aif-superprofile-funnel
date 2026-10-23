@@ -98,7 +98,8 @@ return [{
     payment_id: paymentId,
     order_id: orderId,
     date: regDate,
-    time: regTime
+    time: regTime,
+    force_deliver: Boolean(raw.force_deliver || item.force_deliver)
   }
 }];`;
 
@@ -139,7 +140,7 @@ if (!resolvedEmail && payment.incoming_email) {
   const em = String(payment.incoming_email).trim().toLowerCase();
   if (em.includes('@') && !em.endsWith('@razorpay.com') && !em.includes('void')) {
     resolvedEmail = em;
-    emailSource = 'PAYMENT_PAYLOAD';
+    emailSource = payment.force_deliver ? 'ADMIN_VERIFIED' : 'PAYMENT_PAYLOAD';
   }
 }
 
@@ -149,8 +150,8 @@ const phoneFoundInSheet = Boolean(phoneToFind && phoneToFind.length === 10 && at
 const sheetMatched = Boolean(matchedAttendee);
 const emailFound = Boolean(resolvedEmail);
 
-// User rule: Verified if matched in sheet (phone or email) AND email resolved
-const verifiedInSheet = sheetMatched && emailFound;
+// User rule: Verified if matched in sheet (phone or email) OR admin force_deliver AND email resolved
+const verifiedInSheet = (sheetMatched || payment.force_deliver) && emailFound;
 
 const studentName = matchedAttendee?.Name || payment.name || (resolvedEmail ? resolvedEmail.split('@')[0].toUpperCase() : 'Student');
 const phone = payment.phone || '';
@@ -434,7 +435,7 @@ const workflowPayload = {
       position: [540, 300],
       credentials: {
         googleApi: {
-          id: "SsEE517tRUiLR8pJ",
+          id: "u1KbRiPRv3k5LrOJ",
           name: "Google Sheets account"
         }
       }
@@ -494,7 +495,7 @@ const workflowPayload = {
       position: [1220, 200],
       credentials: {
         smtp: {
-          id: "RmJjbVmoKL0wS3Bl",
+          id: "lTsd4ouJn2s2HPNT",
           name: "SMTP account"
         }
       },
@@ -516,7 +517,7 @@ const workflowPayload = {
       position: [1220, 420],
       credentials: {
         smtp: {
-          id: "RmJjbVmoKL0wS3Bl",
+          id: "lTsd4ouJn2s2HPNT",
           name: "SMTP account"
         }
       },
@@ -561,7 +562,7 @@ const workflowPayload = {
       position: [1680, 300],
       credentials: {
         googleApi: {
-          id: "SsEE517tRUiLR8pJ",
+          id: "u1KbRiPRv3k5LrOJ",
           name: "Google Sheets account"
         }
       },
