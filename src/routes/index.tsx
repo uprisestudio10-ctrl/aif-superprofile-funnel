@@ -279,21 +279,10 @@ function Cta({ label = "Register For Live Workshop 👉" }: { label?: string }) 
     setUrl(getCheckoutUrl());
   }, []);
 
-  const handleClick = () => {
-    if (typeof window !== "undefined" && (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq) {
-      try {
-        (window as unknown as { fbq: (...args: unknown[]) => void }).fbq(
-          "track",
-          "InitiateCheckout",
-          {
-            value: 29.0,
-            currency: "INR",
-            content_name: "AI Influencer Reels Workshop",
-          }
-        );
-      } catch (err) {
-        console.error("Meta pixel track error:", err);
-      }
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("open-register-modal"));
     }
   };
 
@@ -303,10 +292,224 @@ function Cta({ label = "Register For Live Workshop 👉" }: { label?: string }) 
       onClick={handleClick}
       onMouseDown={() => setUrl(getCheckoutUrl())}
       onTouchStart={() => setUrl(getCheckoutUrl())}
-      className="btn-cta text-center text-[15px] sm:text-[17px]"
+      className="btn-cta text-center text-[15px] sm:text-[17px] cursor-pointer"
     >
       <span className="block w-full text-center leading-tight">{label}</span>
     </a>
+  );
+}
+
+function RegistrationModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && isOpen) {
+      const qName = sessionStorage.getItem("lead_name") || "";
+      const qPhone = sessionStorage.getItem("lead_phone") || "";
+      const qEmail = sessionStorage.getItem("lead_email") || "";
+      if (qName) setName(qName);
+      if (qPhone) setPhone(qPhone);
+      if (qEmail) setEmail(qEmail);
+    }
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const cleanName = name.trim();
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanName || cleanName.length < 2) {
+      setError("Please enter your full name.");
+      return;
+    }
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      setError("Please enter a valid 10-digit WhatsApp number.");
+      return;
+    }
+    if (!cleanEmail || !cleanEmail.includes("@") || !cleanEmail.includes(".")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      sessionStorage.setItem("lead_name", cleanName);
+      sessionStorage.setItem("lead_phone", cleanPhone);
+      sessionStorage.setItem("lead_email", cleanEmail);
+    } catch {}
+
+    if (typeof window !== "undefined" && (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq) {
+      try {
+        (window as unknown as { fbq: (...args: unknown[]) => void }).fbq("track", "Lead", {
+          content_name: "Workshop Registration Modal",
+          value: 29.0,
+          currency: "INR",
+        });
+      } catch (err) {
+        console.warn("Pixel Lead warning:", err);
+      }
+    }
+
+    try {
+      fetch("https://prateek.n8n.preetamsoni.com/webhook/ai-influencer-leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: "lead_registered_modal",
+          name: cleanName,
+          phone: cleanPhone,
+          email: cleanEmail,
+          workshop_date: "29th October 2026 (Thursday) 7:00 PM IST",
+          timestamp: new Date().toISOString(),
+        }),
+      }).catch(() => {});
+    } catch {}
+
+    const baseUrl = getCheckoutUrl();
+    const joinChar = baseUrl.includes("?") ? "&" : "?";
+    const targetUrl = `${baseUrl}${joinChar}step=2&name=${encodeURIComponent(cleanName)}&phone=${cleanPhone}&email=${encodeURIComponent(cleanEmail)}`;
+    window.location.href = targetUrl;
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-[420px] rounded-2xl border border-white/15 bg-card p-5 shadow-2xl text-left"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close registration modal"
+          className="absolute right-3.5 top-3.5 size-7 rounded-full bg-white/10 text-center text-lg leading-none text-muted-foreground hover:bg-white/20 hover:text-white transition-colors cursor-pointer"
+        >
+          ×
+        </button>
+
+        <div className="text-center pr-6">
+          <p className="text-[11px] font-extrabold uppercase tracking-widest text-primary flex items-center justify-center gap-1.5">
+            <span>⚡</span>
+            <span>Live AI Influencer Workshop</span>
+          </p>
+          <h2 className="mt-1 font-display text-[21px] font-extrabold leading-tight text-white">
+            Register For Just <span className="text-gold-grad">₹29</span>
+          </h2>
+          <p className="mt-1 text-[12px] text-muted-foreground">
+            29th October 2026 (Thursday) · 7:00 PM IST · Zoom
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} autoComplete="on" className="mt-4 space-y-3.5">
+          <div>
+            <label htmlFor="reg-name" className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+              Full Name *
+            </label>
+            <input
+              id="reg-name"
+              name="name"
+              type="text"
+              required
+              autoComplete="name"
+              autoCapitalize="words"
+              autoCorrect="off"
+              spellCheck={false}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your full name"
+              className="w-full rounded-xl border border-white/10 bg-black/50 px-3.5 py-2.5 text-[14px] text-white placeholder:text-muted-foreground/60 focus:border-amber-400 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="reg-tel" className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+              WhatsApp Mobile Number *
+            </label>
+            <div className="flex">
+              <span className="inline-flex items-center rounded-l-xl border border-r-0 border-white/10 bg-white/5 px-3 text-[13px] font-semibold text-muted-foreground">
+                +91
+              </span>
+              <input
+                id="reg-tel"
+                name="tel"
+                type="tel"
+                required
+                maxLength={10}
+                autoComplete="tel"
+                inputMode="tel"
+                pattern="[0-9]*"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                placeholder="10-digit WhatsApp number"
+                className="w-full rounded-r-xl border border-white/10 bg-black/50 px-3.5 py-2.5 text-[14px] text-white placeholder:text-muted-foreground/60 focus:border-amber-400 focus:outline-none"
+              />
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              Zoom link and VIP group invite will be sent here.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="reg-email" className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+              Email Address *
+            </label>
+            <input
+              id="reg-email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              inputMode="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@example.com"
+              className="w-full rounded-xl border border-white/10 bg-black/50 px-3.5 py-2.5 text-[14px] text-white placeholder:text-muted-foreground/60 focus:border-amber-400 focus:outline-none"
+            />
+          </div>
+
+          {error && (
+            <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-1.5 text-[12px] font-semibold text-destructive">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="btn-cta w-full flex items-center justify-center gap-2 py-3 cursor-pointer disabled:opacity-60 transition-transform hover:scale-[1.01]"
+          >
+            <span>{isSubmitting ? "Opening Pass Options…" : "Register For ₹29 👉"}</span>
+          </button>
+
+          <p className="text-center text-[10.5px] text-muted-foreground">
+            🔒 100% Secure Razorpay UPI / Cards • Instant Zoom Link Delivery
+          </p>
+        </form>
+      </div>
+    </div>
   );
 }
 
@@ -509,6 +712,13 @@ function Faq({ q, a }: { q: string; a: string }) {
 
 function Landing() {
   const [openGalleryImage, setOpenGalleryImage] = useState<string | null>(null);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpen = () => setIsRegisterModalOpen(true);
+    window.addEventListener("open-register-modal", handleOpen);
+    return () => window.removeEventListener("open-register-modal", handleOpen);
+  }, []);
 
   const [openInstagramProof, setOpenInstagramProof] = useState<
     (typeof INSTAGRAM_PAGES)[number] | null
@@ -1067,6 +1277,10 @@ function Landing() {
       <InstagramProofModal
         page={openInstagramProof}
         onClose={() => setOpenInstagramProof(null)}
+      />
+      <RegistrationModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
       />
     </main>
   );
