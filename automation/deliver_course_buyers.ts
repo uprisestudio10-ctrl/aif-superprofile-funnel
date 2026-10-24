@@ -6,8 +6,8 @@
  * and dispatching admin alerts to uprisestudio10@gmail.com with student mobile numbers for missing emails.
  */
 
-const KEY_ID = "rzp_live_TjpSDnPQldisku";
-const KEY_SEC = "JA7v0pGvJoqKLNggE7CPUlLD";
+const KEY_ID = "rzp_live_TreMzXPg39hEiU";
+const KEY_SEC = "MFYrqAT6gbenfRN9PH0421rR";
 const AUTH = Buffer.from(`${KEY_ID}:${KEY_SEC}`).toString("base64");
 
 const N8N_COURSE_WEBHOOK = "https://prateek.n8n.preetamsoni.com/webhook/course-enrollment";

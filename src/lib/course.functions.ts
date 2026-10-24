@@ -34,8 +34,8 @@ export interface StudentSession {
 }
 
 const SECRET_KEY = "rzp_live_ThPkZr13H5M66E_aif_mastery_secret_2026";
-const RZP_KEY_ID = "rzp_live_TjpSDnPQldisku";
-const RZP_KEY_SEC = "JA7v0pGvJoqKLNggE7CPUlLD";
+const RZP_KEY_ID = "rzp_live_TreMzXPg39hEiU";
+const RZP_KEY_SEC = "MFYrqAT6gbenfRN9PH0421rR";
 
 // Deterministic cryptographic signature matching n8n code node
 export function computeStudentAccessKey(identifier: string): string {

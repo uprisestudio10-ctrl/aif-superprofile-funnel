@@ -26,8 +26,8 @@ const offerIdSchema = z.enum(["combo", "recording", "prompts", "call"]);
 
 const NOT_CONFIGURED = "Payment gateway is not configured yet. Please try again shortly.";
 
-const ACTIVE_LIVE_KEY_ID = "rzp_live_TjpSDnPQldisku";
-const ACTIVE_LIVE_KEY_SECRET = "JA7v0pGvJoqKLNggE7CPUlLD";
+const ACTIVE_LIVE_KEY_ID = "rzp_live_TreMzXPg39hEiU";
+const ACTIVE_LIVE_KEY_SECRET = "MFYrqAT6gbenfRN9PH0421rR";
 
 function getAuthHeader(kId: string, kSec: string): string {
   try {
