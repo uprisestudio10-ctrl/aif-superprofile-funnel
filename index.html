@@ -1,544 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Bulking Coach | 53kg ➔ 65kg</title>
-  
-  <!-- Apple & PWA Meta Tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="BulkCoach">
-  <meta name="theme-color" content="#0a0e17">
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/manifest.json">
-
-  <!-- Modern Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="/style.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>AI Influencer Reels Workshop, Earn From Instagram (₹29) [Archive / Preview]</title>
+  <meta name="theme-color" content="#1a0f22"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"/>
+  <link rel="stylesheet" href="./styles.css"/>
 </head>
-<body>
-  <div id="app" class="app-container">
-    
-    <!-- TOP APP BAR -->
-    <header class="top-nav">
-      <div class="user-info">
-        <div class="avatar-ring">
-          <span class="avatar-initials">P</span>
-          <span class="active-dot"></span>
-        </div>
-        <div class="user-meta">
-          <div class="user-name-row">
-            <span class="user-name">Prateek</span>
-            <span class="phase-tag">Day 1 • Veg Mode</span>
-          </div>
-          <div class="target-sub">53 kg &rarr; <strong class="glow-text">65 kg Target</strong></div>
-        </div>
-      </div>
-      
-      <div class="header-actions">
-        <div id="anabolic-timer-badge" class="anabolic-badge" title="Time since last meal">
-          <span class="badge-icon">⏳</span>
-          <span id="gap-time-text">1.2h ago</span>
-        </div>
-      </div>
-    </header>
-
-    <!-- MAIN SCROLLABLE CONTENT -->
-    <main class="main-content">
-      
-      <!-- ============================================== -->
-      <!-- TAB 1: DASHBOARD HUD -->
-      <!-- ============================================== -->
-      <section id="tab-dashboard" class="tab-pane active">
-        
-        <!-- MOTIVATION / STATUS BANNER -->
-        <div class="status-banner">
-          <div class="banner-content">
-            <div class="banner-title">⚡ Day 1 Bulking Rebound</div>
-            <div class="banner-desc">Full Body Priming done! Ab bacha hua fuel body me daalna hai.</div>
-          </div>
-          <button id="btn-rescue" class="btn-rescue-pill" onclick="openRescueModal()">
-            <span>🚨 Rescue</span>
-          </button>
-        </div>
-
-        <!-- MAIN CALORIE HUD CARD -->
-        <div class="hud-card glass-panel">
-          <div class="hud-header">
-            <div>
-              <span class="hud-label">DAILY CALORIE FUEL</span>
-              <div class="hud-val-row">
-                <span id="hud-cal-consumed" class="big-num">830</span>
-                <span class="target-denom">/ <span id="hud-cal-target">2,600</span> kcal</span>
-              </div>
-            </div>
-            <div class="pending-chip">
-              <span class="pending-label">PENDING</span>
-              <span id="hud-cal-pending" class="pending-num">1,770 kcal</span>
-            </div>
-          </div>
-
-          <!-- DUAL PROGRESS BAR -->
-          <div class="progress-track">
-            <div id="cal-progress-bar" class="progress-fill cal-gradient" style="width: 32%;"></div>
-          </div>
-
-          <!-- MACRO TILES -->
-          <div class="macro-grid">
-            <div class="macro-box">
-              <div class="macro-head">
-                <span class="macro-dot dot-protein"></span>
-                <span class="macro-name">PROTEIN</span>
-              </div>
-              <div class="macro-val"><span id="hud-p-val">27</span>g <small>/ 125g</small></div>
-              <div class="mini-track"><div id="p-bar" class="mini-fill fill-protein" style="width: 22%;"></div></div>
-              <span id="p-pending" class="sub-pending">98g left</span>
-            </div>
-
-            <div class="macro-box">
-              <div class="macro-head">
-                <span class="macro-dot dot-carbs"></span>
-                <span class="macro-name">CARBS</span>
-              </div>
-              <div class="macro-val"><span id="hud-c-val">130</span>g <small>/ 365g</small></div>
-              <div class="mini-track"><div id="c-bar" class="mini-fill fill-carbs" style="width: 35%;"></div></div>
-              <span id="c-pending" class="sub-pending">235g left</span>
-            </div>
-
-            <div class="macro-box">
-              <div class="macro-head">
-                <span class="macro-dot dot-fats"></span>
-                <span class="macro-name">FATS</span>
-              </div>
-              <div class="macro-val"><span id="hud-f-val">23</span>g <small>/ 58g</small></div>
-              <div class="mini-track"><div id="f-bar" class="mini-fill fill-fats" style="width: 40%;"></div></div>
-              <span id="f-pending" class="sub-pending">35g left</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- WATER INTAKE TRACKER -->
-        <div class="water-card glass-panel">
-          <div class="water-header">
-            <div class="water-title-group">
-              <span class="water-icon">💧</span>
-              <div>
-                <span class="card-title">Hydration & Cell Volume</span>
-                <div class="water-stats">
-                  <strong id="water-consumed">1,250</strong> / <span id="water-target">3,500</span> ml
-                  <span id="water-pending-badge" class="water-left-badge">(2,250 ml left)</span>
-                </div>
-              </div>
-            </div>
-            <div class="water-buttons">
-              <button class="btn-water" onclick="addWater(250)">+250ml</button>
-              <button class="btn-water btn-water-lg" onclick="addWater(500)">+500ml</button>
-            </div>
-          </div>
-          <div class="progress-track water-track">
-            <div id="water-bar" class="progress-fill water-gradient" style="width: 36%;"></div>
-          </div>
-        </div>
-
-        <!-- SUPPLEMENTS STREAK -->
-        <div class="supplements-card glass-panel">
-          <div class="card-header-row">
-            <span class="card-title">Daily Bulking Supplements</span>
-            <span class="streak-badge">⚡ Streak: Active</span>
-          </div>
-          <div class="supp-grid">
-            <button class="supp-item" id="supp-creatine" onclick="toggleSupp('creatine')">
-              <span class="supp-check">✓</span>
-              <span class="supp-text">Creatine 5g</span>
-            </button>
-            <button class="supp-item" id="supp-whey" onclick="toggleSupp('whey')">
-              <span class="supp-check">✓</span>
-              <span class="supp-text">Whey Scoop</span>
-            </button>
-            <button class="supp-item" id="supp-multivitamin" onclick="toggleSupp('multivitamin')">
-              <span class="supp-check">✓</span>
-              <span class="supp-text">Multivitamin</span>
-            </button>
-            <button class="supp-item" id="supp-omega3_d3" onclick="toggleSupp('omega3_d3')">
-              <span class="supp-check">✓</span>
-              <span class="supp-text">Omega 3 / D3</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- TODAY'S MEALS FEED -->
-        <div class="meals-summary-section">
-          <div class="section-title-row">
-            <span class="section-title">Today's Fuel Log</span>
-            <button class="btn-text" onclick="switchTab('scanner')">+ Log Food</button>
-          </div>
-          <div id="today-meals-list" class="meals-list">
-            <!-- Dynamically Rendered -->
-          </div>
-        </div>
-
-      </section>
-
-      <!-- ============================================== -->
-      <!-- TAB 2: AI FOOD SCANNER & QUICK LOGGER -->
-      <!-- ============================================== -->
-      <section id="tab-scanner" class="tab-pane">
-        <div class="pane-header">
-          <h2>📸 AI Food Scanner & Logger</h2>
-          <p>Photo khicho ya food ka naam likho &mdash; AI macros extract karega!</p>
-        </div>
-
-        <!-- CAMERA / PHOTO UPLOAD BOX -->
-        <div class="scanner-card glass-panel">
-          <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;" onchange="handleImageSelected(event)">
-          <input type="file" id="gallery-input" accept="image/*" style="display: none;" onchange="handleImageSelected(event)">
-
-          <div id="camera-dropzone" class="camera-dropzone" onclick="document.getElementById('gallery-input').click()">
-            <div id="preview-container" class="preview-container" style="display: none;">
-              <img id="food-preview-img" src="" alt="Food Preview">
-              <button class="btn-remove-photo" onclick="removeSelectedImage(event)">&times;</button>
-            </div>
-            <div id="dropzone-prompt" class="dropzone-prompt">
-              <div class="cam-icon-glow">📷</div>
-              <strong>Tap to Upload or Take Plate Photo</strong>
-              <small>Palak paneer, thali, shake, eggs, rice etc.</small>
-            </div>
-          </div>
-
-          <!-- TEXT INPUT OVERRIDE / PROMPT -->
-          <div class="scan-input-group">
-            <input type="text" id="food-text-input" placeholder="Ya yahan likho: e.g. 150g paneer + 2 katori chawal + dahi" class="dark-input">
-            <button id="btn-analyze" class="btn-primary" onclick="analyzeFood()">
-              <span id="analyze-btn-text">Extract Macros ⚡</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- EXTRACTED MACROS PREVIEW MODAL / CARD -->
-        <div id="extracted-card" class="extracted-card glass-panel" style="display: none;">
-          <div class="extracted-header">
-            <div>
-              <span class="chip-detected">DETECTED</span>
-              <h3 id="ext-dish-name">Palak Paneer + White Rice</h3>
-            </div>
-            <span id="ext-calories" class="ext-cal-badge">620 kcal</span>
-          </div>
-          
-          <div class="macro-pill-row">
-            <span class="macro-pill pill-p">Protein: <strong id="ext-p">24g</strong></span>
-            <span class="macro-pill pill-c">Carbs: <strong id="ext-c">78g</strong></span>
-            <span class="macro-pill pill-f">Fats: <strong id="ext-f">22g</strong></span>
-          </div>
-
-          <p id="ext-note" class="ext-note">Component breakdown matches Indian recipe database.</p>
-
-          <div class="modal-actions">
-            <button class="btn-secondary" onclick="cancelExtracted()">Cancel</button>
-            <button class="btn-primary" onclick="confirmAddExtracted()">Add to Dashboard ✓</button>
-          </div>
-        </div>
-
-        <!-- INSTANT 1-TAP INDIAN FOOD SHORTCUTS -->
-        <div class="quick-shortcuts-section">
-          <span class="section-title">⚡ 1-Tap Desi Bulking Shortcuts</span>
-          <div class="shortcuts-grid">
-            <button class="shortcut-btn" onclick="quickAdd('Palak Paneer (150g) + Rice (1.5 bowl)', 620, 24, 78, 22)">
-              <span class="sc-icon">🍲</span>
-              <div class="sc-info">
-                <strong>Palak Paneer + Rice</strong>
-                <small>620 kcal • 24g P</small>
-              </div>
-            </button>
-
-            <button class="shortcut-btn" onclick="quickAdd('Bulking High-Cal Shake (Milk + Oats + PB + Banana)', 680, 26, 85, 26)">
-              <span class="sc-icon">🥤</span>
-              <div class="sc-info">
-                <strong>Mega Bulking Shake</strong>
-                <small>680 kcal • 26g P</small>
-              </div>
-            </button>
-
-            <button class="shortcut-btn" onclick="quickAdd('1 Scoop Whey Protein in Water', 125, 25, 2, 1)">
-              <span class="sc-icon">🥛</span>
-              <div class="sc-info">
-                <strong>Whey Scoop (1x)</strong>
-                <small>125 kcal • 25g P</small>
-              </div>
-            </button>
-
-            <button class="shortcut-btn" onclick="quickAdd('2 Bananas + Peanut Butter (2 tbsp)', 390, 9, 60, 16)">
-              <span class="sc-icon">🍌</span>
-              <div class="sc-info">
-                <strong>2 Bananas + PB</strong>
-                <small>390 kcal • 9g P</small>
-              </div>
-            </button>
-
-            <button class="shortcut-btn" onclick="quickAdd('Thick Dal (1.5 bowl) + 3 Roti + Dahi', 510, 22, 82, 10)">
-              <span class="sc-icon">🫓</span>
-              <div class="sc-info">
-                <strong>Dal + 3 Roti + Dahi</strong>
-                <small>510 kcal • 22g P</small>
-              </div>
-            </button>
-
-            <button class="shortcut-btn" onclick="quickAdd('Soya Chunks Curry (50g) + Rice', 420, 30, 60, 4)">
-              <span class="sc-icon">🌱</span>
-              <div class="sc-info">
-                <strong>Soya Chunks + Rice</strong>
-                <small>420 kcal • 30g P</small>
-              </div>
-            </button>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- ============================================== -->
-      <!-- TAB 3: DIET HACKS & REVERSE PORTIONS -->
-      <!-- ============================================== -->
-      <section id="tab-diet" class="tab-pane">
-        <div class="pane-header">
-          <h2>🍲 Desi Bulking Nutrition Engine</h2>
-          <p>Ghar ka khana, density hacks aur digestion shield</p>
-        </div>
-
-        <!-- REVERSE PORTION CALCULATOR -->
-        <div class="portion-calc-card glass-panel">
-          <div class="card-header-row">
-            <span class="card-title">"Ghar Pe Kya Bana Hai?" Calculator</span>
-            <span class="chip-smart">PORTION GUIDE</span>
-          </div>
-          <p class="card-sub">Select what's cooked at home &mdash; app tells exact katoris to hit target:</p>
-
-          <select id="dish-select" class="dark-input" onchange="calculatePortion()">
-            <option value="palak_paneer">Palak Paneer with Rice</option>
-            <option value="rajma_chawal">Rajma Chawal</option>
-            <option value="dal_roti">Thick Dal + Roti</option>
-            <option value="chhole_bhature_roti">Chhole with Roti/Rice</option>
-            <option value="paneer_bhurji">Paneer Bhurji with Roti</option>
-            <option value="soya_curry">Soya Chunks Sabzi with Rice</option>
-            <option value="aloo_paratha">Aloo / Gobi Paratha with Dahi</option>
-          </select>
-
-          <div id="portion-recommendation-box" class="portion-box">
-            <!-- Dynamically Updated -->
-          </div>
-        </div>
-
-        <!-- CALORIE DENSITY CHEAT-SHEET -->
-        <div class="density-card glass-panel">
-          <div class="card-header-row">
-            <span class="card-title">⚡ Calorie Density Hacks (+500 kcal)</span>
-            <span class="badge-mini">Bina Pet Bhare</span>
-          </div>
-          
-          <div class="density-list">
-            <div class="density-item">
-              <span class="d-icon">🧈</span>
-              <div class="d-info">
-                <strong>1 Tbsp Desi Ghee on Roti / Rice</strong>
-                <small>+120 kcal • Zero extra volume • Lubricates joints</small>
-              </div>
-              <span class="d-tag">+120</span>
-            </div>
-
-            <div class="density-item">
-              <span class="d-icon">🥜</span>
-              <div class="d-info">
-                <strong>2 Tbsp Peanut Butter in Shakes</strong>
-                <small>+190 kcal • 8g Protein • Smooth liquid calories</small>
-              </div>
-              <span class="d-tag">+190</span>
-            </div>
-
-            <div class="density-item">
-              <span class="d-icon">🌰</span>
-              <div class="d-info">
-                <strong>Handful Roasted Chana + Almonds</strong>
-                <small>+180 kcal • Pocket snack while working/studying</small>
-              </div>
-              <span class="d-tag">+180</span>
-            </div>
-
-            <div class="density-item">
-              <span class="d-icon">🥛</span>
-              <div class="d-info">
-                <strong>Full Cream Doodh Swap (Amul Gold)</strong>
-                <small>+80 extra kcal per glass over toned milk</small>
-              </div>
-              <span class="d-tag">+80</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- BAHAR KHANE KA GUIDE (SWIGGY/ZOMATO/RESTAURANT) -->
-        <div class="dining-out-card glass-panel">
-          <div class="card-header-row">
-            <span class="card-title">🛵 Bahar / Canteen Me Kya Order Karein?</span>
-          </div>
-          
-          <div class="dining-tabs">
-            <div class="dining-group">
-              <strong class="dining-label green-label">🟢 VEG DAYS (Agle 7 Din):</strong>
-              <ul class="dining-list">
-                <li><strong>Paneer Tikka + 2 Tandoori Roti + Dal Tadka:</strong> ~35g Protein, ~680 kcal (Cleanest bulk).</li>
-                <li><strong>Soya Chaap (Tandoori/Gravy, Not Deep Fried) + Rumali/Roti:</strong> ~30g Protein, ~550 kcal.</li>
-                <li><strong>Rajma / Chhole + Steamed Rice + Extra Dahi:</strong> ~25g Protein, ~650 kcal.</li>
-              </ul>
-            </div>
-
-            <div class="dining-group">
-              <strong class="dining-label orange-label">🍗 DAY 10 ONWARDS (Non-Veg):</strong>
-              <ul class="dining-list">
-                <li><strong>Half Tandoori Chicken + 2 Roti + Salad:</strong> ~55g Protein, ~580 kcal (Elite Bollywood lean mass).</li>
-                <li><strong>Chicken Curry (Light Oil) + Jeera Rice:</strong> ~40g Protein, ~650 kcal.</li>
-                <li><strong>4 Boiled Eggs Bhurji / Omelette + Toast:</strong> ~26g Protein, ~480 kcal.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- GUT & DIGESTION SHIELD -->
-        <div class="gut-shield-card glass-panel">
-          <div class="card-header-row">
-            <span class="card-title">🛡️ Gut & Bloat Shield (Pachane Ka Rule)</span>
-          </div>
-          <div class="gut-tips">
-            <p>1. <strong>Dahi (Curd) in Lunch:</strong> Digestive enzymes & probiotics stimulate hunger naturally.</p>
-            <p>2. <strong>Water Rule:</strong> Khate waqt 1 sip se zyada paani mat piyo taaki stomach acid dilute na ho. Khane ke 45 min baad piyo.</p>
-            <p>3. <strong>5-Min Stroll:</strong> Bhari meal ke baad 5 minute tehelne se gas aur lethargy khatam ho jati hai.</p>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- ============================================== -->
-      <!-- TAB 4: WORKOUT & REST TIMER -->
-      <!-- ============================================== -->
-      <section id="tab-workout" class="tab-pane">
-        <div class="pane-header">
-          <h2>🏋️ Week 1 Gym Tracker</h2>
-          <p>Phase 1 Foundation • Zero Cardio • Mind-Muscle Focus</p>
-        </div>
-
-        <!-- IN-GYM REST TIMER -->
-        <div class="timer-card glass-panel">
-          <div class="timer-display">
-            <span class="timer-label">REST TIMER</span>
-            <span id="timer-digits" class="timer-digits">01:15</span>
-          </div>
-          <div class="timer-actions">
-            <button class="btn-timer-preset" onclick="startTimer(60)">60s</button>
-            <button class="btn-timer-preset active-preset" onclick="startTimer(75)">75s</button>
-            <button class="btn-timer-preset" onclick="startTimer(90)">90s</button>
-            <button class="btn-timer-control" id="btn-timer-toggle" onclick="toggleTimer()">Start</button>
-            <button class="btn-timer-control btn-reset" onclick="resetTimer()">Reset</button>
-          </div>
-        </div>
-
-        <!-- WORKOUT LIST WITH DAY SWITCHER -->
-        <div class="workout-plan-box">
-          <div class="section-title-row">
-            <span class="section-title">Week 1 Foundation Split</span>
-            <span class="badge-mini">Akash Yaduvanshi PPL Priming</span>
-          </div>
-
-          <!-- DAY SELECTOR SCROLLER (6 DAYS LIFTING • SUNDAY ONLY REST) -->
-          <div class="day-selector-scroller">
-            <button class="day-pill" onclick="selectWorkoutDay(1)">Day 1 (Tue: A)</button>
-            <button class="day-pill" onclick="selectWorkoutDay(2)">Day 2 (Wed: B)</button>
-            <button class="day-pill active-day" onclick="selectWorkoutDay(3)">Day 3 (TODAY: A)</button>
-            <button class="day-pill" onclick="selectWorkoutDay(4)">Day 4 (Fri: B)</button>
-            <button class="day-pill" onclick="selectWorkoutDay(5)">Day 5 (Sat: Pump)</button>
-            <button class="day-pill" onclick="selectWorkoutDay(6)">Sunday (ONLY REST)</button>
-          </div>
-
-          <!-- DYNAMIC WORKOUT CONTENT -->
-          <div id="dynamic-workout-content">
-            <!-- Rendered by app.js -->
-          </div>
-        </div>
-
-      </section>
-
-      <!-- ============================================== -->
-      <!-- TAB 5: AKASH AI COACH CHAT -->
-      <!-- ============================================== -->
-      <section id="tab-chat" class="tab-pane">
-        <div class="chat-container">
-          <div class="chat-header">
-            <div class="coach-badge">
-              <div class="coach-avatar">AY</div>
-              <div>
-                <strong>Coach Akash AI</strong>
-                <small class="coach-status">Online • Bulking Mode Active</small>
-              </div>
-            </div>
-          </div>
-
-          <div id="chat-messages" class="chat-messages">
-            <div class="chat-bubble coach-msg">
-              Bhai Prateek! Shuruat mast ho gayi hai. 2 Kela pre-workout aur Palak Paneer rice lunch me log ho gaya hai. Abhi sham ko shake pelna hai bina fail. Koi bhi doubt ho, diet ya exercise ka, yahan direct pooch lo!
-            </div>
-          </div>
-
-          <div class="chat-input-bar">
-            <input type="text" id="chat-input" placeholder="Kuch bhi poocho Coach se..." onkeydown="if(event.key==='Enter') sendChatMessage()">
-            <button class="btn-send" onclick="sendChatMessage()">➤</button>
-          </div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- EMERGENCY RESCUE MODAL -->
-    <div id="rescue-modal" class="modal-overlay" style="display: none;" onclick="closeRescueModal(event)">
-      <div class="modal-content glass-panel" onclick="event.stopPropagation()">
-        <div class="modal-header">
-          <h3>🚨 Emergency Calorie Rescue</h3>
-          <button class="btn-close" onclick="closeRescueModal()">&times;</button>
-        </div>
-        <div id="rescue-content" class="rescue-body">
-          <!-- Dynamically filled with instant high-calorie shake/snack combinations -->
-        </div>
-      </div>
-    </div>
-
-    <!-- BOTTOM TAB NAVIGATION -->
-    <nav class="bottom-nav">
-      <button class="nav-tab active" onclick="switchTab('dashboard')">
-        <span class="nav-icon">📊</span>
-        <span class="nav-label">Dashboard</span>
-      </button>
-
-      <button class="nav-tab" onclick="switchTab('scanner')">
-        <span class="nav-icon">📸</span>
-        <span class="nav-label">Scanner</span>
-      </button>
-
-      <button class="nav-tab" onclick="switchTab('diet')">
-        <span class="nav-icon">🍲</span>
-        <span class="nav-label">Diet Hacks</span>
-      </button>
-
-      <button class="nav-tab" onclick="switchTab('workout')">
-        <span class="nav-icon">🏋️</span>
-        <span class="nav-label">Workout</span>
-      </button>
-
-      <button class="nav-tab" onclick="switchTab('chat')">
-        <span class="nav-icon">💬</span>
-        <span class="nav-label">Coach AI</span>
-      </button>
-    </nav>
-
+<body class="bg-[#0d0714] text-foreground font-sans antialiased selection:bg-primary/30">
+<main class="min-h-screen pb-28"><section class="px-4  hero-glow overflow-hidden pt-4 pb-2"><div class="mx-auto w-full max-w-[430px]"><p class="hero-kicker text-[11px] py-1 px-3">The Secret To Creating <span class="text-ai-blue">Bold AI Influencer Photos</span> Revealed</p><h1 class="mt-3 text-center text-[28px] leading-[1.18] font-extrabold sm:text-[37px]">Create Your Own <span class="text-neon">AI Influencer</span> &amp; Earn<!-- --> <span class="text-gold-grad">₹50,000–₹1,00,000/Month</span> By Uploading Her<!-- --> <span class="text-ai-blue">Bold Images</span></h1><p class="mt-3 text-center text-[13px] leading-relaxed text-muted-foreground sm:text-[14.5px] font-medium max-w-[420px] mx-auto">There’s a <strong class="text-foreground font-semibold">secret AI tool</strong> that can create the kind of <span class="text-primary font-bold">bold AI influencer images</span> you’re unable to generate with tools like <span class="text-muted-foreground/85 underline decoration-destructive/40">Higgsfield, Seedance, Google Nano Banana &amp; more</span>.</p><div class="mt-4 grid grid-cols-3 gap-1.5 sm:gap-2 text-center"><div class="rounded-xl border border-money/30 bg-card/80 px-1.5 py-2.5 shadow-sm transition-all hover:border-money/50"><span class="text-sm">⚡</span><p class="mt-0.5 text-[10.5px] font-bold leading-tight text-foreground sm:text-xs">Generate Images<br/><span class="mt-0.5 inline-block rounded-md bg-money/15 px-1.5 py-0.5 text-money font-black">100% Free</span></p></div><div class="rounded-xl border border-primary/30 bg-card/80 px-1.5 py-2.5 shadow-sm transition-all hover:border-primary/50"><span class="text-sm">📱</span><p class="mt-0.5 text-[10.5px] font-bold leading-tight text-foreground sm:text-xs">No Laptop<br/><span class="mt-0.5 inline-block rounded-md bg-primary/15 px-1.5 py-0.5 text-primary font-black">Needed (Mobile)</span></p></div><div class="rounded-xl border border-gold/30 bg-card/80 px-1.5 py-2.5 shadow-sm transition-all hover:border-gold/50"><span class="text-sm">⏱️</span><p class="mt-0.5 text-[10.5px] font-bold leading-tight text-foreground sm:text-xs">Work Only<br/><span class="mt-0.5 inline-block rounded-md bg-gold/15 px-1.5 py-0.5 text-gold font-black">1 Hour / Day</span></p></div></div><div class="mt-4.5 overflow-hidden rounded-2xl border border-primary/30 bg-card/60 shadow-xl shadow-primary/10"><img src="./assets/hero-banner.webp" alt="The Secret To Creating Bold AI Influencer Photos Revealed" width="1024" height="576" class="w-full h-auto object-cover block" loading="eager" fetchPriority="high"/></div><a href="#results" class="group mt-3.5 block overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-r from-card/95 via-[#180d2c]/90 to-card/95 p-3 sm:p-3.5 shadow-lg shadow-black/30 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:shadow-primary/10 active:scale-[0.99]"><div class="flex items-center gap-3"><div class="relative flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-ai-blue/15 border border-primary/30 shadow-inner"><span class="text-base sm:text-lg">🔥</span><span class="absolute -top-1 -right-1 flex size-2.5"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span><span class="relative inline-flex size-2.5 rounded-full bg-primary"></span></span></div><div class="min-w-0 flex-1 text-left"><div class="flex items-center gap-1.5 flex-wrap"><span class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-primary">Live Proof &amp; Image Gallery</span><span class="text-[9.5px] font-semibold text-muted-foreground/80">• Scroll to explore</span></div><p class="mt-0.5 text-[12px] sm:text-[13px] font-bold text-foreground leading-snug">Scroll Down To See AI Pages Making <span class="text-gold font-extrabold">₹50K–₹1L+/Mo</span> &amp; The <span class="text-ai-blue font-extrabold">Bold Images</span> You Can Create</p></div><div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/25 text-primary group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-200"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="size-4 animate-bounce"><path d="M12 5v14M19 12l-7 7-7-7"></path></svg></div></div></a></div></section><section id="join" class="px-4  pt-2 pb-7"><div class="mx-auto w-full max-w-[430px]"><div class="surface p-4 sm:p-5"><div class="mb-3.5 rounded-xl border border-gold/50 bg-gradient-to-r from-gold/20 via-gold/10 to-gold/20 p-2.5 text-center shadow-md shadow-gold/5"><p class="text-[12px] font-extrabold tracking-wide text-gold flex items-center justify-center gap-1.5"><span class="animate-pulse">⚡</span><span>EARLY MOVER ADVANTAGE</span></p><p class="mt-0.5 text-[11.5px] font-medium text-foreground/90">Nobody knows how to do this yet. Grab <span class="text-gold font-bold underline decoration-gold/60">₹29 access</span> before it blows up!</p></div><div class="grid grid-cols-2 gap-2 sm:gap-3"><div class="rounded-xl border border-white/5 bg-secondary/80 p-2.5 text-center sm:p-3"><p class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">📅 Date</p><p class="mt-0.5 font-display text-[14px] font-extrabold sm:text-[15px] text-foreground">29th October (Thursday)</p></div><div class="rounded-xl border border-white/5 bg-secondary/80 p-2.5 text-center sm:p-3"><p class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">⏰ Time</p><p class="mt-0.5 font-display text-[14px] font-extrabold sm:text-[15px] text-gold">7:00 PM</p></div><div class="rounded-xl border border-white/5 bg-secondary/80 p-2.5 text-center sm:p-3"><p class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">💻 Platform</p><p class="mt-0.5 font-display text-[14px] font-extrabold sm:text-[15px] text-foreground">Zoom (Live)</p></div><div class="rounded-xl border border-white/5 bg-secondary/80 p-2.5 text-center sm:p-3"><p class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">🗣️ Language</p><p class="mt-0.5 font-display text-[14px] font-extrabold sm:text-[15px] text-foreground">Hindi + English</p></div></div><div class="mt-4 text-center flex items-center justify-center gap-2.5"><span class="price-before text-sm font-bold text-muted-foreground/80">₹499</span> <span class="font-display text-3xl sm:text-4xl font-extrabold text-gold-grad tracking-tight">₹29</span> <span class="text-sm font-semibold text-muted-foreground">Only</span><span class="ml-1 rounded-full bg-primary/20 border border-primary/40 px-2 py-0.5 text-[10px] font-extrabold text-primary uppercase tracking-wide">94% OFF • EARLY BIRD</span></div><div class="mt-3.5"><a href="/checkout" class="btn-cta text-center text-[15px] sm:text-[17px] cursor-pointer"><span class="block w-full text-center leading-tight">Register For Live Workshop 👉</span></a></div><div class="mt-3 flex flex-col items-center justify-center text-center text-[11px] font-medium text-muted-foreground"><div class="inline-flex items-center justify-center gap-1.5 text-center text-emerald-400 font-semibold"><img src="data:image/svg+xml,%3csvg%20xmlns=&#x27;http://www.w3.org/2000/svg&#x27;%20viewBox=&#x27;0%200%2036%2036&#x27;%20role=&#x27;img&#x27;%20aria-labelledby=&#x27;title&#x27;%3e%3ctitle%20id=&#x27;title&#x27;%3eRazorpay%3c/title%3e%3cpath%20fill=&#x27;%232B63E1&#x27;%20d=&#x27;M22.8%202%209.3%2020.2h7.4L11.9%2034l14.8-19.6h-7.8L22.8%202Z&#x27;/%3e%3cpath%20fill=&#x27;%235B8CFF&#x27;%20d=&#x27;m23%202-7.2%2018.2h-6.5L22.8%202h.2Z&#x27;/%3e%3c/svg%3e" alt="Razorpay" width="15" height="15" class="size-3.5 shrink-0"/><span>100% Secure Checkout</span></div><p class="mt-0.5 text-[10.5px] leading-normal text-muted-foreground text-center">UPI (GPay, PhonePe, Paytm), Cards &amp; NetBanking</p></div></div></div></section><section id="results" class="px-4 py-9 glow-bg overflow-hidden scroll-mt-4"><div class="mx-auto w-full max-w-[430px]"><span class="mx-auto mb-3 flex w-fit items-center gap-1.5 rounded-full border border-primary/35 bg-gradient-to-r from-primary/15 to-primary/5 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-widest text-primary shadow-sm shadow-primary/10 backdrop-blur-sm">✅ Real Instagram Pages</span><h2 class="text-center text-[24px] font-extrabold"><span class="text-gold-grad">100+ Indian Instagram Pages</span> Monetized</h2><p class="mt-2 text-center text-[13px] text-muted-foreground">Real subscription pages and their estimated monthly income</p><div class="instagram-proof-marquee mt-5"><div class="instagram-proof-row"><div class="instagram-proof-track"><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for aaniasharmaa"><img src="./assets/instagram-proof/page-19.png" alt="aaniasharmaa Instagram subscription page showing 1054 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->aaniasharmaa</p><p>1,054<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->4,11,060<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for zaraso_phia"><img src="./assets/instagram-proof/page-17.png" alt="zaraso_phia Instagram subscription page showing 177 subscribers at ₹290 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->zaraso_phia</p><p>177<!-- --> subscribers × ₹<!-- -->290</p><p class="instagram-proof-income">≈ ₹<!-- -->51,330<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for myselfalinaa"><img src="./assets/instagram-proof/page-11.png" alt="myselfalinaa Instagram subscription page showing 79 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->myselfalinaa</p><p>79<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->30,810<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for itsalassy"><img src="./assets/instagram-proof/page-10.png" alt="itsalassy Instagram subscription page showing 71 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->itsalassy</p><p>71<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->27,690<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for anushkadaniofficial"><img src="./assets/instagram-proof/page-15.png" alt="anushkadaniofficial Instagram subscription page showing 70 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->anushkadaniofficial</p><p>70<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->27,300<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for arohirawatz"><img src="./assets/instagram-proof/page-7.png" alt="arohirawatz Instagram subscription page showing 83 subscribers at ₹290 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->arohirawatz</p><p>83<!-- --> subscribers × ₹<!-- -->290</p><p class="instagram-proof-income">≈ ₹<!-- -->24,070<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for snowy_nitu"><img src="./assets/instagram-proof/page-4.png" alt="snowy_nitu Instagram subscription page showing 56 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->snowy_nitu</p><p>56<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->21,840<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for aaniasharmaa"><img src="./assets/instagram-proof/page-19.png" alt="aaniasharmaa Instagram subscription page showing 1054 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->aaniasharmaa</p><p>1,054<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->4,11,060<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for zaraso_phia"><img src="./assets/instagram-proof/page-17.png" alt="zaraso_phia Instagram subscription page showing 177 subscribers at ₹290 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->zaraso_phia</p><p>177<!-- --> subscribers × ₹<!-- -->290</p><p class="instagram-proof-income">≈ ₹<!-- -->51,330<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for myselfalinaa"><img src="./assets/instagram-proof/page-11.png" alt="myselfalinaa Instagram subscription page showing 79 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->myselfalinaa</p><p>79<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->30,810<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for itsalassy"><img src="./assets/instagram-proof/page-10.png" alt="itsalassy Instagram subscription page showing 71 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->itsalassy</p><p>71<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->27,690<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for anushkadaniofficial"><img src="./assets/instagram-proof/page-15.png" alt="anushkadaniofficial Instagram subscription page showing 70 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->anushkadaniofficial</p><p>70<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->27,300<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for arohirawatz"><img src="./assets/instagram-proof/page-7.png" alt="arohirawatz Instagram subscription page showing 83 subscribers at ₹290 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->arohirawatz</p><p>83<!-- --> subscribers × ₹<!-- -->290</p><p class="instagram-proof-income">≈ ₹<!-- -->24,070<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for snowy_nitu"><img src="./assets/instagram-proof/page-4.png" alt="snowy_nitu Instagram subscription page showing 56 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->snowy_nitu</p><p>56<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->21,840<!-- --> / month</p></div></button></div></div><div class="instagram-proof-row"><div class="instagram-proof-track instagram-proof-track-reverse"><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for sassy.maaya"><img src="./assets/instagram-proof/page-9.png" alt="sassy.maaya Instagram subscription page showing 47 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->sassy.maaya</p><p>47<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->18,330<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for hey._pearl"><img src="./assets/instagram-proof/page-5.png" alt="hey._pearl Instagram subscription page showing 60 subscribers at ₹290 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->hey._pearl</p><p>60<!-- --> subscribers × ₹<!-- -->290</p><p class="instagram-proof-income">≈ ₹<!-- -->17,400<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for aira_rawat_"><img src="./assets/instagram-proof/page-12.png" alt="aira_rawat_ Instagram subscription page showing 40 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->aira_rawat_</p><p>40<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->15,600<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for relentlessdeepika"><img src="./assets/instagram-proof/page-18.png" alt="relentlessdeepika Instagram subscription page showing 39 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->relentlessdeepika</p><p>39<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->15,210<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for ayahhshruti"><img src="./assets/instagram-proof/page-16.png" alt="ayahhshruti Instagram subscription page showing 49 subscribers at ₹290 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->ayahhshruti</p><p>49<!-- --> subscribers × ₹<!-- -->290</p><p class="instagram-proof-income">≈ ₹<!-- -->14,210<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for avnii_19_"><img src="./assets/instagram-proof/page-13.png" alt="avnii_19_ Instagram subscription page showing 23 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->avnii_19_</p><p>23<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->8,970<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for adhirashreee"><img src="./assets/instagram-proof/page-14.png" alt="adhirashreee Instagram subscription page showing 37 subscribers at ₹180 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->adhirashreee</p><p>37<!-- --> subscribers × ₹<!-- -->180</p><p class="instagram-proof-income">≈ ₹<!-- -->6,660<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for sassy.maaya"><img src="./assets/instagram-proof/page-9.png" alt="sassy.maaya Instagram subscription page showing 47 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->sassy.maaya</p><p>47<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->18,330<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for hey._pearl"><img src="./assets/instagram-proof/page-5.png" alt="hey._pearl Instagram subscription page showing 60 subscribers at ₹290 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->hey._pearl</p><p>60<!-- --> subscribers × ₹<!-- -->290</p><p class="instagram-proof-income">≈ ₹<!-- -->17,400<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for aira_rawat_"><img src="./assets/instagram-proof/page-12.png" alt="aira_rawat_ Instagram subscription page showing 40 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->aira_rawat_</p><p>40<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->15,600<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for relentlessdeepika"><img src="./assets/instagram-proof/page-18.png" alt="relentlessdeepika Instagram subscription page showing 39 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->relentlessdeepika</p><p>39<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->15,210<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for ayahhshruti"><img src="./assets/instagram-proof/page-16.png" alt="ayahhshruti Instagram subscription page showing 49 subscribers at ₹290 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->ayahhshruti</p><p>49<!-- --> subscribers × ₹<!-- -->290</p><p class="instagram-proof-income">≈ ₹<!-- -->14,210<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for avnii_19_"><img src="./assets/instagram-proof/page-13.png" alt="avnii_19_ Instagram subscription page showing 23 subscribers at ₹390 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->avnii_19_</p><p>23<!-- --> subscribers × ₹<!-- -->390</p><p class="instagram-proof-income">≈ ₹<!-- -->8,970<!-- --> / month</p></div></button><button type="button" class="instagram-proof-card text-left" aria-label="Open full-screen proof for adhirashreee"><img src="./assets/instagram-proof/page-14.png" alt="adhirashreee Instagram subscription page showing 37 subscribers at ₹180 monthly" width="720" height="1600" loading="lazy"/><div class="instagram-proof-copy"><p class="instagram-proof-handle">@<!-- -->adhirashreee</p><p>37<!-- --> subscribers × ₹<!-- -->180</p><p class="instagram-proof-income">≈ ₹<!-- -->6,660<!-- --> / month</p></div></button></div></div></div><p class="mt-4 text-center text-[10px] leading-relaxed text-muted-foreground">Estimated income = visible subscribers × monthly subscription price. Actual earnings may vary.</p><div class="method-tease"><p class="method-tease-title">How Thousands Of Indian Creators <span class="text-gold-grad">Earn Like This</span></p><div class="method-flow"><div class="method-step"><span class="method-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7.5" r="3.5"></circle><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"></path></svg></span><span class="method-step-label">Create<br/>AI Influencer</span></div><span class="method-flow-arrow" aria-hidden="true">→</span><div class="method-step"><span class="method-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"></rect><path d="M10.5 10.5l4 2.5-4 2.5z" fill="currentColor" stroke="none"></path></svg></span><span class="method-step-label">Upload<br/>On Instagram</span></div><span class="method-flow-arrow" aria-hidden="true">→</span><div class="method-step"><span class="method-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M9.5 8h5M9.5 11h5M12 8v8M9.5 14.5c.6 1.2 4.4 1.2 5 0"></path></svg></span><span class="method-step-label">Earn From<br/>Subscriptions</span></div></div><p class="method-tease-note">Exact process revealed in our <strong class="text-neon">Live Workshop</strong> , plus <strong class="text-gold-grad">5 more income streams</strong> 👇</p><div class="method-platforms"><span>TeraBox</span><span>Telegram</span><span>Facebook</span><span class="method-platforms-more">+ More</span></div></div><div class="mt-4"><a href="/checkout" class="btn-cta text-center text-[15px] sm:text-[17px] cursor-pointer"><span class="block w-full text-center leading-tight">Register For Live Workshop 👉</span></a></div></div></section><section class="px-4 py-9 glow-bg overflow-hidden"><div class="mx-auto w-full max-w-[430px]"><span class="mx-auto mb-3 flex w-fit items-center gap-1.5 rounded-full border border-primary/35 bg-gradient-to-r from-primary/15 to-primary/5 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-widest text-primary shadow-sm shadow-primary/10 backdrop-blur-sm">🖼️ 100% AI Generated</span><h2 class="text-center text-[24px] font-extrabold">These Are The Images You’ll Be Able To Generate<!-- --> <span class="text-neon">After The Workshop</span></h2><p class="mt-2 text-center text-[13px] text-muted-foreground">Take a look yourself, <strong class="text-foreground font-bold">100% realistic images</strong>, with<!-- --> <span class="text-primary font-bold">no plastic skin</span> and<!-- --> <span class="text-ai-blue font-bold">no visible traces of AI</span>.</p><div class="mt-5"><div class="gallery-grid"><button type="button" class="gallery-grid-item" aria-label="Open AI image 1 full screen"><img src="./assets/gallery/gallery-1.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 2 full screen"><img src="./assets/gallery/gallery-2.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 3 full screen"><img src="./assets/gallery/gallery-3.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 4 full screen"><img src="./assets/gallery/gallery-4.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 5 full screen"><img src="./assets/gallery/gallery-5.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 6 full screen"><img src="./assets/gallery/gallery-6.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 7 full screen"><img src="./assets/gallery/gallery-7.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 8 full screen"><img src="./assets/gallery/gallery-8.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 9 full screen"><img src="./assets/gallery/gallery-9.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 10 full screen"><img src="./assets/gallery/gallery-10.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 11 full screen"><img src="./assets/gallery/gallery-11.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 12 full screen"><img src="./assets/gallery/gallery-12.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 13 full screen"><img src="./assets/gallery/gallery-13.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 14 full screen"><img src="./assets/gallery/gallery-14.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 15 full screen"><img src="./assets/gallery/gallery-15.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 16 full screen"><img src="./assets/gallery/gallery-16.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 17 full screen"><img src="./assets/gallery/gallery-17.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 18 full screen"><img src="./assets/gallery/gallery-18.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 19 full screen"><img src="./assets/gallery/gallery-19.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 20 full screen"><img src="./assets/gallery/gallery-20.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 21 full screen"><img src="./assets/gallery/gallery-21.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 22 full screen"><img src="./assets/gallery/gallery-22.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 23 full screen"><img src="./assets/gallery/gallery-23.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 24 full screen"><img src="./assets/gallery/gallery-24.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 25 full screen"><img src="./assets/gallery/gallery-25.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 26 full screen"><img src="./assets/gallery/gallery-26.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 27 full screen"><img src="./assets/gallery/gallery-27.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 28 full screen"><img src="./assets/gallery/gallery-28.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 29 full screen"><img src="./assets/gallery/gallery-29.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button><button type="button" class="gallery-grid-item" aria-label="Open AI image 30 full screen"><img src="./assets/gallery/gallery-30.webp" alt="Realistic AI influencer image created using the workshop method" loading="lazy" width="720" height="1280"/></button></div></div><p class="mt-3 text-center text-[11px] font-bold text-ai-blue">👆 Tap any image to view full screen</p><p class="mt-5 text-center text-[14px] font-bold">Want to create images like these? 👇</p><div class="mt-3"><a href="/checkout" class="btn-cta text-center text-[15px] sm:text-[17px] cursor-pointer"><span class="block w-full text-center leading-tight">Join Live Workshop For ₹29 👉</span></a></div></div></section><section class="px-4 py-9 glow-bg"><div class="mx-auto w-full max-w-[430px]"><h2 class="text-center text-[24px] font-extrabold">Trying To Create Viral AI Influencer Content But<!-- --> <span class="text-neon">Keep Hitting These Problems?</span></h2><div class="pain-grid mt-5"><div class="pain-card"><span class="pain-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M5.8 5.8l12.4 12.4"></path></svg></span><div><h3 class="text-[15px] font-bold leading-snug">Regular AI Tools Block Realistic Generations</h3><p class="mt-1 text-[13px] leading-relaxed text-muted-foreground">You know the kind of realistic content you want to create, but mainstream tools keep restricting your prompts and results.</p></div></div><div class="pain-card"><span class="pain-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5A8 8 0 1 1 12.5 4"></path><path d="M17 3.5l3.5.5-.5 3.5"></path></svg></span><div><h3 class="text-[15px] font-bold leading-snug">Her Face Changes With Every Generation</h3><p class="mt-1 text-[13px] leading-relaxed text-muted-foreground">One image looks perfect. The next one looks like a completely different person, making it almost impossible to build a consistent AI influencer.</p></div></div><div class="pain-card"><span class="pain-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="2.5"></rect><path d="M12 8V4.5M9.5 4.5h5"></path><circle cx="9.5" cy="13" r="0.9" fill="currentColor"></circle><circle cx="14.5" cy="13" r="0.9" fill="currentColor"></circle><path d="M9.5 16h5"></path></svg></span><div><h3 class="text-[15px] font-bold leading-snug">Your Images Still Look “AI-Generated”</h3><p class="mt-1 text-[13px] leading-relaxed text-muted-foreground">Plastic skin, unnatural faces and weird details. Instead of looking like a real influencer, the content instantly looks artificial.</p></div></div><div class="pain-card"><span class="pain-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5v19"></path><path d="M16.5 6.5c0-2-2-3-4.5-3s-4.5 1-4.5 3 1.6 2.8 4.5 3.4 4.5 1.6 4.5 3.6-2 3-4.5 3-4.5-1-4.5-3"></path></svg></span><div><h3 class="text-[15px] font-bold leading-snug">Expensive Tools Are Too Expensive To Keep Using</h3><p class="mt-1 text-[13px] leading-relaxed text-muted-foreground">Multiple subscriptions just to generate content can quickly become expensive, especially when you&#x27;re just starting out.</p></div></div></div><div class="pain-close mt-6"><p class="text-center font-display text-[19px] font-extrabold leading-snug">The Problem Isn’t Your Idea.<!-- --> <span class="text-gold-grad">It’s The Tools &amp; Prompts You’re Using.</span></p><p class="mt-2 text-center text-[13px] leading-relaxed text-muted-foreground">With the right tool + ready-made prompts + the right process, you can create consistent, ultra-realistic AI influencer images directly from your mobile, without expensive AI subscriptions.</p></div><div class="mt-4"><a href="/checkout" class="btn-cta text-center text-[15px] sm:text-[17px] cursor-pointer"><span class="block w-full text-center leading-tight">Join The Live Workshop 👉</span></a></div></div></section><section class="px-4 py-9 glow-bg overflow-hidden"><div class="mx-auto w-full max-w-[430px]"><span class="mx-auto mb-3 flex w-fit items-center gap-1.5 rounded-full border border-primary/35 bg-gradient-to-r from-primary/15 to-primary/5 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-widest text-primary shadow-sm shadow-primary/10 backdrop-blur-sm">⚡ The Difference</span><h2 class="text-center text-[24px] font-extrabold leading-tight">Generic Prompts vs <span class="text-lime-grad">Proven Master Prompts</span></h2><div class="vs-grid mt-6"><div class="vs-fail"><span class="vs-fail-icon" aria-hidden="true">!</span><h3 class="mt-3 font-display text-[16px] font-extrabold">Failed</h3><p class="mt-1.5 text-[12.5px] leading-relaxed text-muted-foreground">“This generation may violate our policies. Please try a different prompt.”</p></div><div class="vs-img-wrap"><img src="./assets/gallery/gallery-1.webp" alt="Realistic AI influencer image generated with proven prompts" width="720" height="1279" class="vs-img" loading="lazy"/><span class="vs-img-badge">Generated ✅</span></div></div><div class="vs-cols mt-5"><div><h3 class="text-center font-display text-[15px] font-extrabold text-danger">Generic Prompt</h3><p class="mt-0.5 text-center text-[11px] font-semibold text-muted-foreground">Regular AI + copied prompt</p></div><div><h3 class="text-center font-display text-[15px] font-extrabold text-lime-grad">Proven Prompts Pack</h3><p class="mt-0.5 text-center text-[11px] font-semibold text-muted-foreground">Secret AI tool + proven prompts</p></div></div><div class="mt-4 space-y-3.5"><div class="vs-row"><div><p class="text-[12px] font-bold">Realism</p><p class="mt-0.5 text-[11px] text-muted-foreground">Doll face / blocked</p><div class="vs-bar"><span class="vs-bar-bad" style="width:15%"></span></div></div><div><p class="text-right text-[12px] font-bold">Realism<!-- --> <span class="text-lime">95<!-- -->%</span></p><p class="mt-0.5 text-right text-[11px] text-muted-foreground">Real skin, pores, undetectable</p><div class="vs-bar"><span class="vs-bar-good" style="width:95%"></span></div></div></div><div class="vs-row"><div><p class="text-[12px] font-bold">Face Consistency</p><p class="mt-0.5 text-[11px] text-muted-foreground">Changes every time</p><div class="vs-bar"><span class="vs-bar-bad" style="width:10%"></span></div></div><div><p class="text-right text-[12px] font-bold">Face Consistency<!-- --> <span class="text-lime">98<!-- -->%</span></p><p class="mt-0.5 text-right text-[11px] text-muted-foreground">Same face every time</p><div class="vs-bar"><span class="vs-bar-good" style="width:98%"></span></div></div></div><div class="vs-row"><div><p class="text-[12px] font-bold">Speed</p><p class="mt-0.5 text-[11px] text-muted-foreground">Weeks with no result</p><div class="vs-bar"><span class="vs-bar-bad" style="width:20%"></span></div></div><div><p class="text-right text-[12px] font-bold">Speed<!-- --> <span class="text-lime">100<!-- -->%</span></p><p class="mt-0.5 text-right text-[11px] text-muted-foreground">Ready in 60 seconds</p><div class="vs-bar"><span class="vs-bar-good" style="width:100%"></span></div></div></div><div class="vs-row"><div><p class="text-[12px] font-bold">Variety</p><p class="mt-0.5 text-[11px] text-muted-foreground">Same pose, fans cancel</p><div class="vs-bar"><span class="vs-bar-bad" style="width:12%"></span></div></div><div><p class="text-right text-[12px] font-bold">Variety<!-- --> <span class="text-lime">100<!-- -->%</span></p><p class="mt-0.5 text-right text-[11px] text-muted-foreground">Unlimited scenes &amp; poses</p><div class="vs-bar"><span class="vs-bar-good" style="width:100%"></span></div></div></div></div><p class="mt-5 text-center text-[13.5px] leading-relaxed text-muted-foreground">In the live workshop you get the<!-- --> <strong class="text-foreground">same proven prompts + the secret tool</strong>, so your generations stop failing and start looking<!-- --> <strong class="text-lime-grad font-bold">this real</strong>.</p><div class="mt-4"><a href="/checkout" class="btn-cta text-center text-[15px] sm:text-[17px] cursor-pointer"><span class="block w-full text-center leading-tight">Get The Proven Prompts &amp; Join Workshop 👉</span></a></div></div></section><section class="px-4 py-9 glow-bg"><div class="mx-auto w-full max-w-[430px]"><span class="mx-auto mb-3 flex w-fit items-center gap-1.5 rounded-full border border-primary/35 bg-gradient-to-r from-primary/15 to-primary/5 px-3.5 py-1 text-[11px] font-extrabold uppercase tracking-widest text-primary shadow-sm shadow-primary/10 backdrop-blur-sm">👨‍🏫 Your Mentor</span><h2 class="mt-2 text-center font-display text-[15px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Meet Your Mentor</h2><p class="mt-1 text-center font-display text-[30px] font-extrabold leading-tight text-gold-grad">Prateek Mayani</p><p class="mt-2 text-center text-[14px] font-bold leading-snug">The Man Behind India’s Most <span class="text-neon">Realistic AI Influencers</span></p><div class="surface mt-5 overflow-hidden"><div class="bg-gradient-to-r from-primary via-[var(--ai-blue)] to-[var(--money)] p-[3px]"><img src="./assets/mentor.jpg" alt="Prateek Mayani, AI influencer workshop mentor" loading="lazy" width="912" height="1104" class="h-auto w-full rounded-lg object-contain"/></div><div class="space-y-3 p-4 text-[13.5px] leading-relaxed text-muted-foreground"><p>I am not here to say big things. I am not a big hero or a movie star , <!-- --> <strong class="text-foreground">I am a simple man like you.</strong></p><p>I have been in this digital space for more than five years now, and I want to show you the <strong class="text-foreground">actual, real way</strong> all of these AI influencer images are generated, the viral influencer images that modern AI tools block. In this workshop, I’ll reveal the exact method so you can generate them yourself,<!-- --> <strong class="text-foreground">completely free, without paying even ₹1</strong> <!-- -->for any AI tool.</p></div></div><div class="surface mt-4 p-4"><h3 class="text-center font-display text-[16px] font-extrabold">Your Only Job: <span class="text-gold-grad">Join The Workshop.</span></h3><p class="mt-1 text-center text-[12.5px] font-semibold text-muted-foreground">Everything else, we hand you ready-made 👇</p><ul class="mt-3 space-y-2.5 text-[13.5px] leading-relaxed text-foreground/90"><li class="flex items-start gap-2"><span class="text-money font-bold shrink-0">✅</span><div><strong class="text-foreground">Ready-made prompts</strong>, your AI influencer’s character is generated for you, just copy-paste</div></li><li class="flex items-start gap-2"><span class="text-money font-bold shrink-0">✅</span><div><strong class="text-foreground">Full setup done with you</strong>, her look, her name, her page, step by step in the class</div></li><li class="flex items-start gap-2"><span class="text-money font-bold shrink-0">✅</span><div><strong class="text-foreground">Unlimited images from day one</strong> , generate her content yourself, everything in your control</div></li><li class="flex items-start gap-2"><span class="text-money font-bold shrink-0">✅</span><div><strong class="text-foreground">Monetization handled</strong>, 5+ income methods explained and mapped out, so you never figure it out alone</div></li><li class="flex items-start gap-2"><span class="text-money font-bold shrink-0">✅</span><div>Pay just <strong class="text-gold-grad font-black text-sm">₹29</strong> , <!-- --> <strong class="text-foreground">we take care of the rest</strong></div></li></ul></div><div class="mt-4"><a href="/checkout" class="btn-cta text-center text-[15px] sm:text-[17px] cursor-pointer"><span class="block w-full text-center leading-tight">Register For Live Workshop 👉</span></a></div></div></section><section class="px-4 py-9 glow-bg"><div class="mx-auto w-full max-w-[430px]"><h2 class="text-center text-[24px] font-extrabold">Simple Questions ❓</h2><div class="mt-5 space-y-3"><div class="surface overflow-hidden"><button type="button" class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"><span class="font-display text-[15px] font-bold">What is the date of the workshop?</span><span class="text-primary">+</span></button></div><div class="surface overflow-hidden"><button type="button" class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"><span class="font-display text-[15px] font-bold">How do I register for the workshop?</span><span class="text-primary">+</span></button></div><div class="surface overflow-hidden"><button type="button" class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"><span class="font-display text-[15px] font-bold">Only have a mobile phone?</span><span class="text-primary">+</span></button></div><div class="surface overflow-hidden"><button type="button" class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"><span class="font-display text-[15px] font-bold">Do I need paid AI tools?</span><span class="text-primary">+</span></button></div><div class="surface overflow-hidden"><button type="button" class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"><span class="font-display text-[15px] font-bold">I’m a complete beginner, can I still do this?</span><span class="text-primary">+</span></button></div><div class="surface overflow-hidden"><button type="button" class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"><span class="font-display text-[15px] font-bold">Will my face be revealed anywhere?</span><span class="text-primary">+</span></button></div><div class="surface overflow-hidden"><button type="button" class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"><span class="font-display text-[15px] font-bold">Is this a scam?</span><span class="text-primary">+</span></button></div><div class="surface overflow-hidden"><button type="button" class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left"><span class="font-display text-[15px] font-bold">Will I get the recording?</span><span class="text-primary">+</span></button></div></div></div></section><section class="px-4 py-9 "><div class="mx-auto w-full max-w-[430px]"><div class="surface p-4 text-[11px] leading-relaxed text-muted-foreground"><h3 class="text-[13px] font-bold text-foreground">⚠️ Disclaimer &amp; Non-Refundable Policy</h3><p class="mt-2">This workshop is for <strong class="text-foreground">educational purposes only</strong>. Results mentioned are not typical and may vary from person to person depending on individual effort, skills and market conditions. We do not guarantee any specific income or earnings. This site is not affiliated with or endorsed by Instagram / Meta Platforms Inc.</p><hr class="my-3 border-border"/><p>🚫 The registration fee of <strong class="text-foreground">₹29</strong> is strictly non-refundable once payment is made. Since this is a live digital workshop with instant access, no refunds will be issued. By completing payment you agree to this policy.</p></div></div></section><footer class="border-t border-border/60 bg-black/40 pt-8 pb-28 sm:pb-20 text-center text-[12px] text-muted-foreground"><div class="mx-auto max-w-4xl px-4 space-y-4"><div class="flex items-center justify-center gap-4 text-[13px] font-medium text-foreground/80"><a href="/privacy-policy" class="transition hover:text-primary underline">Privacy Policy</a><span class="text-muted-foreground/40">|</span><a href="/terms-and-conditions" class="transition hover:text-primary underline">Terms &amp; Conditions</a></div><div class="text-[11px] leading-relaxed text-muted-foreground/70 max-w-2xl mx-auto"><p>This site is not a part of the Facebook / Meta website or Meta Inc. Additionally, this site is NOT endorsed by Meta in any way.</p><p class="mt-2">© <!-- -->2026<!-- --> Prateek Mayani. All Rights Reserved.</p></div></div></footer><div class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur"><div class="mx-auto w-full max-w-[430px]"><p class="mb-1 text-center text-[11px] font-bold text-gold flex items-center justify-center gap-1"><span>⚡ Early Mover Advantage: ₹29 Only (Nobody Knows This Yet)</span></p><a href="/checkout" class="btn-cta text-center text-[15px] sm:text-[17px] cursor-pointer"><span class="block w-full text-center leading-tight">Register For Live Workshop at ₹29 👉</span></a></div></div>
+<!-- LIGHTBOX MODAL -->
+<div id="lightbox-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/90 p-4 backdrop-blur-sm cursor-pointer" onclick="closeLightbox()">
+  <div class="relative max-h-[92vh] max-w-[92vw] flex flex-col items-center justify-center" onclick="event.stopPropagation()">
+    <button type="button" onclick="closeLightbox()" class="absolute -top-10 right-0 size-8 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center font-bold text-lg cursor-pointer">✕</button>
+    <img id="lightbox-img" src="" alt="Enlarged preview" class="max-h-[85vh] max-w-[90vw] rounded-2xl border border-white/20 object-contain shadow-2xl" />
+    <p id="lightbox-caption" class="mt-2 text-center text-xs text-muted-foreground"></p>
   </div>
+</div>
 
-  <script src="/app.js"></script>
+<!-- SCRIPT FOR INTERACTION -->
+<script>
+  function openLightbox(src, caption) {
+    const m = document.getElementById('lightbox-modal');
+    const img = document.getElementById('lightbox-img');
+    const cap = document.getElementById('lightbox-caption');
+    if (!m || !img) return;
+    img.src = src;
+    if (cap) cap.textContent = caption || '';
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    const m = document.getElementById('lightbox-modal');
+    if (!m) return;
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  document.querySelectorAll('.gallery-grid-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const img = btn.querySelector('img');
+      if (img) openLightbox(img.src, 'Realistic AI Generation Preview');
+    });
+  });
+
+  document.querySelectorAll('.instagram-proof-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const img = btn.querySelector('img');
+      const handle = btn.querySelector('.instagram-proof-handle');
+      const inc = btn.querySelector('.instagram-proof-income');
+      const caption = (handle ? handle.textContent : '') + (inc ? ' • ' + inc.textContent : '');
+      if (img) openLightbox(img.src, caption);
+    });
+  });
+
+  document.querySelectorAll('.surface button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const answer = btn.parentElement.querySelector('.faq-answer');
+      const icon = btn.querySelector('.faq-icon');
+      if (answer) {
+        const isHidden = answer.classList.contains('hidden');
+        if (isHidden) {
+          answer.classList.remove('hidden');
+          if (icon) icon.textContent = '−';
+        } else {
+          answer.classList.add('hidden');
+          if (icon) icon.textContent = '+';
+        }
+      }
+    });
+  });
+</script>
+</main>
 </body>
 </html>
