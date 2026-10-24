@@ -144,6 +144,8 @@ export const createOrder = createServerFn({ method: "POST" })
       throw new Error(errMsg);
     }
 
+    const order = (await res.json()) as { id: string; amount: number; currency: string };
+
     // Generate secure hosted Razorpay Payment Link that bypasses domain mismatch blocks
     let paymentLinkUrl = "";
     try {
