@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { verifyPayment } from "@/lib/checkout.functions";
 
-export const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/G3asnvdznZY3a4Ystpo0wR?mode=gi_t";
+export const WHATSAPP_GROUP_URL =
+  "https://chat.whatsapp.com/GAGkPPnaSbO6bHwT4qGkTs?s=cl&p=a&mlu=4&ilr=4";
 
 export const Route = createFileRoute("/thank-you-5034")({
   head: () => ({
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/thank-you-5034")({
       {
         name: "description",
         content:
-          "Your seat is booked for the live AI Visual & Reels Masterclass on 22nd October (Thursday), 7:00 PM. Join the WhatsApp group to receive your Zoom link.",
+          "Your seat is booked for the live AI Visual & Reels Masterclass on 29th October (Thursday), 7:00 PM. Join the WhatsApp group to receive your Zoom link.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -42,31 +43,98 @@ function CheckIcon() {
 }
 
 function ThankYouPage() {
+  const [countdown, setCountdown] = useState(3);
+  const [hasRedirected, setHasRedirected] = useState(false);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Purchase conversions are tracked server-side via Meta CAPI (n8n workflow)
-    // with SHA256 hashed phone, email, and exact amounts directly from the verified order.
-    // Client-side Purchase/Lead is removed here to prevent 2X duplicate tracking.
     const params = new URLSearchParams(window.location.search);
     const payment_id =
       params.get("payment_id") ||
+      params.get("razorpay_payment_id") ||
       sessionStorage.getItem("last_payment_id") ||
       "";
     const payment_request_id = params.get("payment_request_id");
+    const amount = Number(params.get("amount") || 29);
 
+    // 1. Client-side Meta Pixel Purchase tracking with exact eventID deduplication against CAPI
+    if ((window as unknown as { fbq?: (...args: unknown[]) => void }).fbq && payment_id) {
+      try {
+        (window as unknown as { fbq: (...args: unknown[]) => void }).fbq(
+          "track",
+          "Purchase",
+          {
+            value: amount,
+            currency: "INR",
+            content_name: "AI Influencer Workshop",
+          },
+          { eventID: payment_id }
+        );
+      } catch (pixelErr) {
+        console.warn("Pixel Purchase track warning:", pixelErr);
+      }
+    }
+
+    // 2. Legacy verification fallback
     if (payment_id && payment_request_id) {
       verifyPayment({
         data: {
-          payment_id,
-          payment_request_id: payment_request_id || undefined,
+          razorpay_order_id: payment_request_id,
+          razorpay_payment_id: payment_id,
+          razorpay_signature: "legacy_redirect_verify",
         },
       }).catch((e) => console.error("Verification error:", e));
     }
+
+    // 3. 3-second smart countdown to auto-open WhatsApp group
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setHasRedirected(true);
+          try {
+            window.location.href = WHATSAPP_GROUP_URL;
+          } catch {
+            window.open(WHATSAPP_GROUP_URL, "_blank");
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
+
+  const openWhatsApp = () => {
+    try {
+      window.location.href = WHATSAPP_GROUP_URL;
+    } catch {
+      window.open(WHATSAPP_GROUP_URL, "_blank");
+    }
+  };
 
   return (
     <main className="mx-auto w-full max-w-[430px] px-4 pb-16 pt-8">
+      {/* Auto-redirect Banner */}
+      <div className="surface mb-3 p-3.5 text-center rounded-2xl border border-emerald-500/40 bg-emerald-500/10 shadow-lg shadow-emerald-500/10">
+        <p className="text-[12.5px] font-bold text-emerald-400 flex items-center justify-center gap-2">
+          <span className="size-2 rounded-full bg-emerald-400 animate-ping" />
+          <span>
+            {hasRedirected
+              ? "Redirected! Click below if group didn't open:"
+              : `Redirecting you to VIP WhatsApp Group in ${countdown}s...`}
+          </span>
+        </p>
+        <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-emerald-950/80">
+          <div
+            className="h-full bg-emerald-400 transition-all duration-1000 ease-linear rounded-full"
+            style={{ width: `${((3 - countdown) / 3) * 100}%` }}
+          />
+        </div>
+      </div>
+
       {/* Hero */}
       <div className="surface p-6 text-center rounded-2xl border border-border/80">
         <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[var(--money)]/15">
@@ -85,7 +153,9 @@ function ThankYouPage() {
           Zoom Access
         </h1>
         <p className="mt-3 text-[13.5px] leading-relaxed text-muted-foreground">
-          Your seat is secured for the live masterclass. The <strong className="text-foreground">live Zoom meeting link</strong> and workshop materials are shared exclusively inside our private WhatsApp group.
+          Your seat is secured for the live masterclass. The{" "}
+          <strong className="text-foreground">live Zoom meeting link</strong> and workshop materials
+          are shared exclusively inside our private WhatsApp group.
         </p>
 
         <a
@@ -94,23 +164,16 @@ function ThankYouPage() {
           rel="noopener noreferrer"
           onClick={(e) => {
             e.preventDefault();
-            const w = window.open(WHATSAPP_GROUP_URL, "_blank", "noopener,noreferrer");
-            if (!w) {
-              try {
-                window.top!.location.href = WHATSAPP_GROUP_URL;
-              } catch {
-                window.location.href = WHATSAPP_GROUP_URL;
-              }
-            }
+            openWhatsApp();
           }}
-          className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#25D366] px-5 py-4 font-display text-[16px] font-extrabold text-black shadow-lg transition-transform active:scale-[0.98]"
+          className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#25D366] px-5 py-4 font-display text-[16px] font-extrabold text-black shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
           style={{ boxShadow: "0 10px 30px -10px color-mix(in oklab, #25D366 50%, transparent)" }}
         >
           <WhatsAppIcon className="size-6" />
-          Join The WhatsApp Group
+          Join The WhatsApp Group Now
         </a>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          Button not opening? Use direct link:{" "}
+          Button not opening? Direct link:{" "}
           <a
             href={WHATSAPP_GROUP_URL}
             target="_blank"
@@ -129,7 +192,7 @@ function ThankYouPage() {
         </p>
         <div className="mt-3 grid grid-cols-2 gap-3 text-left">
           {[
-            ["Date", "22nd October 2026 (Thursday)"],
+            ["Date", "29th October 2026 (Thursday)"],
             ["Time", "7:00 PM IST"],
             ["Platform", "Zoom Live"],
             ["Language", "Hindi + English"],
@@ -152,7 +215,7 @@ function ThankYouPage() {
             "Join the private WhatsApp community using the green button above.",
             "Receive the masterclass preparatory guide and guidelines.",
             "Access the live Zoom room link 15 minutes before the session starts.",
-            "Participate live on 22nd October (Thursday) at 7:00 PM IST sharp.",
+            "Participate live on 29th October (Thursday) at 7:00 PM IST sharp.",
           ].map((line, i) => (
             <li key={line} className="flex items-start gap-2.5 text-[13px] text-muted-foreground">
               <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[11px] font-extrabold text-primary">
@@ -179,10 +242,19 @@ function ThankYouPage() {
               <span>🎬</span> Workshop Recording &amp; 300+ Prompts Delivery
             </p>
             <p className="mt-1 text-muted-foreground text-[12px] leading-relaxed">
-              If you purchased the <strong className="text-foreground">Workshop Recording</strong> or <strong className="text-foreground">300+ Prompts Vault</strong>, they will be delivered directly to your <strong className="text-foreground">registered email within 12 hours after the live workshop ends</strong>.
+              If you purchased the <strong className="text-foreground">Workshop Recording</strong> or{" "}
+              <strong className="text-foreground">300+ Prompts Vault</strong>, they will be delivered
+              directly to your{" "}
+              <strong className="text-foreground">
+                registered email within 12 hours after the live workshop ends
+              </strong>
+              .
             </p>
             <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-amber-200 text-[11.5px] leading-relaxed">
-              ⚡ <strong>Please do not panic:</strong> Delivery is 100% automated. If you don't find it in your Primary inbox, please check your <strong className="underline">Spam / Junk folder</strong> or <strong className="underline">Promotions tab</strong>.
+              ⚡ <strong>Please do not panic:</strong> Delivery is 100% automated. If you don't find it in
+              your Primary inbox, please check your{" "}
+              <strong className="underline">Spam / Junk folder</strong> or{" "}
+              <strong className="underline">Promotions tab</strong>.
             </p>
           </div>
 
@@ -191,7 +263,11 @@ function ThankYouPage() {
               <span>📞</span> 1-on-1 Consultation Call Attendees
             </p>
             <p className="mt-1 text-muted-foreground text-[12px] leading-relaxed">
-              All 1:1 strategy calls are conducted <strong className="text-foreground">after the live workshop concludes</strong>. Once the workshop ends, you can directly message the <strong className="text-foreground">WhatsApp Group Admin</strong> to discuss and lock in your convenient 1:1 slot.
+              All 1:1 strategy calls are conducted{" "}
+              <strong className="text-foreground">after the live workshop concludes</strong>. Once the
+              workshop ends, you can directly message the{" "}
+              <strong className="text-foreground">WhatsApp Group Admin</strong> to discuss and lock in your
+              convenient 1:1 slot.
             </p>
           </div>
 
@@ -200,7 +276,8 @@ function ThankYouPage() {
               <span>✉️</span> Registered Email Check
             </p>
             <p className="mt-1 text-muted-foreground text-[12px] leading-relaxed">
-              All links and bonus vault access will be sent to the exact email address you entered during checkout.
+              All links and bonus vault access will be sent to the exact email address you entered during
+              checkout.
             </p>
           </div>
         </div>

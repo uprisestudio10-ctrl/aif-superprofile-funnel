@@ -14,6 +14,7 @@ const META_CAPI_TOKEN =
 // Add-on offer catalog — prices live here on the server so the client
 // can never send a tampered amount.
 export const OFFER_CATALOG = {
+  combo: { label: "VIP All-Access Bundle (Recordings + Prompts)", paise: 21900 },
   recording: { label: "Workshop Recording + Notes PDF", paise: 14900 },
   prompts: { label: "300+ Done-For-You Prompts", paise: 19900 },
   call: { label: "1-On-1 Strategy Consultation Call", paise: 49900 },
@@ -21,7 +22,7 @@ export const OFFER_CATALOG = {
 
 export type OfferId = keyof typeof OFFER_CATALOG;
 
-const offerIdSchema = z.enum(["recording", "prompts", "call"]);
+const offerIdSchema = z.enum(["combo", "recording", "prompts", "call"]);
 
 const NOT_CONFIGURED = "Payment gateway is not configured yet. Please try again shortly.";
 
@@ -342,12 +343,15 @@ export const verifyPayment = createServerFn({ method: "POST" })
     });
 
     // 2. Trigger n8n Webhook for Google Sheet Automation
-    const n8nWebhookUrl = process.env["N8N_WEBHOOK_URL"];
+    const n8nWebhookUrl =
+      process.env["N8N_WEBHOOK_URL"] ||
+      "https://prateek.n8n.preetamsoni.com/webhook/ai-influencer-leads";
     if (n8nWebhookUrl) {
       try {
         const hasCall = orderOffers.includes("call");
-        const hasRecording = orderOffers.includes("recording");
-        const hasPrompts = orderOffers.includes("prompts");
+        const isCombo = orderOffers.includes("combo");
+        const hasRecording = isCombo || orderOffers.includes("recording");
+        const hasPrompts = isCombo || orderOffers.includes("prompts");
         const cleanPhone = orderPhone.replace(/\D/g, "").slice(-10);
         const formattedPhone = cleanPhone.length === 10 ? cleanPhone : orderPhone;
 
@@ -374,7 +378,7 @@ export const verifyPayment = createServerFn({ method: "POST" })
           time: timeStr,
           amount: finalAmountRupees,
           amount_formatted: `₹${finalAmountRupees}`,
-          workshop_date: "22nd October 2026 (Thursday) 7:00 PM IST",
+          workshop_date: "29th October 2026 (Thursday) 7:00 PM IST",
           utm_source: tracking.utm_source || "",
           utm_campaign: tracking.utm_campaign || "",
           utm_content: tracking.utm_content || "",

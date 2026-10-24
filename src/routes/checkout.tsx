@@ -1,28 +1,22 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState, type FormEvent, useEffect } from "react";
+import { createOrder, verifyPayment } from "@/lib/checkout.functions";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Secure Your Workshop Access, AI Influencer Workshop ₹29" },
+      { title: "Secure Your Workshop Access | AI Influencer Workshop ₹29" },
       {
         name: "description",
         content:
-          "Final step: secure your seat for the live AI Influencer Workshop on 22nd October (Thursday), 7:00 PM. Pay securely via Superprofile.",
+          "Final step: secure your seat for the live AI Influencer Workshop on 29th October (Thursday), 7:00 PM IST. Pay securely via Razorpay UPI, GPay, PhonePe & Cards.",
       },
     ],
   }),
   component: CheckoutPage,
 });
 
-type OfferId = "recording" | "prompts" | "combo";
-
-const SUPERPROFILE_LINKS = {
-  basic: "https://superprofile.bio/e/ILjNLKwO", // ₹29
-  recording: "https://superprofile.bio/e/9x5zPMBF", // ₹178
-  prompts: "https://superprofile.bio/e/wjvoptAf", // ₹228
-  combo: "https://superprofile.bio/e/rmJxqGcP", // ₹248
-} as const;
+type OfferId = "combo" | "recording" | "prompts";
 
 const WORKSHOP_BASE_PRICE = 29;
 
@@ -81,6 +75,8 @@ function getTrackingParams() {
       utm_content: "",
       utm_term: "",
       fbclid: "",
+      fbp: "",
+      fbc: "",
     };
   }
   const rawSearch =
@@ -90,6 +86,18 @@ function getTrackingParams() {
     "";
   const params = new URLSearchParams(rawSearch.startsWith("?") ? rawSearch : `?${rawSearch}`);
 
+  // Extract cookies
+  let fbp = "";
+  let fbc = "";
+  try {
+    const cookies = document.cookie.split(";");
+    for (const c of cookies) {
+      const [k, v] = c.trim().split("=");
+      if (k === "_fbp") fbp = v;
+      if (k === "_fbc") fbc = v;
+    }
+  } catch {}
+
   return {
     utm_source: params.get("utm_source") || "",
     utm_medium: params.get("utm_medium") || "",
@@ -97,35 +105,68 @@ function getTrackingParams() {
     utm_content: params.get("utm_content") || "",
     utm_term: params.get("utm_term") || "",
     fbclid: params.get("fbclid") || "",
+    fbp,
+    fbc,
   };
 }
 
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if ((window as unknown as { Razorpay?: unknown }).Razorpay) return resolve(true);
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 function CheckoutPage() {
+  const navigate = useNavigate();
+
+  // Pre-select combo bundle for maximum conversion and AOV
   const [selected, setSelected] = useState<Record<OfferId, boolean>>({
+    combo: true,
     recording: false,
     prompts: false,
-    combo: false,
   });
-  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  // Student details
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+
+  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void loadRazorpayScript();
+  }, []);
 
   // Compute active combination & total price
   let total = WORKSHOP_BASE_PRICE;
-  let targetSuperprofileBaseUrl = SUPERPROFILE_LINKS.basic;
   let activeOfferLabel = "Workshop Basic Pass";
+  const selectedOfferKeys: ("combo" | "recording" | "prompts")[] = [];
 
   if (selected.combo) {
     total = WORKSHOP_BASE_PRICE + 219; // ₹248
-    targetSuperprofileBaseUrl = SUPERPROFILE_LINKS.combo;
     activeOfferLabel = "Workshop + VIP All-Access Bundle";
+    selectedOfferKeys.push("combo");
+  } else if (selected.recording && selected.prompts) {
+    total = WORKSHOP_BASE_PRICE + 219; // Auto combo ₹248
+    activeOfferLabel = "Workshop + VIP All-Access Bundle";
+    selectedOfferKeys.push("combo");
   } else if (selected.recording) {
     total = WORKSHOP_BASE_PRICE + 149; // ₹178
-    targetSuperprofileBaseUrl = SUPERPROFILE_LINKS.recording;
     activeOfferLabel = "Workshop + Lifetime Recordings";
+    selectedOfferKeys.push("recording");
   } else if (selected.prompts) {
     total = WORKSHOP_BASE_PRICE + 199; // ₹228
-    targetSuperprofileBaseUrl = SUPERPROFILE_LINKS.prompts;
     activeOfferLabel = "Workshop + 300+ Prompts Vault";
+    selectedOfferKeys.push("prompts");
   }
 
   function toggle(id: OfferId) {
@@ -155,12 +196,31 @@ function CheckoutPage() {
     });
   }
 
-  function onProceedToPayment(e: FormEvent) {
+  async function onProceedToPayment(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setIsRedirecting(true);
+
+    const cleanName = name.trim();
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanName || cleanName.length < 2) {
+      setError("Please enter your full name.");
+      return;
+    }
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      setError("Please enter a valid 10-digit WhatsApp mobile number.");
+      return;
+    }
+    if (!cleanEmail || !cleanEmail.includes("@") || !cleanEmail.includes(".")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    setIsProcessing(true);
 
     try {
+      // Fire InitiateCheckout Meta Pixel Event
       if (typeof window !== "undefined" && (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq) {
         try {
           (window as unknown as { fbq: (...args: unknown[]) => void }).fbq(
@@ -173,32 +233,117 @@ function CheckoutPage() {
             }
           );
         } catch (pixelErr) {
-          console.error("Meta pixel track error:", pixelErr);
+          console.warn("Pixel InitiateCheckout warning:", pixelErr);
         }
       }
 
-      // Build target redirect URL with all tracking parameters
-      const targetUrl = new URL(targetSuperprofileBaseUrl);
-      targetUrl.searchParams.set("checkout", "true");
-      const tracking = getTrackingParams();
-      if (tracking.utm_source) targetUrl.searchParams.set("utm_source", tracking.utm_source);
-      if (tracking.utm_medium) targetUrl.searchParams.set("utm_medium", tracking.utm_medium);
-      if (tracking.utm_campaign) targetUrl.searchParams.set("utm_campaign", tracking.utm_campaign);
-      if (tracking.utm_content) targetUrl.searchParams.set("utm_content", tracking.utm_content);
-      if (tracking.utm_term) targetUrl.searchParams.set("utm_term", tracking.utm_term);
-      if (tracking.fbclid) targetUrl.searchParams.set("fbclid", tracking.fbclid);
+      // Ensure Razorpay SDK is loaded
+      const hasSdk = await loadRazorpayScript();
+      if (!hasSdk && !(window as unknown as { Razorpay?: unknown }).Razorpay) {
+        throw new Error("Unable to load secure Razorpay gateway. Please refresh or try again.");
+      }
 
-      // Redirect directly to Superprofile Checkout
-      window.location.href = targetUrl.toString();
+      const tracking = getTrackingParams();
+
+      // 1. Create order on server via Razorpay API
+      const orderRes = await createOrder({
+        data: {
+          name: cleanName,
+          email: cleanEmail,
+          phone: cleanPhone,
+          offers: selectedOfferKeys,
+          tracking,
+        },
+      });
+
+      if (!orderRes || !orderRes.orderId) {
+        throw new Error("Could not initialize payment order. Please try again.");
+      }
+
+      // 2. Open standard native Razorpay Checkout Modal
+      const options = {
+        key: orderRes.keyId,
+        amount: orderRes.amount,
+        currency: orderRes.currency,
+        name: "AI Influencer Workshop",
+        description: activeOfferLabel,
+        image: "/favicon.ico",
+        order_id: orderRes.orderId,
+        prefill: {
+          name: cleanName,
+          email: cleanEmail,
+          contact: cleanPhone,
+        },
+        notes: {
+          name: cleanName,
+          email: cleanEmail,
+          phone: cleanPhone,
+          offers: selectedOfferKeys.join(","),
+        },
+        theme: {
+          color: "#f59e0b",
+        },
+        handler: async function (response: {
+          razorpay_payment_id: string;
+          razorpay_order_id: string;
+          razorpay_signature: string;
+        }) {
+          try {
+            // Verify payment and trigger n8n + CAPI server-side
+            await verifyPayment({
+              data: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                customer: {
+                  name: cleanName,
+                  email: cleanEmail,
+                  phone: cleanPhone,
+                  offers: selectedOfferKeys,
+                  amount: total * 100,
+                  tracking: {
+                    ...tracking,
+                    user_agent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+                  },
+                },
+              },
+            });
+          } catch (verifyErr) {
+            console.warn("verifyPayment warning:", verifyErr);
+          }
+
+          // Save last payment ID to session for pixel attribution
+          try {
+            sessionStorage.setItem("last_payment_id", response.razorpay_payment_id);
+          } catch {}
+
+          // Navigate to thank you page with parameters
+          const targetUrl = `/thank-you-5034?payment_id=${response.razorpay_payment_id}&order_id=${response.razorpay_order_id}&amount=${total}&name=${encodeURIComponent(cleanName)}&email=${encodeURIComponent(cleanEmail)}&phone=${cleanPhone}`;
+          window.location.href = targetUrl;
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+          },
+        },
+      };
+
+      const RazorpayConstructor = (window as unknown as { Razorpay: new (opts: unknown) => { open: () => void } }).Razorpay;
+      const rzpInstance = new RazorpayConstructor(options);
+      rzpInstance.open();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Redirect failed. Please try again.");
-      setIsRedirecting(false);
+      console.error("Payment initiation error:", err);
+      setError(err instanceof Error ? err.message : "Payment failed to start. Please try again.");
+      setIsProcessing(false);
     }
   }
 
   return (
     <main className="mx-auto w-full max-w-[430px] px-4 pb-16 pt-8">
-      <Link to="/" className="text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors">
+      <Link
+        to="/"
+        className="text-[13px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+      >
         ← Back to Workshop Details
       </Link>
 
@@ -208,7 +353,7 @@ function CheckoutPage() {
           <span className="text-gold-grad">Customize</span> Your Access Pass
         </h1>
         <p className="mt-2 text-[13px] text-muted-foreground">
-          October 22, 2026 (Thursday) · 7:00 PM IST · Live on Zoom
+          October 29, 2026 (Thursday) · 7:00 PM IST · Live on Zoom
         </p>
       </div>
 
@@ -217,12 +362,71 @@ function CheckoutPage() {
         <div className="bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 py-2.5 px-4 text-center">
           <p className="text-[11.5px] font-extrabold uppercase tracking-widest text-primary flex items-center justify-center gap-1.5">
             <span>🔒</span>
-            <span>1-Step Direct Checkout via Superprofile</span>
+            <span>Instant 1-Click Razorpay UPI / Cards Checkout</span>
           </p>
         </div>
       </div>
 
       <form onSubmit={onProceedToPayment} className="mt-4 space-y-4">
+        {/* Student Details Form */}
+        <div className="surface space-y-3.5 p-4 sm:p-5 rounded-2xl border border-white/10">
+          <p className="text-[13.5px] font-extrabold text-white flex items-center gap-2">
+            <span>👤</span>
+            <span>Enter Your Registration Details:</span>
+          </p>
+
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your full name"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-[14px] text-white placeholder:text-muted-foreground/60 focus:border-amber-400 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+              WhatsApp Mobile Number *
+            </label>
+            <div className="flex">
+              <span className="inline-flex items-center rounded-l-xl border border-r-0 border-white/10 bg-white/5 px-3 text-[13px] font-semibold text-muted-foreground">
+                +91
+              </span>
+              <input
+                type="tel"
+                required
+                maxLength={10}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                placeholder="10-digit WhatsApp number"
+                className="w-full rounded-r-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-[14px] text-white placeholder:text-muted-foreground/60 focus:border-amber-400 focus:outline-none"
+              />
+            </div>
+            <p className="mt-1 text-[10.5px] text-muted-foreground">
+              Zoom link and prompts will be sent to this WhatsApp number.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="name@example.com"
+              className="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-[14px] text-white placeholder:text-muted-foreground/60 focus:border-amber-400 focus:outline-none"
+            />
+          </div>
+        </div>
+
         {/* Order summary */}
         <div className="surface flex items-center justify-between p-4">
           <div>
@@ -281,7 +485,12 @@ function CheckoutPage() {
                         }`}
                       >
                         {on && (
-                          <svg viewBox="0 0 24 24" className="size-3.5 stroke-[3.5]" fill="none" stroke="currentColor">
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="size-3.5 stroke-[3.5]"
+                            fill="none"
+                            stroke="currentColor"
+                          >
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
                         )}
@@ -346,22 +555,22 @@ function CheckoutPage() {
         <div className="surface space-y-4 p-5">
           <div className="rounded-xl bg-secondary/60 p-4">
             <p className="text-[13px] font-semibold text-foreground">
-              Payment Method: Instant Checkout
+              Payment Method: Instant Razorpay Gateway
             </p>
             <div className="mt-2 flex items-center justify-between text-[13px] font-bold text-foreground">
               <span className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
                 UPI / GPay / PhonePe / Paytm / Cards
               </span>
-              <span className="text-[11px] font-medium text-muted-foreground">
-                via Superprofile
+              <span className="text-[11px] font-medium text-amber-300">
+                ⚡ Instant Verified
               </span>
             </div>
           </div>
 
           <p className="text-[11px] leading-relaxed text-muted-foreground">
-            Your personal data will be used to process your order, support your experience
-            throughout this website, and for other purposes described in our{" "}
+            Your personal data will be used to process your order, provide Zoom link &amp; prompt guides,
+            and for other purposes described in our{" "}
             <Link to="/privacy-policy" target="_blank" className="text-primary underline">
               privacy policy
             </Link>
@@ -383,26 +592,26 @@ function CheckoutPage() {
 
           <button
             type="submit"
-            disabled={isRedirecting}
-            className="btn-cta w-full flex items-center justify-center gap-2 py-3.5"
+            disabled={isProcessing}
+            className="btn-cta w-full flex items-center justify-center gap-2 py-3.5 cursor-pointer disabled:opacity-60 transition-transform hover:scale-[1.01]"
           >
             <LockIcon className="size-4" />
             <span>
-              {isRedirecting
-                ? "Redirecting to Secure Checkout…"
+              {isProcessing
+                ? "Opening Razorpay Secure Gateway…"
                 : selected.combo
-                ? `Proceed with VIP Pass (₹${total}) →`
-                : `Proceed to Pay ₹${total} →`}
+                ? `Pay ₹${total} (VIP Pass) via UPI / Cards →`
+                : `Pay ₹${total} via UPI / Cards →`}
             </span>
           </button>
 
           <div className="text-center">
             <p className="flex items-center justify-center gap-2 text-[14px] font-extrabold text-foreground">
               <LockIcon className="size-4 text-[var(--money)]" />
-              100% Secure 256-Bit Encrypted Payment
+              100% Secure 256-Bit Razorpay Payment
             </p>
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-              Details are entered only once directly on Superprofile's encrypted gateway with instant WhatsApp community access.
+              Supports Google Pay, PhonePe, Paytm, all UPI apps, Debit/Credit Cards &amp; NetBanking.
             </p>
           </div>
         </div>
@@ -411,7 +620,7 @@ function CheckoutPage() {
         <div className="surface space-y-3 p-5 text-center">
           <p className="text-[15px] font-bold text-foreground">Enroll For The Workshop Before</p>
           <p className="rounded-lg bg-[var(--money)]/20 px-3 py-2 font-display text-[17px] font-extrabold text-gold-grad">
-            October 22, 2026 (Thursday) · 7:00 PM
+            October 29, 2026 (Thursday) · 7:00 PM IST
           </p>
           <div className="rounded-xl border border-border p-4">
             <p className="font-display text-[16px] font-extrabold leading-snug text-foreground">
@@ -457,27 +666,51 @@ function CheckoutPage() {
       {/* Compliance & Policy Links */}
       <div className="mt-8 border-t border-border/60 pt-6 text-center text-[12px] text-muted-foreground space-y-3">
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-          <Link to="/privacy-policy" target="_blank" className="transition hover:text-primary underline">
+          <Link
+            to="/privacy-policy"
+            target="_blank"
+            className="transition hover:text-primary underline"
+          >
             Privacy Policy
           </Link>
           <span className="text-muted-foreground/40">•</span>
-          <Link to="/terms-and-conditions" target="_blank" className="transition hover:text-primary underline">
+          <Link
+            to="/terms-and-conditions"
+            target="_blank"
+            className="transition hover:text-primary underline"
+          >
             Terms &amp; Conditions
           </Link>
           <span className="text-muted-foreground/40">•</span>
-          <Link to="/refund-cancellation-policy" target="_blank" className="transition hover:text-primary underline">
+          <Link
+            to="/refund-cancellation-policy"
+            target="_blank"
+            className="transition hover:text-primary underline"
+          >
             Refund Policy
           </Link>
           <span className="text-muted-foreground/40">•</span>
-          <Link to="/shipping-policy" target="_blank" className="transition hover:text-primary underline">
+          <Link
+            to="/shipping-policy"
+            target="_blank"
+            className="transition hover:text-primary underline"
+          >
             Shipping Policy
           </Link>
           <span className="text-muted-foreground/40">•</span>
-          <Link to="/contact-us" target="_blank" className="transition hover:text-primary underline">
+          <Link
+            to="/contact-us"
+            target="_blank"
+            className="transition hover:text-primary underline"
+          >
             Contact Us
           </Link>
           <span className="text-muted-foreground/40">•</span>
-          <Link to="/grievance-redressal" target="_blank" className="transition hover:text-primary underline">
+          <Link
+            to="/grievance-redressal"
+            target="_blank"
+            className="transition hover:text-primary underline"
+          >
             Grievance Redressal
           </Link>
         </div>
