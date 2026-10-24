@@ -144,25 +144,52 @@ export const createOrder = createServerFn({ method: "POST" })
       throw new Error(errMsg);
     }
 
-    const order = (await res.json()) as { id: string; amount: number; currency: string };
-
-    // Save the order for the admin dashboard (best-effort — never block payment).
+    // Generate secure hosted Razorpay Payment Link that bypasses domain mismatch blocks
+    let paymentLinkUrl = "";
     try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin.from("orders").insert({
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        amount_paise: amount,
-        offers: uniqueOffers,
-        razorpay_order_id: order.id,
-        status: "created",
+      const plinkRes = await fetch("https://api.razorpay.com/v1/payment_links", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: getAuthHeader(keyId, keySecret),
+        },
+        body: JSON.stringify({
+          amount,
+          currency: "INR",
+          accept_partial: false,
+          description: "AI Influencer Workshop Access Pass",
+          customer: {
+            name: (data.name || "").slice(0, 50),
+            email: (data.email || "").slice(0, 50),
+            contact: (data.phone || "").slice(-10),
+          },
+          notify: {
+            sms: false,
+            email: false,
+            whatsapp: false,
+          },
+          reminder_enable: false,
+          notes: safeNotes,
+          callback_url: `https://live.prateekmayani.com/thank-you-5034?amount=${amount / 100}&name=${encodeURIComponent(data.name || "")}&phone=${(data.phone || "").slice(-10)}&email=${encodeURIComponent(data.email || "")}`,
+          callback_method: "get",
+        }),
       });
-    } catch (e) {
-      console.error("order insert failed", e);
+
+      if (plinkRes.ok) {
+        const plinkData = (await plinkRes.json()) as { short_url?: string };
+        paymentLinkUrl = plinkData.short_url || "";
+      }
+    } catch (plinkErr) {
+      console.warn("Payment link generation fallback warning:", plinkErr);
     }
 
-    return { orderId: order.id, amount: order.amount, currency: order.currency, keyId: ACTIVE_LIVE_KEY_ID };
+    return {
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: ACTIVE_LIVE_KEY_ID,
+      paymentLinkUrl,
+    };
   });
 
 const verifyInput = z.object({

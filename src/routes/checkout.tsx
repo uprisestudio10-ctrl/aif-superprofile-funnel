@@ -334,11 +334,18 @@ function CheckoutPage() {
         },
       });
 
-      if (!orderRes || !orderRes.orderId) {
+      if (!orderRes || (!orderRes.orderId && !(orderRes as unknown as { paymentLinkUrl?: string }).paymentLinkUrl)) {
         throw new Error("Could not initialize payment order. Please try again.");
       }
 
-      // 2. Open standard native Razorpay Checkout Modal
+      // If hosted Payment Link is available, redirect directly to avoid domain security block
+      const paymentLink = (orderRes as unknown as { paymentLinkUrl?: string }).paymentLinkUrl;
+      if (paymentLink) {
+        window.location.href = paymentLink;
+        return;
+      }
+
+      // 2. Fallback to standard native Razorpay Checkout Modal
       const options = {
         key: orderRes.keyId,
         amount: orderRes.amount,
