@@ -180,6 +180,7 @@ export const VERIFIED_COURSE_BUYERS: Array<{
   { name: "Student (VIP Access)", phone: "", email: "editdesign1947@gmail.com" },
   { name: "Naveen", phone: "9573399944", email: "naveegaadi@gmail.com" },
   { name: "Ayan Malik", phone: "9343163399", email: "amalik0924@gmail.com" },
+  { name: "Narayana", phone: "9629525196", email: "narayana.usd@gmail.com" },
 ];
 
 // List of students whose course access has been explicitly revoked (refunded or cancelled)
